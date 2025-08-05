@@ -1,4 +1,4 @@
-🌐 Language Switch | 语言切换:  [English](./README.md) | [中文](./README.cn. md) |
+🌐 Language Switch | 语言切换:  [English](./README.md) | [中文](./README.cn.md) |
 
 ## Red Envelope Rain Mini Program
 Developed a WeChat mini program using Vue 3 and the Ruoyi Framework. Key features include:
