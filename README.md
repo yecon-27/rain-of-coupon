@@ -85,8 +85,6 @@ Developed a WeChat mini program using Vue 3 and the Ruoyi Framework. Key feature
 │   ├── bin/                      # Admin start/build scripts
 │   ├── package.json              # NPM configuration
 │   └── vue.config.js             # Vue CLI configuration
-
-# ✅ RuoYi Backend Modules (Spring Boot)
 ├── ruoyi-admin/                  # Main backend module
 │   ├── src/main/java/com/ruoyi/  # Java source code
 │   ├── src/main/resources/       # Application configs
