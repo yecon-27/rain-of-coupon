@@ -19,7 +19,6 @@ Developed a WeChat mini program using Vue 3 and the Ruoyi Framework. Key feature
 ## Project Structure
 
 ```
-
 ├── .gitignore                    # Git ignore file
 ├── LICENSE                       # Open source license
 ├── README.md                     # Project documentation
@@ -93,8 +92,6 @@ Developed a WeChat mini program using Vue 3 and the Ruoyi Framework. Key feature
 │   └── pom.xml                   # Module-specific Maven config
 ├── ruoyi-common/                 # Shared utility module
 ├── ruoyi-framework/             
-
-
 ```
 
 ## Dev Progress
@@ -138,7 +135,6 @@ Phase 1 and Phase 2 may progress in parallel, with priority given to completing 
 ### Phase 2: Frontend Page Structure & API Integration (In Progress: 3 days)
 
 ```
-
 Home (/)
 ├─ Click “Join Activity” → Login Page (/login)
   ├─ After successful login → Loading Page (/loading)
@@ -149,7 +145,6 @@ Home (/)
       └─ After the draw → Return to Home (/)
 ├─ Click “Event Rules” → Rules Page (/rule)
 └─ After draw ends or user logs in → Coupon Page (/coupon)
-
 ```
 - LoginPage.vue
 
@@ -157,11 +152,42 @@ Home (/)
 
 2. Axios setup with request interceptors
 
-- HomePage.vue
+- Red Envelope logic: *Falling red envelope animation*， *Click to trigger draw request*， *Popup to show win or no-win*
+  
+```
+let totalRedPackets = 100;
+let interval = setInterval(() => {
+  if (totalRedPackets <= 0) clearInterval(interval);
+  generateRedPacket(); // 每次生成1个红包动画
+  totalRedPackets--;
+}, 200);
+```
 
-1. Components(Overlay): CountDown, RedPacketRain, CouponModal, Rulepop Up, EncourageTip, CrowdingTip
+- Detects high user traffic： "Current Limitation" Problem -> Backend current limiting + status response + 
+Front-end loading judgment, return `{ "status": "crowded" } // or "ok"`
 
-2. Red Envelope logic: *Falling red envelope animation*， *Click to trigger draw request*， *Popup to show win or no-win*
+- Randomly determine whether the user has grabbed the red envelope
+```
+// Query today's lottery records
+List<UserPrizeLog> logs = userPrizeLogMapper.queryToday(userId);
+if (logs.size() >= 3) return fail("次数用尽");
+
+boolean alreadyWon = logs.stream().anyMatch(log -> log.isWin());
+if (alreadyWon) return fail("已中奖");
+
+boolean isWin = Math.random() < 0.2; // 20% chance of winning, configurable in the background
+if (isWin) {
+    // Randomly distribute prizes
+    Prize prize = prizeService.getRandomAvailablePrize();
+    saveUserPrize(userId, prize);
+}
+
+```
+Configurable prize distribution algorithm:
+
+Use Redis for inventory deductions (to prevent concurrent over-issuance)
+
+Prize probability is stored in a configurable field in the database
 
 ### Phase 3: Integration & Deployment Preparation (In progress: 1 days)
 
