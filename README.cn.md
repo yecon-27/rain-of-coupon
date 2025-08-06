@@ -36,9 +36,8 @@
 │   └── RuoYi User Manual.docx    # 若依框架设置手册
 ├── sql/                          # 数据库初始化 SQL 文件
 │   ├── ry_20250522.sql           # 若依基础表
-│   ├──  
-│   ├──  
-│   ├──  
+│   ├── coupon_activity_simplified.sql # 六张表prize, log, config, image_resource, food(2)
+│   ├── README.sql.md             # SQL文件的信息
 │   └── quartz.sql                # Quartz 定时任务
 ├── rain-of-coupon/
 │   ├── public/                   # 公共静态文件

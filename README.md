@@ -37,9 +37,8 @@ Developed a mini program using Vue 3 and the Ruoyi Framework. Key features inclu
 │   └── RuoYi User Manual.docx    # Manual for setting up RuoYi framework
 ├── sql/                          # SQL files for database setup
 │   ├── ry_20250522.sql           # RuoYi base tables
-│   ├──  
-│   ├──  
-│   ├──  
+│   ├── coupon_activity_simplified.sql # prize, log, config, image_resource, food(2)
+│   ├── README.sql.md             # Info of sql
 │   └── quartz.sql                # Quartz scheduled tasks
 ├── rain-of-coupon/
 │   ├── public/                   # Public static files

@@ -1,6 +1,6 @@
 -- 1. 奖品配置表
 DROP TABLE IF EXISTS `redpacket_prize`;
-CREATE TABLE `prize` (
+CREATE TABLE `redpacket_prize` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '奖品ID',
   `prize_name` varchar(100) NOT NULL COMMENT '奖品名称',
   `total_count` int(11) NOT NULL DEFAULT '0' COMMENT '奖品总数量',
@@ -9,21 +9,38 @@ CREATE TABLE `prize` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='奖品配置表';
 
--- 2. 用户抽奖记录表
+-- 2. 用户抽奖记录表（防刷票设计）
 DROP TABLE IF EXISTS `redpacket_user_prize_log`;
-CREATE TABLE `user_prize_log` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '记录ID',
+CREATE TABLE `redpacket_user_prize_log` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键',
   `user_id` bigint(20) NOT NULL COMMENT '用户ID',
-  `prize_name` varchar(100) DEFAULT NULL COMMENT '奖品名称',
-  `draw_time` datetime NOT NULL COMMENT '中奖时间',
-  `use_status` char(1) DEFAULT '0' COMMENT '使用状态(0未使用 1已使用)',
+  `prize_name` varchar(100) DEFAULT NULL COMMENT '奖品名称（未中奖时为空）',
+  `is_win` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否中奖(0未中奖 1中奖)',
+  `is_used` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否使用(0未使用 1已使用)',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '抽奖时间',
+  `ip_address` varchar(45) NOT NULL COMMENT 'IP记录（支持IPv6）',
   PRIMARY KEY (`id`),
-  KEY `idx_user_id` (`user_id`)
+  KEY `idx_user_id` (`user_id`),
+  KEY `idx_created_at` (`created_at`),
+  KEY `idx_ip_address` (`ip_address`),
+  KEY `idx_user_ip_time` (`user_id`, `ip_address`, `created_at`),
+  KEY `idx_user_win_used` (`user_id`, `is_win`, `is_used`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='用户抽奖记录表';
 
--- 3. 图片资源表
+-- 3. 活动配置表
+DROP TABLE IF EXISTS `redpacket_event_config`;
+CREATE TABLE `redpacket_event_config` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `start_time` datetime NOT NULL COMMENT '活动开始时间',
+  `end_time` datetime NOT NULL COMMENT '活动结束时间',
+  `max_users` int(11) NOT NULL DEFAULT '1000' COMMENT '并发用户上限',
+  `max_draws_per_day` int(11) NOT NULL DEFAULT '3' COMMENT '每日最大抽奖次数',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='活动配置表';
+
+-- 4. 图片资源表
 DROP TABLE IF EXISTS `redpacket_image_resource`;
-CREATE TABLE `image_resource` (
+CREATE TABLE `redpacket_image_resource` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '资源ID',
   `resource_name` varchar(100) NOT NULL COMMENT '资源名称',
   `resource_key` varchar(100) NOT NULL COMMENT '资源标识',
@@ -35,9 +52,9 @@ CREATE TABLE `image_resource` (
   UNIQUE KEY `uk_resource_key` (`resource_key`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='图片资源表';
 
--- 4. TOP10网络人气特色美食表
+-- 5. TOP10网络人气特色美食表
 DROP TABLE IF EXISTS `redpacket_top10_popular_food`;
-CREATE TABLE `top10_popular_food` (
+CREATE TABLE `redpacket_top10_popular_food` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '美食ID',
   `food_name` varchar(100) NOT NULL COMMENT '美食名称',
   `ranking` int(11) NOT NULL COMMENT '排名',
@@ -45,9 +62,9 @@ CREATE TABLE `top10_popular_food` (
   UNIQUE KEY `uk_ranking` (`ranking`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='TOP10网络人气特色美食表';
 
--- 5. "一镇一品"特色菜表
+-- 6. "一镇一品"特色菜表
 DROP TABLE IF EXISTS `redpacket_town_specialty_food`;
-CREATE TABLE `town_specialty_food` (
+CREATE TABLE `redpacket_town_specialty_food` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '特色菜ID',
   `food_name` varchar(100) NOT NULL COMMENT '美食名称',
   `ranking` int(11) NOT NULL COMMENT '排名',
@@ -61,6 +78,10 @@ INSERT INTO `redpacket_prize` (`prize_name`, `total_count`, `remaining_count`, `
 ('188元优惠券', 100, 100, 0.1000),
 ('588元优惠券', 50, 50, 0.0500),
 ('888元优惠券', 20, 20, 0.0100);
+
+-- 插入活动配置数据
+INSERT INTO `redpacket_event_config` (`start_time`, `end_time`, `max_users`, `max_draws_per_day`) VALUES
+('2025-02-06 00:00:00', '2025-02-28 23:59:59', 1000, 3);
 
 -- 插入图片资源数据
 INSERT INTO `redpacket_image_resource` (`resource_name`, `resource_key`, `file_name`, `file_path`, `usage_scene`, `description`) VALUES
@@ -125,40 +146,9 @@ INSERT INTO `redpacket_town_specialty_food` (`food_name`, `ranking`) VALUES
 ('酒炖猷蠓', 21);
 
 -- 创建索引
-CREATE INDEX idx_user_prize_log_user_id ON user_prize_log(user_id);
-CREATE INDEX idx_image_resource_key ON image_resource(resource_key);
-CREATE INDEX idx_top10_food_ranking ON top10_popular_food(ranking);
-CREATE INDEX idx_town_food_ranking ON town_specialty_food(ranking);
+CREATE INDEX idx_redpacket_user_prize_log_user_id ON redpacket_user_prize_log(user_id);
+CREATE INDEX idx_redpacket_image_resource_key ON redpacket_image_resource(resource_key);
+CREATE INDEX idx_redpacket_top10_food_ranking ON redpacket_top10_popular_food(ranking);
+CREATE INDEX idx_redpacket_town_food_ranking ON redpacket_town_specialty_food(ranking);
 
 COMMIT;
-
--- ========== 表结构说明 ==========
--- 
--- 1. prize（奖品配置）
---    - 奖品名称、奖品总数、剩余数量、中奖概率
--- 
--- 2. user_prize_log（用户抽奖记录）
---    - 用户ID、奖品名称、中奖时间、使用状态
--- 
--- 3. image_resource（图片静态资源）
---    - 资源名称、资源标识、文件名、文件访问路径、使用场景、描述
--- 
--- 4. user_info（若依内置）
---    - 用户名、密码、手机号（使用若依系统自带的sys_user表）
--- 
--- 5. top10_popular_food（TOP10网络人气特色美食）
---    - 美食名称、排名
--- 
--- 6. town_specialty_food（"一镇一品"特色菜）
---    - 美食名称、排名
--- 
--- ========== 图片文件部署说明 ==========
--- 
--- 图片存储目录：ruoyi-admin/src/main/resources/static/images/coupon/
--- 
--- 需要的图片文件（共22个）：
--- home.png, button.png, gz.png, hdgz.png, qb.png, zbh.png
--- 1.png, 2.png, 3.png, ds.png, sl.png, 福气+1.png
--- 活动拥挤.png, 加载.gif, 188.png, 588.png, 888.png
--- 满500且消费一道特色菜可使用.png, 满1500且消费一道特色菜可使用.png, 满2500且消费一道特色菜可使用.png
--- cytzhq.png, zscp.png
