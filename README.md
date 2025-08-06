@@ -1,5 +1,7 @@
+🌐 Language Switch | 语言切换:  [English](./README.md) | [中文](./README.cn.md)
+
 ## Red Envelope Rain Mini Program
-Developed a WeChat mini program using Vue 3 and the Ruoyi Framework. Key features include:
+Developed a mini program using Vue 3 and the Ruoyi Framework. Key features include:
 
 - Lottery system: Up to 3 draws per user per day; ends automatically upon winning.
 
@@ -8,6 +10,7 @@ Developed a WeChat mini program using Vue 3 and the Ruoyi Framework. Key feature
 - Interactive animations: Falling red envelopes and clickable reward triggers.
 
 - Coupon package page: Designed a responsive layout with return navigation.
+<img width="1199" height="756" alt="642b289e022901a99b5f68f1a5e94f4" src="https://github.com/user-attachments/assets/ee03551b-73a5-4565-862b-7016bc432df9" />
 
 ### Tech Stack
 - Frontend: Vue 3, Pinia, Vite
@@ -19,7 +22,6 @@ Developed a WeChat mini program using Vue 3 and the Ruoyi Framework. Key feature
 ## Project Structure
 
 ```
-
 ├── .gitignore                    # Git ignore file
 ├── LICENSE                       # Open source license
 ├── README.md                     # Project documentation
@@ -85,8 +87,6 @@ Developed a WeChat mini program using Vue 3 and the Ruoyi Framework. Key feature
 │   ├── bin/                      # Admin start/build scripts
 │   ├── package.json              # NPM configuration
 │   └── vue.config.js             # Vue CLI configuration
-
-# ✅ RuoYi Backend Modules (Spring Boot)
 ├── ruoyi-admin/                  # Main backend module
 │   ├── src/main/java/com/ruoyi/  # Java source code
 │   ├── src/main/resources/       # Application configs
@@ -96,8 +96,6 @@ Developed a WeChat mini program using Vue 3 and the Ruoyi Framework. Key feature
 │   └── pom.xml                   # Module-specific Maven config
 ├── ruoyi-common/                 # Shared utility module
 ├── ruoyi-framework/             
-
-
 ```
 
 ## Dev Progress
@@ -141,7 +139,6 @@ Phase 1 and Phase 2 may progress in parallel, with priority given to completing 
 ### Phase 2: Frontend Page Structure & API Integration (In Progress: 3 days)
 
 ```
-
 Home (/)
 ├─ Click “Join Activity” → Login Page (/login)
   ├─ After successful login → Loading Page (/loading)
@@ -152,7 +149,6 @@ Home (/)
       └─ After the draw → Return to Home (/)
 ├─ Click “Event Rules” → Rules Page (/rule)
 └─ After draw ends or user logs in → Coupon Page (/coupon)
-
 ```
 - LoginPage.vue
 
@@ -160,11 +156,42 @@ Home (/)
 
 2. Axios setup with request interceptors
 
-- HomePage.vue
+- Red Envelope logic: *Falling red envelope animation*， *Click to trigger draw request*， *Popup to show win or no-win*
+  
+```
+let totalRedPackets = 100;
+let interval = setInterval(() => {
+  if (totalRedPackets <= 0) clearInterval(interval);
+  generateRedPacket(); // 每次生成1个红包动画
+  totalRedPackets--;
+}, 200);
+```
 
-1. Components(Overlay): CountDown, RedPacketRain, CouponModal, Rulepop Up, EncourageTip, CrowdingTip
+- Detects high user traffic： "Current Limitation" Problem -> Backend current limiting + status response + 
+Front-end loading judgment, return `{ "status": "crowded" } // or "ok"`
 
-2. Red Envelope logic: *Falling red envelope animation*， *Click to trigger draw request*， *Popup to show win or no-win*
+- Randomly determine whether the user has grabbed the red envelope
+```
+// Query today's lottery records
+List<UserPrizeLog> logs = userPrizeLogMapper.queryToday(userId);
+if (logs.size() >= 3) return fail("次数用尽");
+
+boolean alreadyWon = logs.stream().anyMatch(log -> log.isWin());
+if (alreadyWon) return fail("已中奖");
+
+boolean isWin = Math.random() < 0.2; // 20% chance of winning, configurable in the background
+if (isWin) {
+    // Randomly distribute prizes
+    Prize prize = prizeService.getRandomAvailablePrize();
+    saveUserPrize(userId, prize);
+}
+
+```
+Configurable prize distribution algorithm:
+
+Use Redis for inventory deductions (to prevent concurrent over-issuance)
+
+Prize probability is stored in a configurable field in the database
 
 ### Phase 3: Integration & Deployment Preparation (In progress: 1 days)
 
