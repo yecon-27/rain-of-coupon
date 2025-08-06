@@ -34,7 +34,7 @@ Developed a mini program using Vue 3 and the Ruoyi Framework. Key features inclu
 │   ├── package.bat               # Build/package script
 │   └── run.bat                   # Run script
 ├── doc/                          # Documentation
-│   └── RuoYi User Manual.docx    # Manual for setting up RuoYi framework
+│   └── ruoyi-code-generation-config   #Code generator export configuration
 ├── sql/                          # SQL files for database setup
 │   ├── ry_20250522.sql           # RuoYi base tables
 │   ├── coupon_activity_simplified.sql # prize, log, config, image_resource, food(2)

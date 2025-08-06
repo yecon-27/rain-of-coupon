@@ -33,7 +33,7 @@
 │   ├── package.bat               # 构建/打包脚本
 │   └── run.bat                   # 运行脚本
 ├── doc/                          # 文档目录
-│   └── RuoYi User Manual.docx    # 若依框架设置手册
+│   └── ruoyi-code-generation-config   #代码生成器导出配置
 ├── sql/                          # 数据库初始化 SQL 文件
 │   ├── ry_20250522.sql           # 若依基础表
 │   ├── coupon_activity_simplified.sql # 六张表prize, log, config, image_resource, food(2)
