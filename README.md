@@ -102,7 +102,55 @@ Developed a mini program using Vue 3 and the Ruoyi Framework. Key features inclu
 ├── ruoyi-common/                 # Shared utility module
 ├── ruoyi-framework/             
 ```
+## Userflow & Page-Level Route Structure
+1. 
+```
+Home (/)
+├─ Click "Join Activity" → Login Page (/login)
+│   ├─ After successful login → Check if user has already won
+│   │   ├─ If already won → Show PrizeModal popup
+│   │   ├─ If not yet won → Auto redirect → Loading Page (/loading)
+│   │   │   ├─ If traffic is high → Show CrowdingTip component
+│   │   │   ├─ If traffic is normal → Go to Countdown Page (/countdown)
+│   │   │   │   ├─ After countdown → Redirect to RedPacket Page (/redpacket)
+│   │   │   │   │   ├─ If user wins → Show PrizeModal popup
+│   │   │   │   │   └─ If user doesn't win → Show EncourageTip popup
+│   │   │   └─ After lottery draw → Return to Home (/)
+├─ Click "Activity Rules" → Rules Page (/rule)
+└─ After lottery ends or user logs in → Coupon Page (/coupon)
+```
+2. 
+```
+/
+├── HomePage (/)
+│   ├── Join Activity → LoginPage (/login)
+│   ├── View Activity Rules → RulePage (/rule)
+│   └── View My Coupons → CouponPage (/coupon)
 
+├── LoginPage (/login)
+│   └── On successful login → Check winning status
+│       ├── If already won → show PrizeModal (component)
+│       └── If not yet → redirect to LoadingPage (/loading)
+
+├── LoadingPage (/loading)
+│   ├── If crowded → show CrowdingTip (component)
+│   └── If smooth → redirect to CountdownPage (/countdown)
+
+├── CountdownPage (/countdown)
+│   └── After countdown → redirect to RedPacketPage (/redpacket)
+
+├── RedPacketPage (/redpacket)
+│   ├── After user taps a red packet:
+│   │   ├── If won → show PrizeModal (component)
+│   │   └── If not → show EncourageTip (component)
+│   └── After drawing → auto-return to HomePage
+
+├── RulePage (/rule)
+│   └── Display static activity rules content
+
+├── CouponPage (/coupon)
+│   └── Display received coupons + BackButton
+```
 ## Dev Progress
 
 Phase 1 and Phase 2 may progress in parallel, with priority given to completing the MVP.
@@ -156,60 +204,15 @@ Phase 1 and Phase 2 may progress in parallel, with priority given to completing 
 
 ### Phase 2: Frontend Page Structure & API Integration (In Progress: 3 days)
 
-```
-Home (/)
-├─ Click "Join Activity" → Login Page (/login)
-│   ├─ After successful login → Check if user has already won
-│   │   ├─ If already won → Show PrizeModal popup
-│   │   ├─ If not yet won → Auto redirect → Loading Page (/loading)
-│   │   │   ├─ If traffic is high → Show CrowdingTip component
-│   │   │   ├─ If traffic is normal → Go to Countdown Page (/countdown)
-│   │   │   │   ├─ After countdown → Redirect to RedPacket Page (/redpacket)
-│   │   │   │   │   ├─ If user wins → Show PrizeModal popup
-│   │   │   │   │   └─ If user doesn't win → Show EncourageTip popup
-│   │   │   └─ After lottery draw → Return to Home (/)
-├─ Click "Activity Rules" → Rules Page (/rule)
-└─ After lottery ends or user logs in → Coupon Page (/coupon)
-```
-```
-📦 Page-Level Route Structure
-/
-├── HomePage (/)
-│   ├── Join Activity → LoginPage (/login)
-│   ├── View Activity Rules → RulePage (/rule)
-│   └── View My Coupons → CouponPage (/coupon)
+[README.frontend.md](doc\frontend-development-guide.md)
 
-├── LoginPage (/login)
-│   └── On successful login → Check winning status
-│       ├── If already won → show PrizeModal (component)
-│       └── If not yet → redirect to LoadingPage (/loading)
-
-├── LoadingPage (/loading)
-│   ├── If crowded → show CrowdingTip (component)
-│   └── If smooth → redirect to CountdownPage (/countdown)
-
-├── CountdownPage (/countdown)
-│   └── After countdown → redirect to RedPacketPage (/redpacket)
-
-├── RedPacketPage (/redpacket)
-│   ├── After user taps a red packet:
-│   │   ├── If won → show PrizeModal (component)
-│   │   └── If not → show EncourageTip (component)
-│   └── After drawing → auto-return to HomePage
-
-├── RulePage (/rule)
-│   └── Display static activity rules content
-
-├── CouponPage (/coupon)
-│   └── Display received coupons + BackButton
-```
-- LoginPage.vue
+- **LoginPage.vue**
 
 1. User status detection (via token login)
 
 2. Axios setup with request interceptors
 
-- Red Envelope logic: *Falling red envelope animation*， *Click to trigger draw request*， *Popup to show win or no-win*
+- **Red Envelope logic**: *Falling red envelope animation*， *Click to trigger draw request*， *Popup to show win or no-win*
   
 ```
 let totalRedPackets = 100;
@@ -220,10 +223,10 @@ let interval = setInterval(() => {
 }, 200);
 ```
 
-- Detects high user traffic： "Current Limitation" Problem -> Backend current limiting + status response + 
+- **Detects high user traffic**： "Current Limitation" Problem -> Backend current limiting + status response + 
 Front-end loading judgment, return `{ "status": "crowded" } // or "ok"`
 
-- Randomly determine whether the user has grabbed the red envelope
+- **Randomly determine whether the user has grabbed the red envelope**
 ```
 // Query today's lottery records
 List<UserPrizeLog> logs = userPrizeLogMapper.queryToday(userId);
@@ -240,11 +243,11 @@ if (isWin) {
 }
 
 ```
-Configurable prize distribution algorithm:
+- **Configurable prize distribution algorithm**:
 
-Use Redis for inventory deductions (to prevent concurrent over-issuance)
+1. Use Redis for inventory deductions (to prevent concurrent over-issuance)
 
-Prize probability is stored in a configurable field in the database
+2. Prize probability is stored in a configurable field in the database
 
 ### Phase 3: Integration & Deployment Preparation (In progress: 1 days)
 
