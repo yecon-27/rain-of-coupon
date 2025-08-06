@@ -35,74 +35,16 @@
 - ✅ 基础 CRUD Service 和 Controller 层已生成
 - ✅ 菜单配置 SQL 文件已生成
 
-#### 🔄 **进行中任务：**
+ **抽奖控制器和服务层的核心业务逻辑**`8/6`
+- ✅ 每日3次限制
+- ✅ 中奖后停止抽奖
+- ✅ IP频率限制（1小时10次）
+- ✅ 活动时间控制
+- ✅ 加权随机概率算法
+- ✅ 自动库存扣减
+- ✅ 零库存自动排除
+- ✅ 事务保证数据一致性
 
-**核心业务逻辑实现** `8/6 - present`
-
-1. **抽奖控制器开发**
-   ```java
-   @RestController
-   @RequestMapping("/api/lottery")
-   public class LotteryController {
-       @PostMapping("/draw")           // 执行抽奖
-       @GetMapping("/records")         // 获取用户抽奖记录
-       @GetMapping("/drawCount")       // 检查剩余抽奖次数
-       @GetMapping("/prizes")          // 获取可用奖品
-       @GetMapping("/status")          // 检查用户抽奖资格
-   }
-   ```
-
-2. **抽奖服务层**
-   ```java
-   @Service
-   public class LotteryService {
-       // 检查用户抽奖资格（每日限制、已中奖、IP限制）
-       boolean checkDrawEligibility(Long userId, String ipAddress);
-       
-       // 执行抽奖算法，概率控制
-       DrawResult executeDraw(Long userId);
-       
-       // 保存抽奖记录到数据库
-       void saveDrawRecord(Long userId, DrawResult result, String ipAddress);
-       
-       // 获取用户今日剩余抽奖次数
-       int getRemainingDrawCount(Long userId);
-       
-       // 检查用户今日是否已中奖
-       boolean hasWonToday(Long userId);
-   }
-   ```
-
-3. **防刷票机制**
-   - **每日限制控制**：每用户每天最多3次抽奖
-   - **中奖者限制**：中奖后停止抽奖
-   - **IP频率限制**：防止同一IP过度抽奖
-   - **并发控制**：基于Redis的库存管理
-   - **请求节流**：抽奖间隔最小时间限制
-
-4. **概率算法**
-   ```java
-   // 基于奖品概率的加权随机选择
-   // Redis原子操作进行库存扣减
-   // 奖品用完时的降级机制
-   ```
-
-5. **配置管理**
-   - 活动时间控制（开始/结束时间）
-   - 并发用户数限制
-   - 奖品概率调整
-   - 每日抽奖次数配置
-
-#### 📋 **API 接口规范：**
-
-| 接口地址 | 请求方式 | 功能描述 | 状态 |
-|----------|----------|----------|------|
-| `/api/lottery/draw` | POST | 执行抽奖 | 🔄 进行中 |
-| `/api/lottery/records` | GET | 获取用户抽奖历史 | 🔄 进行中 |
-| `/api/lottery/drawCount` | GET | 获取剩余抽奖次数 | 🔄 进行中 |
-| `/api/lottery/prizes` | GET | 获取奖品配置 | 🔄 进行中 |
-| `/api/lottery/status` | GET | 检查用户抽奖资格 | 🔄 进行中 |
-| `/api/activity/config` | GET | 获取活动设置 | 🔄 进行中 |
 
 ### 第二阶段：前端页面结构与 API 集成（进行中：3 天）
 
@@ -197,6 +139,17 @@ if (isWin) {
 
 - 连接前端和后端抽奖逻辑
 - 验证抽奖限制和中奖逻辑
+
+#### 📋 **API 接口规范：**
+
+| 接口地址 | 请求方式 | 功能描述 | 状态 |
+|----------|----------|----------|------|
+| `/api/lottery/draw` | POST | 执行抽奖 | 🔄 进行中 |
+| `/api/lottery/records` | GET | 获取用户抽奖历史 | 🔄 进行中 |
+| `/api/lottery/drawCount` | GET | 获取剩余抽奖次数 | 🔄 进行中 |
+| `/api/lottery/prizes` | GET | 获取奖品配置 | 🔄 进行中 |
+| `/api/lottery/status` | GET | 检查用户抽奖资格 | 🔄 进行中 |
+| `/api/activity/config` | GET | 获取活动设置 | 🔄 进行中 |
 
 ## 许可证
 

@@ -119,74 +119,16 @@ Phase 1 and Phase 2 may progress in parallel, with priority given to completing 
 - ✅ Basic CRUD Service and Controller layers generated
 - ✅ Menu configuration SQL files generated
 
-#### 🔄 **In Progress Tasks:**
+**Core Business Logic for the Lottery Controller and Service Layer**`8/6`
+- ✅ Daily Limit of 3
+- ✅ Lottery Stops After Winning
+- ✅ IP Frequency Limit (10 Times per Hour)
+- ✅ Event Duration Control
+- ✅ Weighted Random Probability Algorithm
+- ✅ Automatic Inventory Deductions
+- ✅ Automatic Exclusion of Low Inventory
+- ✅ Transactions Ensure Data Consistency
 
-**Core Business Logic Implementation** `8/6 - present`
-
-1. **Lottery Controller Development**
-   ```java
-   @RestController
-   @RequestMapping("/api/lottery")
-   public class LotteryController {
-       @PostMapping("/draw")           // Execute lottery draw
-       @GetMapping("/records")         // Get user draw records
-       @GetMapping("/drawCount")       // Check remaining draws
-       @GetMapping("/prizes")          // Get available prizes
-       @GetMapping("/status")          // Check user eligibility
-   }
-   ```
-
-2. **Lottery Service Layer**
-   ```java
-   @Service
-   public class LotteryService {
-       // Check user draw eligibility (daily limit, already won, IP limit)
-       boolean checkDrawEligibility(Long userId, String ipAddress);
-       
-       // Execute lottery algorithm with probability control
-       DrawResult executeDraw(Long userId);
-       
-       // Save draw record to database
-       void saveDrawRecord(Long userId, DrawResult result, String ipAddress);
-       
-       // Get user's remaining draw count for today
-       int getRemainingDrawCount(Long userId);
-       
-       // Check if user already won today
-       boolean hasWonToday(Long userId);
-   }
-   ```
-
-3. **Anti-Fraud Mechanisms**
-   - **Daily Limit Control**: Max 3 draws per user per day
-   - **Winner Restriction**: Stop draws after winning
-   - **IP Rate Limiting**: Prevent same IP excessive draws
-   - **Concurrent Control**: Redis-based inventory management
-   - **Request Throttling**: Minimum interval between draws
-
-4. **Probability Algorithm**
-   ```java
-   // Weighted random selection based on prize probability
-   // Redis atomic operations for inventory deduction
-   // Fallback mechanism when prizes run out
-   ```
-
-5. **Configuration Management**
-   - Activity time control (start/end time)
-   - Concurrent user limits
-   - Prize probability adjustment
-   - Daily draw limits configuration
-
-#### 📋 **API Specifications:**
-
-| Endpoint | Method | Description | Status |
-|----------|--------|-------------|--------|
-| `/api/lottery/draw` | POST | Execute lottery draw | 🔄 In Progress |
-| `/api/lottery/records` | GET | Get user draw history | 🔄 In Progress |
-| `/api/lottery/drawCount` | GET | Get remaining draws | 🔄 In Progress |
-| `/api/lottery/prizes` | GET | Get prize configuration | 🔄 In Progress |
-| `/api/lottery/status` | GET | Check user eligibility | 🔄 In Progress |
-| `/api/activity/config` | GET | Get activity settings | 🔄 In Progress |
 
 ### Phase 2: Frontend Page Structure & API Integration (In Progress: 3 days)
 
@@ -286,6 +228,16 @@ Prize probability is stored in a configurable field in the database
 
 - Validate draw limits and winning logic
 
+#### 📋 **API Specifications:**
+
+| Endpoint | Method | Description | Status |
+|----------|--------|-------------|--------|
+| `/api/lottery/draw` | POST | Execute lottery draw | 🔄 In Progress |
+| `/api/lottery/records` | GET | Get user draw history | 🔄 In Progress |
+| `/api/lottery/drawCount` | GET | Get remaining draws | 🔄 In Progress |
+| `/api/lottery/prizes` | GET | Get prize configuration | 🔄 In Progress |
+| `/api/lottery/status` | GET | Check user eligibility | 🔄 In Progress |
+| `/api/activity/config` | GET | Get activity settings | 🔄 In Progress |
 
 ## License
 This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for details.
