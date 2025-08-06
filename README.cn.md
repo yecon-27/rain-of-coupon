@@ -1,4 +1,5 @@
 🌐 语言切换 | Language Switch: [English](./README.md) | [中文](./README.cn.md)
+
 # 红包雨小程序
 
 基于 Vue 3 和若依框架开发了一个小程序。主要功能包括：
@@ -18,113 +19,90 @@
 - **API**：RESTful API
 - **部署**：Nginx + Docker
 
-## 项目结构
-
-```
-├── .gitignore                    # Git 忽略文件
-├── LICENSE                       # 开源许可证
-├── README.md                     # 项目文档
-├── pom.xml                       # Maven 根配置文件
-├── ry.bat                        # 后端启动脚本（Windows）
-├── ry.sh                         # 后端启动脚本（Linux/Mac）
-├── backend-sql                   # MySQL 数据库文件
-├── bin/                          # 脚本目录
-│   ├── clean.bat                 # 清理脚本
-│   ├── package.bat               # 构建/打包脚本
-│   └── run.bat                   # 运行脚本
-├── doc/                          # 文档目录
-│   └── ruoyi-code-generation-config   #代码生成器导出配置
-├── sql/                          # 数据库初始化 SQL 文件
-│   ├── ry_20250522.sql           # 若依基础表
-│   ├── coupon_activity_simplified.sql # 六张表prize, log, config, image_resource, food(2)
-│   ├── README.sql.md             # SQL文件的信息
-│   └── quartz.sql                # Quartz 定时任务
-├── rain-of-coupon/
-│   ├── public/                   # 公共静态文件
-│   ├── docs/                     # 项目特定文档
-│   ├── package.json              # NPM 依赖和脚本
-│   ├── vite.config.ts            # Vite 配置文件
-│   ├── vercel.json               # Vercel 部署配置
-│   └── src/
-│       ├── api/                  # API 抽象层（Axios）
-│       ├── assets/               # 静态资源（模拟数据）
-│       ├── components/           # 可复用 UI 组件
-│       │   ├── PrizeModal.vue          # 中奖弹窗组件
-│       │   ├── EncourageTip.vue        # 未中奖鼓励提示弹窗
-│       │   ├── RedPacket.vue           # 红包动画与点击逻辑
-│       │   ├── CountDown.vue           # 倒计时动画（3、2、1）
-│       │   ├── RulePopup.vue           # 活动规则弹窗（或静态块）
-│       │   ├── CouponCard.vue          # 单张优惠券展示组件（券包页使用）
-│       │   ├── CrowdingTip.vue         # 活动拥挤提示组件
-│       │   ├── LoadingAnim.vue         # 加载动效（如火箭动画）
-│       │   ├── BackButton.vue          # 返回按钮（券包页使用）
-│       │   ├── LoginForm.vue           # 登录表单封装组件
-│       ├── composables/          # Vue 3 组合式函数（例如 useUser）
-│       ├── directives/           # 自定义 Vue 指令
-│       ├── router/               # Vue Router 设置
-│       │   └── index.js              # 路由定义
-│       ├── stores/               # 状态管理（Pinia）
-│       ├── utils/                # 工具函数
-│       │   └── request.js            # Axios 拦截器和配置
-│       ├── views/                # 页面级组件（路由）
-│       │   ├── HomePage.vue          # 首页
-│       │   ├── LoginPage.vue         # 登录页面
-│       │   ├── LoadingPage.vue       # 加载动画页面
-│       │   ├── CountDownPage.vue     # 倒计时页面
-│       │   ├── RedPacketPage.vue     # 红包抽奖页面
-│       │   ├── RulePage.vue          # 活动规则页面
-│       │   └── CouponPage.vue        # 优惠券/奖品列表页面
-│       ├── App.vue               # Vue 根组件
-│       └── main.js               # 应用入口
-├── ruoyi-ui/
-│   ├── src/
-│   │   ├── api/                  # API 定义
-│   │   ├── assets/               # 静态资源
-│   │   ├── components/           # UI 组件
-│   │   ├── directive/            # 自定义指令
-│   │   ├── layout/               # 页面布局系统
-│   │   ├── router/               # Vue Router 配置
-│   │   ├── store/                # Vuex 状态管理
-│   │   ├── utils/                # 工具函数和辅助方法
-│   │   └── views/                # 页面视图（管理端）
-│   ├── bin/                      # 管理端启动/构建脚本
-│   ├── package.json              # NPM 配置
-│   └── vue.config.js             # Vue CLI 配置
-├── ruoyi-admin/                  # 主后端模块
-│   ├── src/main/java/com/ruoyi/  # Java 源代码
-│   ├── src/main/resources/       # 应用配置
-│   │   ├──image/redpacket        # 图片资源
-|   │   │   ├── README.image.md   # 图片信息
-|   │   │   ├── ...
-│   └── pom.xml                   # 模块特定的 Maven 配置
-├── ruoyi-common/                 # 共享工具模块
-├── ruoyi-framework/             
-```
-
 ## 开发进展
 
 第一阶段和第二阶段可并行进行，优先完成 MVP。
 
-### 第一阶段：数据库设计与 API 开发（进行中：2 天）
+### 第一阶段：数据库设计与 API 开发（进行中：3 天）
 
-- **设计表**：`8.5 - present`
-  1. prize – 奖品配置：奖品名称，奖品总数，剩余数量，中奖概率
-  2. user_prize_log – 用户抽奖记录: 用户ID，奖品名称，中奖时间，使用状态
-  3. image_resource - 其余静态资源：资源名称，资源标识，文件名，文件访问路径，使用场景，描述
-  4. user_info -（若依内置）：用户名，密码，手机号
-  5. TOP10 网络人气特色美食：美食名称，排名
-  6. “一镇一品”特色菜：美食名称，排名
+#### ✅ **已完成任务：**
 
-- 使用若依内置代码生成器生成：
-  1. 实体类
-  2. Mapper 接口
-  3. Service 和 Controller 层
+**数据库设计** `8/5 - 8/6`
 
-- 开发 API：
-  - 抽奖：POST /api/draw
-  - 查看抽奖记录：GET /api/user/records
-  - 检查剩余抽奖次数：GET /api/user/drawCount
-  - 获取奖池配置：GET /api/prizes
+**代码生成** `8/6`
+- ✅ 实体类已生成
+- ✅ Mapper 接口已生成
+- ✅ 基础 CRUD Service 和 Controller 层已生成
+- ✅ 菜单配置 SQL 文件已生成
+
+#### 🔄 **进行中任务：**
+
+**核心业务逻辑实现** `8/6 - present`
+
+1. **抽奖控制器开发**
+   ```java
+   @RestController
+   @RequestMapping("/api/lottery")
+   public class LotteryController {
+       @PostMapping("/draw")           // 执行抽奖
+       @GetMapping("/records")         // 获取用户抽奖记录
+       @GetMapping("/drawCount")       // 检查剩余抽奖次数
+       @GetMapping("/prizes")          // 获取可用奖品
+       @GetMapping("/status")          // 检查用户抽奖资格
+   }
+   ```
+
+2. **抽奖服务层**
+   ```java
+   @Service
+   public class LotteryService {
+       // 检查用户抽奖资格（每日限制、已中奖、IP限制）
+       boolean checkDrawEligibility(Long userId, String ipAddress);
+       
+       // 执行抽奖算法，概率控制
+       DrawResult executeDraw(Long userId);
+       
+       // 保存抽奖记录到数据库
+       void saveDrawRecord(Long userId, DrawResult result, String ipAddress);
+       
+       // 获取用户今日剩余抽奖次数
+       int getRemainingDrawCount(Long userId);
+       
+       // 检查用户今日是否已中奖
+       boolean hasWonToday(Long userId);
+   }
+   ```
+
+3. **防刷票机制**
+   - **每日限制控制**：每用户每天最多3次抽奖
+   - **中奖者限制**：中奖后停止抽奖
+   - **IP频率限制**：防止同一IP过度抽奖
+   - **并发控制**：基于Redis的库存管理
+   - **请求节流**：抽奖间隔最小时间限制
+
+4. **概率算法**
+   ```java
+   // 基于奖品概率的加权随机选择
+   // Redis原子操作进行库存扣减
+   // 奖品用完时的降级机制
+   ```
+
+5. **配置管理**
+   - 活动时间控制（开始/结束时间）
+   - 并发用户数限制
+   - 奖品概率调整
+   - 每日抽奖次数配置
+
+#### 📋 **API 接口规范：**
+
+| 接口地址 | 请求方式 | 功能描述 | 状态 |
+|----------|----------|----------|------|
+| `/api/lottery/draw` | POST | 执行抽奖 | 🔄 进行中 |
+| `/api/lottery/records` | GET | 获取用户抽奖历史 | 🔄 进行中 |
+| `/api/lottery/drawCount` | GET | 获取剩余抽奖次数 | 🔄 进行中 |
+| `/api/lottery/prizes` | GET | 获取奖品配置 | 🔄 进行中 |
+| `/api/lottery/status` | GET | 检查用户抽奖资格 | 🔄 进行中 |
+| `/api/activity/config` | GET | 获取活动设置 | 🔄 进行中 |
 
 ### 第二阶段：前端页面结构与 API 集成（进行中：3 天）
 

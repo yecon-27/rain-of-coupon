@@ -107,39 +107,86 @@ Developed a mini program using Vue 3 and the Ruoyi Framework. Key features inclu
 
 Phase 1 and Phase 2 may progress in parallel, with priority given to completing the MVP.
 
-### Phase 1: Database Design & API Development (In Progress:2 days)
+### Phase 1: Database Design & API Development (In Progress: 3 days)
 
-- Design tables:`8/5 - present`
+#### ✅ **Completed Tasks:**
 
-1.  prize – Prize configuration: Prize name, total number of prizes, remaining quantity, winning probability
+**Database Design** `8/5 - 8/6`
 
-2. user_prize_log – User draw records: User ID, prize name, winning time, usage status
+**Code Generation** `8/6`
+- ✅ Entity classes generated
+- ✅ Mapper interfaces generated  
+- ✅ Basic CRUD Service and Controller layers generated
+- ✅ Menu configuration SQL files generated
 
-3. image_resource - Static assets: Resource name, resource identifier, file name, file access path, usage scenario, description
+#### 🔄 **In Progress Tasks:**
 
-4. user_info - (Ruoyi-embeded): Username, password, phone number
+**Core Business Logic Implementation** `8/6 - present`
 
-5. Top 10 popular online specialties: Dish name, ranking
+1. **Lottery Controller Development**
+   ```java
+   @RestController
+   @RequestMapping("/api/lottery")
+   public class LotteryController {
+       @PostMapping("/draw")           // Execute lottery draw
+       @GetMapping("/records")         // Get user draw records
+       @GetMapping("/drawCount")       // Check remaining draws
+       @GetMapping("/prizes")          // Get available prizes
+       @GetMapping("/status")          // Check user eligibility
+   }
+   ```
 
-6. "One Town, One Product" specialties: Dish name, ranking
+2. **Lottery Service Layer**
+   ```java
+   @Service
+   public class LotteryService {
+       // Check user draw eligibility (daily limit, already won, IP limit)
+       boolean checkDrawEligibility(Long userId, String ipAddress);
+       
+       // Execute lottery algorithm with probability control
+       DrawResult executeDraw(Long userId);
+       
+       // Save draw record to database
+       void saveDrawRecord(Long userId, DrawResult result, String ipAddress);
+       
+       // Get user's remaining draw count for today
+       int getRemainingDrawCount(Long userId);
+       
+       // Check if user already won today
+       boolean hasWonToday(Long userId);
+   }
+   ```
 
-- Use Ruoyi's built-in code generator to generate
+3. **Anti-Fraud Mechanisms**
+   - **Daily Limit Control**: Max 3 draws per user per day
+   - **Winner Restriction**: Stop draws after winning
+   - **IP Rate Limiting**: Prevent same IP excessive draws
+   - **Concurrent Control**: Redis-based inventory management
+   - **Request Throttling**: Minimum interval between draws
 
-1. Entity classes
+4. **Probability Algorithm**
+   ```java
+   // Weighted random selection based on prize probability
+   // Redis atomic operations for inventory deduction
+   // Fallback mechanism when prizes run out
+   ```
 
-2. Mapper interfaces
+5. **Configuration Management**
+   - Activity time control (start/end time)
+   - Concurrent user limits
+   - Prize probability adjustment
+   - Daily draw limits configuration
 
-3. Service and Controller layers
+#### 📋 **API Specifications:**
 
-- Develop APIs:
-
-- Draw lottery: POST /api/draw
-
-- View draw records: GET /api/user/records
-
-- Check remaining draws: GET /api/user/drawCount
-
-- Get prize pool config: GET /api/prizes
+| Endpoint | Method | Description | Status |
+|----------|--------|-------------|--------|
+| `/api/lottery/draw` | POST | Execute lottery draw | 🔄 In Progress |
+| `/api/lottery/records` | GET | Get user draw history | 🔄 In Progress |
+| `/api/lottery/drawCount` | GET | Get remaining draws | 🔄 In Progress |
+| `/api/lottery/prizes` | GET | Get prize configuration | 🔄 In Progress |
+| `/api/lottery/status` | GET | Check user eligibility | 🔄 In Progress |
+| `/api/activity/config` | GET | Get activity settings | 🔄 In Progress |
 
 ### Phase 2: Frontend Page Structure & API Integration (In Progress: 3 days)
 
