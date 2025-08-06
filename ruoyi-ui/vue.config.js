@@ -33,6 +33,12 @@ module.exports = {
     host: '0.0.0.0',
     port: port,
     open: true,
+    // 开发环境禁用缓存
+    headers: {
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    },
     proxy: {
       // detail: https://cli.vuejs.org/config/#devserver-proxy
       [process.env.VUE_APP_BASE_API]: {

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.redpacket.mapper.RedpacketUserPrizeLogMapper">
+    
+    <resultMap type="RedpacketUserPrizeLog" id="RedpacketUserPrizeLogResult">
+        <result property="id"    column="id"    />
+        <result property="userId"    column="user_id"    />
+        <result property="prizeName"    column="prize_name"    />
+        <result property="isWin"    column="is_win"    />
+        <result property="isUsed"    column="is_used"    />
+        <result property="createdAt"    column="created_at"    />
+        <result property="ipAddress"    column="ip_address"    />
+    </resultMap>
+
+    <sql id="selectRedpacketUserPrizeLogVo">
+        select id, user_id, prize_name, is_win, is_used, created_at, ip_address from redpacket_user_prize_log
+    </sql>
+
+    <select id="selectRedpacketUserPrizeLogList" parameterType="RedpacketUserPrizeLog" resultMap="RedpacketUserPrizeLogResult">
+        <include refid="selectRedpacketUserPrizeLogVo"/>
+        <where>  
+            <if test="userId != null "> and user_id = #{userId}</if>
+            <if test="prizeName != null  and prizeName != ''"> and prize_name like concat('%', #{prizeName}, '%')</if>
+            <if test="isWin != null "> and is_win = #{isWin}</if>
+            <if test="isUsed != null "> and is_used = #{isUsed}</if>
+            <if test="params.beginCreatedAt != null and params.beginCreatedAt != '' and params.endCreatedAt != null and params.endCreatedAt != ''"> and created_at between #{params.beginCreatedAt} and #{params.endCreatedAt}</if>
+            <if test="ipAddress != null  and ipAddress != ''"> and ip_address like concat('%', #{ipAddress}, '%')</if>
+        </where>
+    </select>
+    
+    <select id="selectRedpacketUserPrizeLogById" parameterType="Long" resultMap="RedpacketUserPrizeLogResult">
+        <include refid="selectRedpacketUserPrizeLogVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertRedpacketUserPrizeLog" parameterType="RedpacketUserPrizeLog" useGeneratedKeys="true" keyProperty="id">
+        insert into redpacket_user_prize_log
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null">user_id,</if>
+            <if test="prizeName != null and prizeName != ''">prize_name,</if>
+            <if test="isWin != null">is_win,</if>
+            <if test="isUsed != null">is_used,</if>
+            <if test="createdAt != null">created_at,</if>
+            <if test="ipAddress != null and ipAddress != ''">ip_address,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userId != null">#{userId},</if>
+            <if test="prizeName != null and prizeName != ''">#{prizeName},</if>
+            <if test="isWin != null">#{isWin},</if>
+            <if test="isUsed != null">#{isUsed},</if>
+            <if test="createdAt != null">#{createdAt},</if>
+            <if test="ipAddress != null and ipAddress != ''">#{ipAddress},</if>
+         </trim>
+    </insert>
+
+    <update id="updateRedpacketUserPrizeLog" parameterType="RedpacketUserPrizeLog">
+        update redpacket_user_prize_log
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="prizeName != null and prizeName != ''">prize_name = #{prizeName},</if>
+            <if test="isWin != null">is_win = #{isWin},</if>
+            <if test="isUsed != null">is_used = #{isUsed},</if>
+            <if test="createdAt != null">created_at = #{createdAt},</if>
+            <if test="ipAddress != null and ipAddress != ''">ip_address = #{ipAddress},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteRedpacketUserPrizeLogById" parameterType="Long">
+        delete from redpacket_user_prize_log where id = #{id}
+    </delete>
+
+    <delete id="deleteRedpacketUserPrizeLogByIds" parameterType="String">
+        delete from redpacket_user_prize_log where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

@@ -16,6 +16,7 @@ import { download } from '@/utils/request'
 
 import './assets/icons' // icon
 import './permission' // permission control
+import { checkVersionAndClearCache, devClearCache } from '@/utils/cache-clear' // 缓存清理
 import { getDicts } from "@/api/system/dict/data"
 import { getConfigKey } from "@/api/system/config"
 import { parseTime, resetForm, addDateRange, selectDictLabel, selectDictLabels, handleTree } from "@/utils/ruoyi"
@@ -74,6 +75,12 @@ Vue.use(Element, {
 })
 
 Vue.config.productionTip = false
+
+// 应用启动时检查版本并清除缓存
+checkVersionAndClearCache()
+
+// 开发环境自动清除缓存
+devClearCache()
 
 new Vue({
   el: '#app',

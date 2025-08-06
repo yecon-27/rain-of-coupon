@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.redpacket.mapper.RedpacketPrizeMapper">
+    
+    <resultMap type="RedpacketPrize" id="RedpacketPrizeResult">
+        <result property="id"    column="id"    />
+        <result property="prizeName"    column="prize_name"    />
+        <result property="totalCount"    column="total_count"    />
+        <result property="remainingCount"    column="remaining_count"    />
+        <result property="probability"    column="probability"    />
+    </resultMap>
+
+    <sql id="selectRedpacketPrizeVo">
+        select id, prize_name, total_count, remaining_count, probability from redpacket_prize
+    </sql>
+
+    <select id="selectRedpacketPrizeList" parameterType="RedpacketPrize" resultMap="RedpacketPrizeResult">
+        <include refid="selectRedpacketPrizeVo"/>
+        <where>  
+            <if test="prizeName != null  and prizeName != ''"> and prize_name like concat('%', #{prizeName}, '%')</if>
+        </where>
+    </select>
+    
+    <select id="selectRedpacketPrizeById" parameterType="Long" resultMap="RedpacketPrizeResult">
+        <include refid="selectRedpacketPrizeVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertRedpacketPrize" parameterType="RedpacketPrize" useGeneratedKeys="true" keyProperty="id">
+        insert into redpacket_prize
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="prizeName != null and prizeName != ''">prize_name,</if>
+            <if test="totalCount != null">total_count,</if>
+            <if test="remainingCount != null">remaining_count,</if>
+            <if test="probability != null">probability,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="prizeName != null and prizeName != ''">#{prizeName},</if>
+            <if test="totalCount != null">#{totalCount},</if>
+            <if test="remainingCount != null">#{remainingCount},</if>
+            <if test="probability != null">#{probability},</if>
+         </trim>
+    </insert>
+
+    <update id="updateRedpacketPrize" parameterType="RedpacketPrize">
+        update redpacket_prize
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="prizeName != null and prizeName != ''">prize_name = #{prizeName},</if>
+            <if test="totalCount != null">total_count = #{totalCount},</if>
+            <if test="remainingCount != null">remaining_count = #{remainingCount},</if>
+            <if test="probability != null">probability = #{probability},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteRedpacketPrizeById" parameterType="Long">
+        delete from redpacket_prize where id = #{id}
+    </delete>
+
+    <delete id="deleteRedpacketPrizeByIds" parameterType="String">
+        delete from redpacket_prize where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>
