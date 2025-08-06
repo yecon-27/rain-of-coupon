@@ -90,6 +90,9 @@ Developed a WeChat mini program using Vue 3 and the Ruoyi Framework. Key feature
 ├── ruoyi-admin/                  # Main backend module
 │   ├── src/main/java/com/ruoyi/  # Java source code
 │   ├── src/main/resources/       # Application configs
+│   │   ├──image/redpacket        # Image resources
+|   │   │   ├── README.image.md   # Info of image
+|   │   │   ├── ...
 │   └── pom.xml                   # Module-specific Maven config
 ├── ruoyi-common/                 # Shared utility module
 ├── ruoyi-framework/             
@@ -103,19 +106,19 @@ Phase 1 and Phase 2 may progress in parallel, with priority given to completing 
 
 ### Phase 1: Database Design & API Development (In Progress:2 days)
 
-- Design tables:`8/5`
+- Design tables:`8/5 - present`
 
-1.  prize – Prize configuration
+1.  prize – Prize configuration: Prize name, total number of prizes, remaining quantity, winning probability
 
-2. user_prize_log – User draw records
+2. user_prize_log – User draw records: User ID, prize name, winning time, usage status
 
-3. image_resource - Static assets
+3. image_resource - Static assets: Resource name, resource identifier, file name, file access path, usage scenario, description
 
-4. user_info - (Ruoyi-embeded)
+4. user_info - (Ruoyi-embeded): Username, password, phone number
 
-5. TOP10网络人气特色美食
+5. Top 10 popular online specialties: Dish name, ranking
 
-6. “一镇一品”特色菜
+6. "One Town, One Product" specialties: Dish name, ranking
 
 - Use Ruoyi's built-in code generator to generate
 
