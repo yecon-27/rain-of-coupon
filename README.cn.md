@@ -89,6 +89,9 @@
 ├── ruoyi-admin/                  # 主后端模块
 │   ├── src/main/java/com/ruoyi/  # Java 源代码
 │   ├── src/main/resources/       # 应用配置
+│   │   ├──image/redpacket        # 图片资源
+|   │   │   ├── README.image.md   # 图片信息
+|   │   │   ├── ...
 │   └── pom.xml                   # 模块特定的 Maven 配置
 ├── ruoyi-common/                 # 共享工具模块
 ├── ruoyi-framework/             
@@ -100,7 +103,7 @@
 
 ### 第一阶段：数据库设计与 API 开发（进行中：2 天）
 
-- **设计表**：`8.5-present`
+- **设计表**：`8.5 - present`
   1. prize – 奖品配置：奖品名称，奖品总数，剩余数量，中奖概率
   2. user_prize_log – 用户抽奖记录: 用户ID，奖品名称，中奖时间，使用状态
   3. image_resource - 其余静态资源：资源名称，资源标识，文件名，文件访问路径，使用场景，描述
