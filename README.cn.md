@@ -44,6 +44,30 @@
 - ✅ 自动库存扣减
 - ✅ 零库存自动排除
 - ✅ 事务保证数据一致性
+***API 接口规范**`8/6`
+1. POST /api/lottery/draw ✅
+- 执行抽奖逻辑
+- 检查用户资格
+- 保存抽奖记录
+- 返回抽奖结果
+2. GET /api/lottery/records ✅
+- 获取用户历史抽奖记录
+- 需要用户登录
+3. GET /api/lottery/drawCount ✅
+- 获取剩余抽奖次数
+- 检查是否已中奖
+- 返回是否可以抽奖
+4. GET /api/lottery/prizes ✅
+- 获取所有可用奖品列表
+- 自动过滤库存为0的奖品
+5. GET /api/lottery/status ✅
+- 检查用户抽奖资格
+- 返回详细的状态信息
+- 包含不能抽奖的原因
+6. GET /api/activity/config ✅
+- 获取活动配置信息
+- 活动时间、限制等
+- 活动状态判断
 
 
 ### 第二阶段：前端页面结构与 API 集成（进行中：3 天）
@@ -140,16 +164,6 @@ if (isWin) {
 - 连接前端和后端抽奖逻辑
 - 验证抽奖限制和中奖逻辑
 
-#### 📋 **API 接口规范：**
-
-| 接口地址 | 请求方式 | 功能描述 | 状态 |
-|----------|----------|----------|------|
-| `/api/lottery/draw` | POST | 执行抽奖 | 🔄 进行中 |
-| `/api/lottery/records` | GET | 获取用户抽奖历史 | 🔄 进行中 |
-| `/api/lottery/drawCount` | GET | 获取剩余抽奖次数 | 🔄 进行中 |
-| `/api/lottery/prizes` | GET | 获取奖品配置 | 🔄 进行中 |
-| `/api/lottery/status` | GET | 检查用户抽奖资格 | 🔄 进行中 |
-| `/api/activity/config` | GET | 获取活动设置 | 🔄 进行中 |
 
 ## 许可证
 

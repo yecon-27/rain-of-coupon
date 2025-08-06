@@ -129,6 +129,30 @@ Phase 1 and Phase 2 may progress in parallel, with priority given to completing 
 - ✅ Automatic Exclusion of Low Inventory
 - ✅ Transactions Ensure Data Consistency
 
+***API Interface Specification** `8/6`
+1. POST /api/lottery/draw ✅
+- Executes the lottery logic
+- Checks user eligibility
+- Saves the lottery record
+- Returns the lottery results
+2. GET /api/lottery/records ✅
+- Gets the user's historical lottery records
+- Requires user login
+3. GET /api/lottery/drawCount ✅
+- Gets the remaining number of draws
+- Checks if a prize has been won
+- Returns whether a draw is available
+4. GET /api/lottery/prizes ✅
+- Gets a list of all available prizes
+- Automatically filters prizes with zero inventory
+5. GET /api/lottery/status ✅
+- Checks user eligibility
+- Returns detailed status information
+- Including the reason for not being able to draw
+6. GET /api/activity/config ✅
+- Gets activity configuration information
+- Activity duration, restrictions, etc.
+- Determines activity status
 
 ### Phase 2: Frontend Page Structure & API Integration (In Progress: 3 days)
 
@@ -227,17 +251,6 @@ Prize probability is stored in a configurable field in the database
 - Connect frontend and backend lottery logic
 
 - Validate draw limits and winning logic
-
-#### 📋 **API Specifications:**
-
-| Endpoint | Method | Description | Status |
-|----------|--------|-------------|--------|
-| `/api/lottery/draw` | POST | Execute lottery draw | 🔄 In Progress |
-| `/api/lottery/records` | GET | Get user draw history | 🔄 In Progress |
-| `/api/lottery/drawCount` | GET | Get remaining draws | 🔄 In Progress |
-| `/api/lottery/prizes` | GET | Get prize configuration | 🔄 In Progress |
-| `/api/lottery/status` | GET | Check user eligibility | 🔄 In Progress |
-| `/api/activity/config` | GET | Get activity settings | 🔄 In Progress |
 
 ## License
 This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for details.
