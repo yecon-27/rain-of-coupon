@@ -50,11 +50,16 @@
 │       ├── api/                  # API 抽象层（Axios）
 │       ├── assets/               # 静态资源（模拟数据）
 │       ├── components/           # 可复用 UI 组件
-│       │   ├── PrizeModal.vue        # 中奖弹窗
-│       │   ├── EncourageTip.vue      # 未中奖鼓励弹窗
-│       │   ├── RedPacket.vue         # 红包动画
-│       │   ├── CountDown.vue         # 倒计时动画（3,2,1）
-│       │   └── RulePopup.vue         # 规则弹窗（可选）
+│       │   ├── PrizeModal.vue          # 中奖弹窗组件
+│       │   ├── EncourageTip.vue        # 未中奖鼓励提示弹窗
+│       │   ├── RedPacket.vue           # 红包动画与点击逻辑
+│       │   ├── CountDown.vue           # 倒计时动画（3、2、1）
+│       │   ├── RulePopup.vue           # 活动规则弹窗（或静态块）
+│       │   ├── CouponCard.vue          # 单张优惠券展示组件（券包页使用）
+│       │   ├── CrowdingTip.vue         # 活动拥挤提示组件
+│       │   ├── LoadingAnim.vue         # 加载动效（如火箭动画）
+│       │   ├── BackButton.vue          # 返回按钮（券包页使用）
+│       │   ├── LoginForm.vue           # 登录表单封装组件
 │       ├── composables/          # Vue 3 组合式函数（例如 useUser）
 │       ├── directives/           # 自定义 Vue 指令
 │       ├── router/               # Vue Router 设置
@@ -127,16 +132,51 @@
 ```
 首页 (/)
 ├─ 点击“加入活动” → 登录页面 (/login)
-│   ├─ 登录成功后 → 加载页面 (/loading)
-│   │   ├─ 自动跳转 → 倒计时页面 (/countdown)
-│   │   │   ├─ 倒计时结束 → 红包页面 (/redpacket)
-│   │   │   │   ├─ 用户中奖 → 显示 PrizeModal 弹窗
-│   │   │   │   └─ 用户未中奖 → 显示 EncourageTip 弹窗
+│   ├─ 登录成功后 → 判断中奖状态
+│   │   ├─ 如果已中奖 → 显示 PrizeModal 弹窗
+|   │   ├─ 如果未中奖 → 自动跳转 → 加载页面 (/loading)
+|   |   │   ├─ 如果人数拥挤 → 拥挤提示组件
+|   |   │   ├─ 如果不拥挤 → 倒计时页面 (/countdown)
+|   │   │   │   ├─ 倒计时结束 → 红包页面 (/redpacket)
+|   │   │   │   │   ├─ 用户中奖 → 显示 PrizeModal 弹窗
+|   │   │   │   │   └─ 用户未中奖 → 显示 EncourageTip 弹窗
 │   │   │   └─ 抽奖后 → 返回首页 (/)
 ├─ 点击“活动规则” → 规则页面 (/rule)
 └─ 抽奖结束或用户登录后 → 优惠券页面 (/coupon)
 ```
+```
+📦 路由页面结构（Page层级）
+/
+├── HomePage (/)
+│   ├── 加入活动 → 登录页（/login）
+│   └── 活动规则页（/rule）
+│   └── 查看我的优惠券（/coupon）
 
+├── LoginPage (/login)
+│   ├── 登录成功 → 判断是否中奖
+│   │   ├── 已中奖 → PrizeModal（组件）
+│   │   └── 未中奖 → /loading
+
+├── LoadingPage (/loading)
+│   ├── 拥挤 → CrowdingTip（组件）
+│   └── 正常 → 倒计时页面 /countdown
+
+├── CountdownPage (/countdown)
+│   └── 倒计时结束 → /redpacket
+
+├── RedPacketPage (/redpacket)
+│   ├── 抽奖完成（点击红包）
+│   │   ├── 中奖 → PrizeModal（组件）
+│   │   └── 未中奖 → EncourageTip（组件）
+│   └── 抽奖后自动返回 HomePage
+
+├── RulePage (/rule)
+│   └── 显示活动规则静态内容
+
+├── CouponPage (/coupon)
+│   └── 显示已领取的券 + 返回按钮
+
+```
 - **LoginPage.vue**
   1. 用户状态检测（通过 token 登录）
   2. 配置 Axios 请求拦截器

@@ -51,11 +51,17 @@ Developed a mini program using Vue 3 and the Ruoyi Framework. Key features inclu
 │       ├── api/                  # API abstraction layer (Axios)
 │       ├── assets/               # Static assets (mock data)
 │       ├── components/           # Reusable UI components
-│       │   ├── PrizeModal.vue        # Modal when user wins a prize
-│       │   ├── EncourageTip.vue      # Popup for encouragement on loss
-│       │   ├── RedPacket.vue         # Red envelope animation
-│       │   ├── CountDown.vue         # Countdown animation (3,2,1)
-│       │   └── RulePopup.vue         # Rules popup (optional)
+│       ├── components/             # Reusable UI components
+│       │   ├── PrizeModal.vue          # Modal when user wins a prize
+│       │   ├── EncourageTip.vue        # Popup for encouragement on loss
+│       │   ├── RedPacket.vue           # Red envelope animation logic
+│       │   ├── CountDown.vue           # Countdown animation (3,2,1)
+│       │   ├── RulePopup.vue           # Popup or static block for activity rules
+│       │   ├── CouponCard.vue          # Single coupon display block (in /coupon)
+│       │   ├── CrowdingTip.vue         # UI hint for "Too many users"
+│       │   ├── LoadingAnim.vue         # Rocket animation / loading animation
+│       │   ├── BackButton.vue          # Back button used in /coupon or others
+│       │   ├── LoginForm.vue           # Encapsulated login form block
 │       ├── composables/          # Vue 3 composable functions (e.g., useUser)
 │       ├── directives/           # Custom Vue directives
 │       ├── router/               # Vue Router setup
@@ -140,15 +146,50 @@ Phase 1 and Phase 2 may progress in parallel, with priority given to completing 
 
 ```
 Home (/)
-├─ Click “Join Activity” → Login Page (/login)
-  ├─ After successful login → Loading Page (/loading)
-    ├─ Auto redirect → Countdown Page (/countdown)
-      ├─ When countdown ends → Red Packet Page (/redpacket)
-        ├─ If user wins → Show PrizeModal popup
-        └─ If user loses → Show EncourageTip popup
-      └─ After the draw → Return to Home (/)
-├─ Click “Event Rules” → Rules Page (/rule)
-└─ After draw ends or user logs in → Coupon Page (/coupon)
+├─ Click "Join Activity" → Login Page (/login)
+│   ├─ After successful login → Check if user has already won
+│   │   ├─ If already won → Show PrizeModal popup
+│   │   ├─ If not yet won → Auto redirect → Loading Page (/loading)
+│   │   │   ├─ If traffic is high → Show CrowdingTip component
+│   │   │   ├─ If traffic is normal → Go to Countdown Page (/countdown)
+│   │   │   │   ├─ After countdown → Redirect to RedPacket Page (/redpacket)
+│   │   │   │   │   ├─ If user wins → Show PrizeModal popup
+│   │   │   │   │   └─ If user doesn't win → Show EncourageTip popup
+│   │   │   └─ After lottery draw → Return to Home (/)
+├─ Click "Activity Rules" → Rules Page (/rule)
+└─ After lottery ends or user logs in → Coupon Page (/coupon)
+```
+```
+📦 Page-Level Route Structure
+/
+├── HomePage (/)
+│   ├── Join Activity → LoginPage (/login)
+│   ├── View Activity Rules → RulePage (/rule)
+│   └── View My Coupons → CouponPage (/coupon)
+
+├── LoginPage (/login)
+│   └── On successful login → Check winning status
+│       ├── If already won → show PrizeModal (component)
+│       └── If not yet → redirect to LoadingPage (/loading)
+
+├── LoadingPage (/loading)
+│   ├── If crowded → show CrowdingTip (component)
+│   └── If smooth → redirect to CountdownPage (/countdown)
+
+├── CountdownPage (/countdown)
+│   └── After countdown → redirect to RedPacketPage (/redpacket)
+
+├── RedPacketPage (/redpacket)
+│   ├── After user taps a red packet:
+│   │   ├── If won → show PrizeModal (component)
+│   │   └── If not → show EncourageTip (component)
+│   └── After drawing → auto-return to HomePage
+
+├── RulePage (/rule)
+│   └── Display static activity rules content
+
+├── CouponPage (/coupon)
+│   └── Display received coupons + BackButton
 ```
 - LoginPage.vue
 
