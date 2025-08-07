@@ -4,10 +4,10 @@ import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.redpacket.domain.DrawResult;
 import com.ruoyi.redpacket.domain.RedpacketEventConfig;
 import com.ruoyi.redpacket.domain.RedpacketPrize;
-import com.ruoyi.redpacket.domain.RedpacketUserPrizeLog;
+import com.ruoyi.redpacket.domain.RedpacketUserParticipationLog;
 import com.ruoyi.redpacket.mapper.RedpacketEventConfigMapper;
 import com.ruoyi.redpacket.mapper.RedpacketPrizeMapper;
-import com.ruoyi.redpacket.mapper.RedpacketUserPrizeLogMapper;
+import com.ruoyi.redpacket.mapper.RedpacketUserParticipationLogMapper;
 import com.ruoyi.redpacket.service.ILotteryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,16 +19,16 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * 抽奖服务实现类
+ * 抽奖服务实现类 - 混合规则：一共只能中一次 + 每天三次参与机会
  * 
  * @author ruoyi
- * @date 2025-08-06
+ * @date 2025-08-07
  */
 @Service
 public class LotteryServiceImpl implements ILotteryService {
     
     @Autowired
-    private RedpacketUserPrizeLogMapper userPrizeLogMapper;
+    private RedpacketUserParticipationLogMapper participationLogMapper;
     
     @Autowired
     private RedpacketPrizeMapper prizeMapper;
@@ -45,12 +45,12 @@ public class LotteryServiceImpl implements ILotteryService {
             return false;
         }
         
-        // 2. 检查用户今日是否已中奖
-        if (hasWonToday(userId)) {
+        // 2. 检查用户是否已经中过奖（核心规则：一共只能中一次）
+        if (hasEverWon(userId)) {
             return false;
         }
         
-        // 3. 检查今日抽奖次数
+        // 3. 检查今日参与次数（每天3次机会）
         if (getRemainingDrawCount(userId) <= 0) {
             return false;
         }
@@ -73,6 +73,12 @@ public class LotteryServiceImpl implements ILotteryService {
             return new DrawResult(false, "奖品已发完，感谢参与！");
         }
         
+        // 检查用户是否已经中过奖
+        if (hasEverWon(userId)) {
+            // 已中奖用户参与，但强制未中奖
+            return new DrawResult(false, "感谢参与，继续体验红包雨吧！");
+        }
+        
         // 执行概率抽奖算法
         RedpacketPrize wonPrize = executeWeightedRandom(availablePrizes);
         
@@ -90,41 +96,43 @@ public class LotteryServiceImpl implements ILotteryService {
     
     @Override
     public void saveDrawRecord(Long userId, DrawResult result, String ipAddress) {
-        RedpacketUserPrizeLog log = new RedpacketUserPrizeLog();
+        RedpacketUserParticipationLog log = new RedpacketUserParticipationLog();
         log.setUserId(userId);
-        log.setPrizeName(result.isWin() ? result.getPrizeName() : null);
-        log.setIsWin(result.isWin() ? 1 : 0);
-        log.setIsUsed(0); // 默认未使用
-        log.setCreatedAt(new Date());
         log.setIpAddress(ipAddress);
+        log.setIsWin(result.isWin() ? 1 : 0);
+        log.setParticipationTime(new Date());
         
-        userPrizeLogMapper.insertRedpacketUserPrizeLog(log);
+        if (result.isWin()) {
+            log.setPrizeId(result.getPrizeId());
+            log.setPrizeName(result.getPrizeName());
+        }
+        
+        participationLogMapper.insertRedpacketUserParticipationLog(log);
     }
     
     @Override
     public int getRemainingDrawCount(Long userId) {
-        // 获取活动配置的每日抽奖次数限制
+        // 获取活动配置的每日参与次数限制
         RedpacketEventConfig config = getEventConfig();
         int maxDrawsPerDay = config != null ? config.getMaxDrawsPerDay() : 3;
         
-        // 查询今日已抽奖次数
-        int todayDrawCount = getTodayDrawCount(userId);
+        // 查询今日已参与次数
+        int todayDrawCount = getTodayParticipationCount(userId);
         
         return Math.max(0, maxDrawsPerDay - todayDrawCount);
     }
     
     @Override
-    public boolean hasWonToday(Long userId) {
-        RedpacketUserPrizeLog queryLog = new RedpacketUserPrizeLog();
+    public boolean hasEverWon(Long userId) {
+        // 核心方法：检查用户是否曾经中过奖（不限日期）
+        RedpacketUserParticipationLog queryLog = new RedpacketUserParticipationLog();
         queryLog.setUserId(userId);
         queryLog.setIsWin(1);
         
-        List<RedpacketUserPrizeLog> logs = userPrizeLogMapper.selectRedpacketUserPrizeLogList(queryLog);
+        List<RedpacketUserParticipationLog> winLogs = 
+            participationLogMapper.selectRedpacketUserParticipationLogList(queryLog);
         
-        // 检查今日是否有中奖记录
-        String today = DateUtils.dateTimeNow("yyyy-MM-dd");
-        return logs.stream().anyMatch(log -> 
-            DateUtils.dateTime(log.getCreatedAt()).startsWith(today));
+        return !winLogs.isEmpty();
     }
     
     @Override
@@ -140,10 +148,10 @@ public class LotteryServiceImpl implements ILotteryService {
     
     @Override
     public List<Object> getUserDrawRecords(Long userId) {
-        RedpacketUserPrizeLog queryLog = new RedpacketUserPrizeLog();
+        RedpacketUserParticipationLog queryLog = new RedpacketUserParticipationLog();
         queryLog.setUserId(userId);
         
-        return userPrizeLogMapper.selectRedpacketUserPrizeLogList(queryLog)
+        return participationLogMapper.selectRedpacketUserParticipationLogList(queryLog)
                 .stream()
                 .map(log -> (Object) log)
                 .toList();
@@ -186,35 +194,37 @@ public class LotteryServiceImpl implements ILotteryService {
     }
     
     /**
-     * 获取今日抽奖次数
+     * 获取今日参与次数
      */
-    private int getTodayDrawCount(Long userId) {
-        RedpacketUserPrizeLog queryLog = new RedpacketUserPrizeLog();
+    private int getTodayParticipationCount(Long userId) {
+        RedpacketUserParticipationLog queryLog = new RedpacketUserParticipationLog();
         queryLog.setUserId(userId);
         
-        List<RedpacketUserPrizeLog> logs = userPrizeLogMapper.selectRedpacketUserPrizeLogList(queryLog);
+        List<RedpacketUserParticipationLog> logs = 
+            participationLogMapper.selectRedpacketUserParticipationLogList(queryLog);
         
         String today = DateUtils.dateTimeNow("yyyy-MM-dd");
-        return (int) logs.stream()
-                .filter(log -> DateUtils.dateTime(log.getCreatedAt()).startsWith(today))
+        long count = logs.stream()
+                .filter(log -> DateUtils.dateTime(log.getParticipationTime()).startsWith(today))
                 .count();
+        
+        return Math.toIntExact(count);
     }
     
     /**
      * 检查IP频率限制
      */
     private boolean checkIpFrequencyLimit(String ipAddress) {
-        // 这里可以使用Redis实现更精确的频率限制
-        // 暂时使用数据库查询实现
-        RedpacketUserPrizeLog queryLog = new RedpacketUserPrizeLog();
+        RedpacketUserParticipationLog queryLog = new RedpacketUserParticipationLog();
         queryLog.setIpAddress(ipAddress);
         
-        List<RedpacketUserPrizeLog> logs = userPrizeLogMapper.selectRedpacketUserPrizeLogList(queryLog);
+        List<RedpacketUserParticipationLog> logs = 
+            participationLogMapper.selectRedpacketUserParticipationLogList(queryLog);
         
         // 检查1小时内的请求次数
         Date oneHourAgo = new Date(System.currentTimeMillis() - 60 * 60 * 1000);
         long recentCount = logs.stream()
-                .filter(log -> log.getCreatedAt().after(oneHourAgo))
+                .filter(log -> log.getParticipationTime().after(oneHourAgo))
                 .count();
         
         return recentCount >= 10; // 1小时内超过10次则限制
@@ -224,7 +234,8 @@ public class LotteryServiceImpl implements ILotteryService {
      * 获取活动配置
      */
     private RedpacketEventConfig getEventConfig() {
-        List<RedpacketEventConfig> configs = eventConfigMapper.selectRedpacketEventConfigList(new RedpacketEventConfig());
+        List<RedpacketEventConfig> configs = 
+            eventConfigMapper.selectRedpacketEventConfigList(new RedpacketEventConfig());
         return configs.isEmpty() ? null : configs.get(0);
     }
 }
