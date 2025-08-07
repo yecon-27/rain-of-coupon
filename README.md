@@ -3,7 +3,7 @@
 ## Red Envelope Rain Mini Program
 Developed a mini program using Vue 3 and the Ruoyi Framework. Key features include:
 
-- Lottery system: Up to 3 draws per user per day; ends automatically upon winning.
+- **Red Envelope Rain System**: Up to 3 games per user per day; ends automatically upon winning. The more red envelopes clicked, the higher the winning probability.
 
 - Traffic control: Detects high user traffic and displays congestion notifications.
 
@@ -18,6 +18,23 @@ Developed a mini program using Vue 3 and the Ruoyi Framework. Key features inclu
 - Database: MySQL
 - API: RESTful API
 - Deployment: Nginx + Docker
+
+## Database Schema
+
+### Core Business Tables
+1. **redpacket_prize** (Prize Configuration Table)
+   - Prize name, total quantity, remaining quantity, win probability
+2. **redpacket_user_participation_log** (User Participation Log Table)
+   - User ID, IP address, win status, participation time, prize info
+3. **redpacket_event_config** (Event Configuration Table)
+   - Event duration, concurrency limits, daily game limits
+4. **image_resource** (Image Resource Table)
+   - Static image resource management for red envelope rain
+
+### Business Features
+- **Anti-Fraud Mechanism**: IP frequency limits, daily attempt limits, stop after winning
+- **Probability Algorithm**: Dynamic probability calculation based on click count
+- **Concurrency Control**: Redis cache + database transactions ensure data consistency
 
 ## Project Structure
 
@@ -38,7 +55,9 @@ Developed a mini program using Vue 3 and the Ruoyi Framework. Key features inclu
 ├── sql/                          # SQL scripts for database initialization
 │   ├── ry_20250522.sql               # Base tables for RuoYi framework
 │   ├── coupon_activity_simplified.sql # Tables: prize, log, config, image, food
-│   ├── README.sql.md                 # Description of SQL files
+│   ├── add-participation-log-table.sql # Red envelope rain user participation log table
+│   ├── business_log.sql              # Business log table
+│   ├── README.sql.md                 # Description of SQL files (includes red envelope rain table structure)
 │   └── quartz.sql                    # Quartz scheduled task tables
 ├── rain-of-coupon/              # Frontend project (e.g., mini-game or web)
 │   ├── public/                   # Public static resources
@@ -158,7 +177,7 @@ Phase 1 and Phase 2 may progress in parallel, with priority given to completing 
 
 #### ✅ **Completed Tasks:**
 
-**Database Design** `8/5 - 8/6`
+**Database Design** `8/5 - 8/6``8/7 Supplemented the participation log table`
 
 **Code Generation** `8/6`
 - ✅ Entity classes generated
@@ -166,36 +185,38 @@ Phase 1 and Phase 2 may progress in parallel, with priority given to completing 
 - ✅ Basic CRUD Service and Controller layers generated
 - ✅ Menu configuration SQL files generated
 
-**Core Business Logic for the Lottery Controller and Service Layer**`8/6`
-- ✅ Daily Limit of 3
-- ✅ Lottery Stops After Winning
+**Core Business Logic for Red Envelope Rain Controller and Service Layer**`8/6`
+- ✅ Daily Limit of 3 Games
+- ✅ Participation Stops After Winning (One Win Per Person)
 - ✅ IP Frequency Limit (10 Times per Hour)
 - ✅ Event Duration Control
-- ✅ Weighted Random Probability Algorithm
+- ✅ Click-Based Probability Algorithm (More Clicks = Higher Win Rate)
+- ✅ Red Envelope Rain Interactive Mode (100 Red Envelopes Fall in 50 Seconds)
 - ✅ Automatic Inventory Deductions
-- ✅ Automatic Exclusion of Low Inventory
+- ✅ Automatic Exclusion of Zero Inventory
 - ✅ Transactions Ensure Data Consistency
 
 ***API Interface Specification** `8/6`
 1. POST /api/lottery/draw ✅
-- Executes the lottery logic
+- Executes red envelope rain logic
+- Calculates win probability based on click count
 - Checks user eligibility
-- Saves the lottery record
-- Returns the lottery results
+- Saves participation record
+- Returns red envelope grab results
 2. GET /api/lottery/records ✅
-- Gets the user's historical lottery records
+- Gets the user's historical participation records
 - Requires user login
 3. GET /api/lottery/drawCount ✅
-- Gets the remaining number of draws
+- Gets the remaining number of games
 - Checks if a prize has been won
-- Returns whether a draw is available
+- Returns whether user can participate in red envelope rain
 4. GET /api/lottery/prizes ✅
 - Gets a list of all available prizes
 - Automatically filters prizes with zero inventory
 5. GET /api/lottery/status ✅
-- Checks user eligibility
+- Checks user eligibility for red envelope rain
 - Returns detailed status information
-- Including the reason for not being able to draw
+- Including the reason for not being able to participate
 6. GET /api/activity/config ✅
 - Gets activity configuration information
 - Activity duration, restrictions, etc.
@@ -211,7 +232,7 @@ Phase 1 and Phase 2 may progress in parallel, with priority given to completing 
 
 2. Axios setup with request interceptors
 
-- **Red Envelope logic**: *Falling red envelope animation*， *Click to trigger draw request*， *Popup to show win or no-win*
+- **Red Envelope Rain Logic**: *100 red envelopes fall in 50 seconds*, *Click to accumulate count*, *Calculate win probability based on click count after game ends*, *Popup to show win or no-win*
   
 ```
 let totalRedPackets = 100;
@@ -225,22 +246,28 @@ let interval = setInterval(() => {
 - **Detects high user traffic**： "Current Limitation" Problem -> Backend current limiting + status response + 
 Front-end loading judgment, return `{ "status": "crowded" } // or "ok"`
 
-- **Randomly determine whether the user has grabbed the red envelope**
-```
-// Query today's lottery records
+- **Determine win based on click count**:
+
+```java
+// Query today's participation records
 List<UserPrizeLog> logs = userPrizeLogMapper.queryToday(userId);
-if (logs.size() >= 3) return fail("次数用尽");
+if (logs.size() >= 3) return fail("No attempts left");
 
 boolean alreadyWon = logs.stream().anyMatch(log -> log.isWin());
-if (alreadyWon) return fail("已中奖");
+if (alreadyWon) return fail("Already won");
 
-boolean isWin = Math.random() < 0.2; // 20% chance of winning, configurable in the background
+// Calculate win probability based on click count
+int clickedCount = request.getClickedCount(); // Number of red envelopes clicked
+double baseProbability = 0.05; // 5% base probability
+double probabilityMultiplier = 1.0 + Math.log(clickedCount) / Math.log(10) * 0.8;
+double finalProbability = baseProbability * Math.min(probabilityMultiplier, 4.0);
+
+boolean isWin = Math.random() < finalProbability;
 if (isWin) {
     // Randomly distribute prizes
     Prize prize = prizeService.getRandomAvailablePrize();
     saveUserPrize(userId, prize);
 }
-
 ```
 - **Configurable prize distribution algorithm**:
 

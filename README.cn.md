@@ -4,7 +4,7 @@
 
 基于 Vue 3 和若依框架开发了一个小程序。主要功能包括：
 
-- **抽奖系统**：每位用户每天最多抽奖 3 次，获奖后自动结束。
+- **红包雨抢红包系统**：每位用户每天最多参与 3 次，获奖后自动结束。点击红包数量越多，中奖概率越大。
 - **流量控制**：检测高用户流量并显示拥堵通知。
 - **交互动画**：下落的红包动画和可点击的奖励触发。
 - **优惠券页面**：设计了响应式布局，包含返回导航。
@@ -19,7 +19,27 @@
 - **API**：RESTful API
 - **部署**：Nginx + Docker
 
+## 数据库表结构
+
+### 核心业务表
+
+1. **redpacket_prize**（奖品配置表）
+   - 奖品名称、总数量、剩余数量、中奖概率
+2. **redpacket_user_participation_log**（用户参与记录表）
+   - 用户 ID、IP 地址、是否中奖、参与时间、奖品信息
+3. **redpacket_event_config**（活动配置表）
+   - 活动时间、并发限制、每日游戏次数限制
+4. **image_resource**（图片资源表）
+   - 红包雨相关的静态图片资源管理
+
+### 业务特色
+
+- **防刷机制**：IP 频率限制、每日次数限制、中奖后停止
+- **概率算法**：基于点击数量的动态概率计算
+- **并发控制**：Redis 缓存 + 数据库事务保证数据一致性
+
 ## 项目结构
+
 ```
 ├── .gitignore                    # Git 忽略文件
 ├── LICENSE                       # 开源许可证
@@ -37,7 +57,9 @@
 ├── sql/                          # 数据库初始化 SQL 文件
 │   ├── ry_20250522.sql               # 若依框架基础表
 │   ├── coupon_activity_simplified.sql # 活动相关表：奖品、日志、配置、图片资源、食品等
-│   ├── README.sql.md                 # SQL 文件说明
+│   ├── add-participation-log-table.sql # 红包雨用户参与记录表
+│   ├── business_log.sql              # 业务日志表
+│   ├── README.sql.md                 # SQL 文件说明（包含红包雨表结构）
 │   └── quartz.sql                    # Quartz 定时任务相关表
 ├── rain-of-coupon/              # 小程序前端项目
 │   ├── public/                   # 公共静态资源
@@ -100,6 +122,7 @@
 ├── ruoyi-common/                # 通用工具模块（Java）
 ├── ruoyi-framework/             # 框架核心模块（Java）
 ```
+
 ## 用户流 & 路由页面结构（Page 层级）
 
 1.
@@ -163,7 +186,7 @@
 
 #### ✅ **已完成任务：**
 
-**数据库设计** `8/5 - 8/6`
+**数据库设计** ` 8/5 - 8/6``8.7上午补充了参与活动的表数据库 `
 
 **代码生成** `8/6`
 
@@ -172,13 +195,14 @@
 - ✅ 基础 CRUD Service 和 Controller 层已生成
 - ✅ 菜单配置 SQL 文件已生成
 
-  **抽奖控制器和服务层的核心业务逻辑**`8/6`
+  **红包雨抢红包控制器和服务层的核心业务逻辑**`8/6`
 
-- ✅ 每日 3 次限制
-- ✅ 中奖后停止抽奖
+- ✅ 每日 3 次游戏限制
+- ✅ 中奖后停止参与（一人只能中一次）
 - ✅ IP 频率限制（1 小时 10 次）
 - ✅ 活动时间控制
-- ✅ 加权随机概率算法
+- ✅ 基于点击数量的概率算法（点击越多，中奖概率越大）
+- ✅ 红包雨交互模式（50 秒内 100 个红包飘落）
 - ✅ 自动库存扣减
 - ✅ 零库存自动排除
 - ✅ 事务保证数据一致性
@@ -187,21 +211,22 @@
 
 1. POST /api/lottery/draw ✅
 
-- 执行抽奖逻辑
+- 执行红包雨抢红包逻辑
+- 基于点击数量计算中奖概率
 - 检查用户资格
-- 保存抽奖记录
-- 返回抽奖结果
+- 保存参与记录
+- 返回抢红包结果
 
 2. GET /api/lottery/records ✅
 
-- 获取用户历史抽奖记录
+- 获取用户历史参与记录
 - 需要用户登录
 
 3. GET /api/lottery/drawCount ✅
 
-- 获取剩余抽奖次数
+- 获取剩余游戏次数
 - 检查是否已中奖
-- 返回是否可以抽奖
+- 返回是否可以参与红包雨
 
 4. GET /api/lottery/prizes ✅
 
@@ -210,9 +235,9 @@
 
 5. GET /api/lottery/status ✅
 
-- 检查用户抽奖资格
+- 检查用户参与红包雨资格
 - 返回详细的状态信息
-- 包含不能抽奖的原因
+- 包含不能参与的原因
 
 6. GET /api/activity/config ✅
 
@@ -229,7 +254,7 @@
   1. 用户状态检测（通过 token 登录）
   2. 配置 Axios 请求拦截器
 
-- **红包逻辑**：_下落红包动画_，_点击触发抽奖请求_，_弹窗显示中奖或未中奖_
+- **红包雨逻辑**：_50 秒内 100 个红包下落动画_，_点击红包累积计数_，_游戏结束后根据点击数量计算中奖概率_，_弹窗显示中奖或未中奖_
 
 ```javascript
 let totalRedPackets = 100;
@@ -242,17 +267,23 @@ let interval = setInterval(() => {
 
 - **流量检测**：“限流”问题 -> 后端限流 + 状态响应 + 前端加载判断，返回 `{ "status": "crowded" } // 或 "ok"`
 
-- **随机判断用户是否抢到红包**：
+- **基于点击数量判断用户是否抢到红包**：
 
 ```java
-// 查询今日抽奖记录
+// 查询今日参与记录
 List<UserPrizeLog> logs = userPrizeLogMapper.queryToday(userId);
 if (logs.size() >= 3) return fail("次数用尽");
 
 boolean alreadyWon = logs.stream().anyMatch(log -> log.isWin());
 if (alreadyWon) return fail("已中奖");
 
-boolean isWin = Math.random() < 0.2; // 20% 中奖概率，后台可配置
+// 基于点击数量计算中奖概率
+int clickedCount = request.getClickedCount(); // 用户点击的红包数量
+double baseProbability = 0.05; // 5% 基础概率
+double probabilityMultiplier = 1.0 + Math.log(clickedCount) / Math.log(10) * 0.8;
+double finalProbability = baseProbability * Math.min(probabilityMultiplier, 4.0);
+
+boolean isWin = Math.random() < finalProbability;
 if (isWin) {
     // 随机分配奖品
     Prize prize = prizeService.getRandomAvailablePrize();
