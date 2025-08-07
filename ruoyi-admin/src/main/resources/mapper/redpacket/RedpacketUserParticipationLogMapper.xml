@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.redpacket.mapper.RedpacketUserParticipationLogMapper">
+    
+    <resultMap type="RedpacketUserParticipationLog" id="RedpacketUserParticipationLogResult">
+        <result property="id"    column="id"    />
+        <result property="userId"    column="user_id"    />
+        <result property="participationTime"    column="participation_time"    />
+        <result property="ipAddress"    column="ip_address"    />
+        <result property="isWin"    column="is_win"    />
+        <result property="prizeId"    column="prize_id"    />
+        <result property="prizeName"    column="prize_name"    />
+        <result property="isUsed"    column="is_used"    />
+    </resultMap>
+
+    <sql id="selectRedpacketUserParticipationLogVo">
+        select id, user_id, participation_time, ip_address, is_win, prize_id, prize_name, is_used from redpacket_user_participation_log
+    </sql>
+
+    <select id="selectRedpacketUserParticipationLogList" parameterType="RedpacketUserParticipationLog" resultMap="RedpacketUserParticipationLogResult">
+        <include refid="selectRedpacketUserParticipationLogVo"/>
+        <where>  
+            <if test="userId != null "> and user_id = #{userId}</if>
+            <if test="params.beginParticipationTime != null and params.beginParticipationTime != '' and params.endParticipationTime != null and params.endParticipationTime != ''"> and participation_time between #{params.beginParticipationTime} and #{params.endParticipationTime}</if>
+            <if test="ipAddress != null  and ipAddress != ''"> and ip_address like concat('%', #{ipAddress}, '%')</if>
+            <if test="isWin != null "> and is_win = #{isWin}</if>
+            <if test="prizeId != null "> and prize_id = #{prizeId}</if>
+            <if test="prizeName != null  and prizeName != ''"> and prize_name like concat('%', #{prizeName}, '%')</if>
+            <if test="isUsed != null "> and is_used = #{isUsed}</if>
+        </where>
+    </select>
+    
+    <select id="selectRedpacketUserParticipationLogById" parameterType="Long" resultMap="RedpacketUserParticipationLogResult">
+        <include refid="selectRedpacketUserParticipationLogVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertRedpacketUserParticipationLog" parameterType="RedpacketUserParticipationLog" useGeneratedKeys="true" keyProperty="id">
+        insert into redpacket_user_participation_log
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null">user_id,</if>
+            <if test="participationTime != null">participation_time,</if>
+            <if test="ipAddress != null and ipAddress != ''">ip_address,</if>
+            <if test="isWin != null">is_win,</if>
+            <if test="prizeId != null">prize_id,</if>
+            <if test="prizeName != null">prize_name,</if>
+            <if test="isUsed != null">is_used,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userId != null">#{userId},</if>
+            <if test="participationTime != null">#{participationTime},</if>
+            <if test="ipAddress != null and ipAddress != ''">#{ipAddress},</if>
+            <if test="isWin != null">#{isWin},</if>
+            <if test="prizeId != null">#{prizeId},</if>
+            <if test="prizeName != null">#{prizeName},</if>
+            <if test="isUsed != null">#{isUsed},</if>
+         </trim>
+    </insert>
+
+    <update id="updateRedpacketUserParticipationLog" parameterType="RedpacketUserParticipationLog">
+        update redpacket_user_participation_log
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="participationTime != null">participation_time = #{participationTime},</if>
+            <if test="ipAddress != null and ipAddress != ''">ip_address = #{ipAddress},</if>
+            <if test="isWin != null">is_win = #{isWin},</if>
+            <if test="prizeId != null">prize_id = #{prizeId},</if>
+            <if test="prizeName != null">prize_name = #{prizeName},</if>
+            <if test="isUsed != null">is_used = #{isUsed},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteRedpacketUserParticipationLogById" parameterType="Long">
+        delete from redpacket_user_participation_log where id = #{id}
+    </delete>
+
+    <delete id="deleteRedpacketUserParticipationLogByIds" parameterType="String">
+        delete from redpacket_user_participation_log where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

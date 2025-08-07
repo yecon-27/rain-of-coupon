@@ -88,82 +88,82 @@ export const constantRoutes = [
       },
     ],
   },
-  // 红包雨活动路由 - 按照用户流程重新设计
-  {
-    path: "/loading",
-    component: () => import("@/views/redpacket/loading"),
-    name: "Loading",
-    hidden: true,
-    beforeEnter: (to, from, next) => {
-      import("@/router/redpacket-guards").then(({ beforeEnterLoading }) => {
-        beforeEnterLoading(to, from, next);
-      });
-    },
-    meta: {
-      title: "加载中",
-      noCache: true,
-      requireAuth: true,
-    },
-  },
-  {
-    path: "/countdown",
-    component: () => import("@/views/redpacket/countdown"),
-    name: "Countdown",
-    hidden: true,
-    beforeEnter: (to, from, next) => {
-      import("@/router/redpacket-guards").then(({ beforeEnterCountdown }) => {
-        beforeEnterCountdown(to, from, next);
-      });
-    },
-    meta: {
-      title: "倒计时",
-      noCache: true,
-      requireAuth: true,
-    },
-  },
-  {
-    path: "/redpacket",
-    component: () => import("@/views/redpacket/index"),
-    name: "RedPacket",
-    hidden: true,
-    beforeEnter: (to, from, next) => {
-      import("@/router/redpacket-guards").then(({ beforeEnterRedPacket }) => {
-        beforeEnterRedPacket(to, from, next);
-      });
-    },
-    meta: {
-      title: "红包雨",
-      noCache: true,
-      requireAuth: true,
-      requireActivity: true,
-    },
-  },
-  {
-    path: "/rule",
-    component: () => import("@/views/redpacket/rule"),
-    name: "Rule",
-    hidden: true,
-    meta: {
-      title: "活动规则",
-      public: true,
-    },
-  },
-  {
-    path: "/coupon",
-    component: () => import("@/views/redpacket/coupon"),
-    name: "Coupon",
-    hidden: true,
-    beforeEnter: (to, from, next) => {
-      import("@/router/redpacket-guards").then(({ beforeEnterCoupon }) => {
-        beforeEnterCoupon(to, from, next);
-      });
-    },
-    meta: {
-      title: "我的优惠券",
-      noCache: true,
-      requireAuth: true,
-    },
-  },
+  // TODO: 红包雨活动路由 - 等前端开发时取消注释
+  // {
+  //   path: "/loading",
+  //   component: () => import("@/views/redpacket/loading"),
+  //   name: "Loading",
+  //   hidden: true,
+  //   beforeEnter: (to, from, next) => {
+  //     import("@/router/redpacket-guards").then(({ beforeEnterLoading }) => {
+  //       beforeEnterLoading(to, from, next);
+  //     });
+  //   },
+  //   meta: {
+  //     title: "加载中",
+  //     noCache: true,
+  //     requireAuth: true,
+  //   },
+  // },
+  // {
+  //   path: "/countdown",
+  //   component: () => import("@/views/redpacket/countdown"),
+  //   name: "Countdown",
+  //   hidden: true,
+  //   beforeEnter: (to, from, next) => {
+  //     import("@/router/redpacket-guards").then(({ beforeEnterCountdown }) => {
+  //       beforeEnterCountdown(to, from, next);
+  //     });
+  //   },
+  //   meta: {
+  //     title: "倒计时",
+  //     noCache: true,
+  //     requireAuth: true,
+  //   },
+  // },
+  // {
+  //   path: "/redpacket",
+  //   component: () => import("@/views/redpacket/index"),
+  //   name: "RedPacket",
+  //   hidden: true,
+  //   beforeEnter: (to, from, next) => {
+  //     import("@/router/redpacket-guards").then(({ beforeEnterRedPacket }) => {
+  //       beforeEnterRedPacket(to, from, next);
+  //     });
+  //   },
+  //   meta: {
+  //     title: "红包雨",
+  //     noCache: true,
+  //     requireAuth: true,
+  //     requireActivity: true,
+  //   },
+  // },
+  // {
+  //   path: "/rule",
+  //   component: () => import("@/views/redpacket/rule"),
+  //   name: "Rule",
+  //   hidden: true,
+  //   meta: {
+  //     title: "活动规则",
+  //     public: true,
+  //   },
+  // },
+  // {
+  //   path: "/coupon",
+  //   component: () => import("@/views/redpacket/coupon"),
+  //   name: "Coupon",
+  //   hidden: true,
+  //   beforeEnter: (to, from, next) => {
+  //     import("@/router/redpacket-guards").then(({ beforeEnterCoupon }) => {
+  //       beforeEnterCoupon(to, from, next);
+  //     });
+  //   },
+  //   meta: {
+  //     title: "我的优惠券",
+  //     noCache: true,
+  //     requireAuth: true,
+  //   },
+  // },
 ];
 
 // 动态路由，基于用户权限动态去加载

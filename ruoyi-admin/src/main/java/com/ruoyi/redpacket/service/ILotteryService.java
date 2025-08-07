@@ -55,6 +55,14 @@ public interface ILotteryService {
     boolean hasWonToday(Long userId);
     
     /**
+     * 检查用户是否曾经中过奖（混合规则核心方法）
+     * 
+     * @param userId 用户ID
+     * @return 是否曾经中奖
+     */
+    boolean hasEverWon(Long userId);
+    
+    /**
      * 获取可用奖品列表
      * 
      * @return 奖品列表

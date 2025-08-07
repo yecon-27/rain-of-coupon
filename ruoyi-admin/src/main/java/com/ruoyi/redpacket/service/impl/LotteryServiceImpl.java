@@ -17,6 +17,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 /**
  * 抽奖服务实现类 - 混合规则：一共只能中一次 + 每天三次参与机会
@@ -114,7 +115,7 @@ public class LotteryServiceImpl implements ILotteryService {
     public int getRemainingDrawCount(Long userId) {
         // 获取活动配置的每日参与次数限制
         RedpacketEventConfig config = getEventConfig();
-        int maxDrawsPerDay = config != null ? config.getMaxDrawsPerDay() : 3;
+        int maxDrawsPerDay = config != null ? config.getMaxDrawsPerDay().intValue() : 3;
         
         // 查询今日已参与次数
         int todayDrawCount = getTodayParticipationCount(userId);
@@ -136,6 +137,20 @@ public class LotteryServiceImpl implements ILotteryService {
     }
     
     @Override
+    public boolean hasWonToday(Long userId) {
+        RedpacketUserParticipationLog queryLog = new RedpacketUserParticipationLog();
+        queryLog.setUserId(userId);
+        queryLog.setIsWin(1);
+        
+        List<RedpacketUserParticipationLog> logs = 
+            participationLogMapper.selectRedpacketUserParticipationLogList(queryLog);
+        
+        String today = DateUtils.dateTimeNow("yyyy-MM-dd");
+        return logs.stream()
+                .anyMatch(log -> DateUtils.dateTime(log.getParticipationTime()).startsWith(today));
+    }
+    
+    @Override
     public List<RedpacketPrize> getAvailablePrizes() {
         RedpacketPrize queryPrize = new RedpacketPrize();
         List<RedpacketPrize> allPrizes = prizeMapper.selectRedpacketPrizeList(queryPrize);
@@ -143,7 +158,7 @@ public class LotteryServiceImpl implements ILotteryService {
         // 过滤出有库存的奖品
         return allPrizes.stream()
                 .filter(prize -> prize.getRemainingCount() > 0)
-                .toList();
+                .collect(Collectors.toList());
     }
     
     @Override
@@ -154,7 +169,7 @@ public class LotteryServiceImpl implements ILotteryService {
         return participationLogMapper.selectRedpacketUserParticipationLogList(queryLog)
                 .stream()
                 .map(log -> (Object) log)
-                .toList();
+                .collect(Collectors.toList());
     }
     
     @Override
@@ -208,7 +223,7 @@ public class LotteryServiceImpl implements ILotteryService {
                 .filter(log -> DateUtils.dateTime(log.getParticipationTime()).startsWith(today))
                 .count();
         
-        return Math.toIntExact(count);
+        return (int) count;
     }
     
     /**
@@ -227,7 +242,7 @@ public class LotteryServiceImpl implements ILotteryService {
                 .filter(log -> log.getParticipationTime().after(oneHourAgo))
                 .count();
         
-        return recentCount >= 10; // 1小时内超过10次则限制
+        return recentCount >= 10L; // 1小时内超过10次则限制
     }
     
     /**
