@@ -13,7 +13,7 @@ Developed a mini program using Vue 3 and the Ruoyi Framework. Key features inclu
 <img width="1199" height="756" alt="642b289e022901a99b5f68f1a5e94f4" src="https://github.com/user-attachments/assets/ee03551b-73a5-4565-862b-7016bc432df9" />
 
 ### Tech Stack
-- Frontend: Vue 3, Pinia, Vite
+- Frontend: Vue 2, Vuex, Vite
 - Backend: Ruoyi Framework (Spring Boot)
 - Database: MySQL
 - API: RESTful API

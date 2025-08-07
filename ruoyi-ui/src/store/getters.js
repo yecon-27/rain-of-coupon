@@ -16,6 +16,14 @@ const getters = {
   permission_routes: state => state.permission.routes,
   topbarRouters: state => state.permission.topbarRouters,
   defaultRoutes: state => state.permission.defaultRoutes,
-  sidebarRouters: state => state.permission.sidebarRouters
+  sidebarRouters: state => state.permission.sidebarRouters,
+  
+  // 抽奖相关全局getters
+  lotteryCanDraw: state => state.lottery.canDraw,
+  lotteryDrawCount: state => state.lottery.userStatus.drawCount,
+  lotteryPrizes: state => state.lottery.prizes,
+  lotteryRecords: state => state.lottery.records.list,
+  lotteryDrawing: state => state.lottery.drawing,
+  lotteryActivityStatus: state => state.lottery.activityConfig.status
 }
 export default getters

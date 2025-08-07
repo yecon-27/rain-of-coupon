@@ -13,7 +13,7 @@
 
 ## 技术栈
 
-- **前端**：Vue 3, Pinia, Vite
+- **前端**：Vue 2, Vuex, Vite
 - **后端**：若依框架（Spring Boot）
 - **数据库**：MySQL
 - **API**：RESTful API
