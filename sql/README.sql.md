@@ -23,6 +23,9 @@
 ### 7. town_specialty_food（"一镇一品"特色菜）
 - 美食名称、排名
 
+### 8.redpacket_user_participation_log (每次用户参与红包雨的行为)
+- 
+
 ## 图片文件部署说明
 
 **图片存储目录：** `ruoyi-admin/src/main/resources/static/images/coupon/`

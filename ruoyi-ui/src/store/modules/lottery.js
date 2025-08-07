@@ -18,19 +18,22 @@ const lottery = {
   namespaced: true,
   
   state: {
-    // 用户红包雨状态 - 基于数据库表结构设计
+    // 用户红包雨状态 - 混合规则：一共只能中一次 + 每天三次参与机会
     userStatus: {
-      canDraw: false,           // 是否可以参与红包雨（根据活动状态和用户次数计算）
-      remainingCount: null,     // 剩余参与次数（从后端计算：max_draws_per_day - 今日已参与次数）
-      todayDrawCount: null,     // 今日已参与次数（从redpacket_user_prize_log表统计）
-      totalDrawCount: null,     // 历史总参与次数（从redpacket_user_prize_log表统计）
-      maxDrawsPerDay: null,     // 每日最大参与次数（从redpacket_event_config表读取）
+      canDraw: false,           // 是否可以参与红包雨（根据活动状态和参与次数计算）
+      remainingCount: null,     // 今日剩余参与次数（从后端计算：maxDrawsPerDay - todayDrawCount）
+      todayDrawCount: null,     // 今日已参与次数（从数据库统计）
+      totalDrawCount: null,     // 历史总参与次数（从数据库统计）
+      maxDrawsPerDay: null,     // 每日最大参与次数（从redpacket_event_config表读取，固定为3）
       isLogin: false,           // 是否已登录
       userId: null,             // 用户ID
-      hasWon: false,            // 是否已中奖（从redpacket_user_prize_log表查询is_win=1的记录）
+      hasEverWon: false,        // 是否曾经中过奖（混合规则的关键字段）
+      winRecord: null,          // 中奖记录（如果有的话，最多只有一条）
       isCrowded: false,         // 当前是否拥挤（根据max_users和当前在线用户数计算）
       canEnterCountdown: false, // 是否可以进入倒计时
-      winRecords: []            // 用户中奖记录列表（从redpacket_user_prize_log表查询is_win=1）
+      participationHistory: [], // 用户参与历史记录（按日期分组）
+      canStillWin: true,        // 是否还能中奖（!hasEverWon）
+      canParticipateToday: true // 今日是否还能参与（remainingCount > 0）
     },
     
     // 优惠券信息

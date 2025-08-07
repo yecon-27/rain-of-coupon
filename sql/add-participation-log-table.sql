@@ -1,6 +1,7 @@
--- 建议添加：用户参与记录表
--- 用于记录每次用户参与红包雨的行为（无论是否中奖）
+-- 新增用户参与记录表
+-- 在原有表结构基础上，新增这个表来记录所有参与行为
 
+-- 创建用户参与记录表
 DROP TABLE IF EXISTS `redpacket_user_participation_log`;
 CREATE TABLE `redpacket_user_participation_log` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键',
@@ -9,23 +10,18 @@ CREATE TABLE `redpacket_user_participation_log` (
   `ip_address` varchar(45) NOT NULL COMMENT 'IP记录（防刷）',
   `is_win` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否中奖(0未中奖 1中奖)',
   `prize_id` bigint(20) DEFAULT NULL COMMENT '中奖奖品ID（未中奖时为空）',
-  `session_id` varchar(100) DEFAULT NULL COMMENT '会话ID（防刷）',
+  `prize_name` varchar(100) DEFAULT NULL COMMENT '奖品名称（未中奖时为空）',
+  `is_used` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否使用(0未使用 1已使用)',
   PRIMARY KEY (`id`),
   KEY `idx_user_id` (`user_id`),
   KEY `idx_participation_time` (`participation_time`),
   KEY `idx_user_date` (`user_id`, `participation_time`),
+  KEY `idx_user_win_used` (`user_id`, `is_win`, `is_used`),
+  KEY `idx_ip_address` (`ip_address`),
   FOREIGN KEY (`prize_id`) REFERENCES `redpacket_prize`(`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='用户参与记录表';
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='用户参与记录表（记录所有参与行为）';
 
--- 这样就可以正确统计参与次数了：
--- 1. 今日参与次数
-SELECT COUNT(*) FROM redpacket_user_participation_log 
-WHERE user_id = ? AND DATE(participation_time) = CURDATE();
+-- 创建索引优化查询性能
+CREATE INDEX idx_redpacket_user_participation_log_user_id ON redpacket_user_participation_log(user_id);
 
--- 2. 历史总参与次数  
-SELECT COUNT(*) FROM redpacket_user_participation_log 
-WHERE user_id = ?;
-
--- 3. 今日中奖次数
-SELECT COUNT(*) FROM redpacket_user_participation_log 
-WHERE user_id = ? AND DATE(participation_time) = CURDATE() AND is_win = 1;
+COMMIT;
