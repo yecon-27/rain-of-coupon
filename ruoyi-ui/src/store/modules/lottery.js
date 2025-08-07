@@ -22,18 +22,23 @@ const lottery = {
     userStatus: {
       canDraw: false,           // 是否可以参与红包雨（根据活动状态和参与次数计算）
       remainingCount: null,     // 今日剩余参与次数（从后端计算：maxDrawsPerDay - todayDrawCount）
-      todayDrawCount: null,     // 今日已参与次数（从数据库统计）
-      totalDrawCount: null,     // 历史总参与次数（从数据库统计）
+      todayDrawCount: null,     // 今日已参与次数（从redpacket_user_participation_log统计）
+      totalDrawCount: null,     // 历史总参与次数（从redpacket_user_participation_log统计）
+      todayWinCount: null,      // 今日中奖次数（从redpacket_user_participation_log统计is_win=1）
+      totalWinCount: null,      // 历史总中奖次数
       maxDrawsPerDay: null,     // 每日最大参与次数（从redpacket_event_config表读取，固定为3）
       isLogin: false,           // 是否已登录
       userId: null,             // 用户ID
-      hasEverWon: false,        // 是否曾经中过奖（混合规则的关键字段）
-      winRecord: null,          // 中奖记录（如果有的话，最多只有一条）
+      hasEverWon: false,        // 是否曾经中过奖（混合规则的关键字段，从redpacket_user_participation_log查询）
+      winRecords: [],           // 所有中奖记录列表（可能有多条，但按规则只能中一次）
       isCrowded: false,         // 当前是否拥挤（根据max_users和当前在线用户数计算）
       canEnterCountdown: false, // 是否可以进入倒计时
       participationHistory: [], // 用户参与历史记录（按日期分组）
+      todayParticipations: [],  // 今日参与记录详情
       canStillWin: true,        // 是否还能中奖（!hasEverWon）
-      canParticipateToday: true // 今日是否还能参与（remainingCount > 0）
+      canParticipateToday: true,// 今日是否还能参与（remainingCount > 0）
+      todayClickedTotal: 0,     // 今日总点击红包数量
+      avgClicksPerGame: 0       // 平均每局点击数量
     },
     
     // 优惠券信息
@@ -68,6 +73,13 @@ const lottery = {
     drawing: false,            // 是否正在参与红包雨
     drawResult: null,          // 领取结果
     showResult: false,         // 是否显示结果弹窗
+    currentGameSession: {      // 当前游戏会话状态
+      sessionId: null,         // 会话ID
+      startTime: null,         // 游戏开始时间
+      clickedCount: 0,         // 当前游戏点击的红包数量
+      gameStatus: 'idle',      // 游戏状态：idle, playing, finished
+      duration: 50000          // 游戏持续时间（50秒）
+    },
     
     // 今日统计
     todayStats: {
@@ -153,6 +165,27 @@ const lottery = {
     // 设置今日统计
     SET_TODAY_STATS: (state, stats) => {
       state.todayStats = { ...state.todayStats, ...stats }
+    },
+    
+    // 设置游戏会话状态
+    SET_GAME_SESSION: (state, session) => {
+      state.currentGameSession = { ...state.currentGameSession, ...session }
+    },
+    
+    // 增加点击计数
+    INCREMENT_CLICKED_COUNT: (state) => {
+      state.currentGameSession.clickedCount += 1
+    },
+    
+    // 重置游戏会话
+    RESET_GAME_SESSION: (state) => {
+      state.currentGameSession = {
+        sessionId: null,
+        startTime: null,
+        clickedCount: 0,
+        gameStatus: 'idle',
+        duration: 50000
+      }
     }
   },
 
@@ -269,37 +302,87 @@ const lottery = {
       }
     },
     
-    // 执行抽奖
-    async performDraw({ commit, dispatch, state }) {
+    // 开始红包雨游戏会话
+    startGameSession({ commit }) {
+      const sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
+      commit('SET_GAME_SESSION', {
+        sessionId,
+        startTime: new Date(),
+        clickedCount: 0,
+        gameStatus: 'playing'
+      })
+      return sessionId
+    },
+    
+    // 点击红包
+    clickRedPacket({ commit, state }) {
+      if (state.currentGameSession.gameStatus === 'playing') {
+        commit('INCREMENT_CLICKED_COUNT')
+        return state.currentGameSession.clickedCount
+      }
+      return 0
+    },
+    
+    // 结束游戏会话
+    endGameSession({ commit, state }) {
+      commit('SET_GAME_SESSION', { gameStatus: 'finished' })
+      return {
+        sessionId: state.currentGameSession.sessionId,
+        clickedCount: state.currentGameSession.clickedCount,
+        duration: Date.now() - new Date(state.currentGameSession.startTime).getTime()
+      }
+    },
+    
+    // 执行红包雨抽奖（基于点击数量）
+    async performDraw({ commit, dispatch, state }, clickedCount = null) {
       if (state.drawing) {
-        throw new Error('正在抽奖中，请稍候')
+        throw new Error('正在参与红包雨中，请稍候')
       }
       
-      if (state.userStatus.drawCount <= 0) {
-        throw new Error('抽奖次数不足')
+      if (state.userStatus.remainingCount <= 0) {
+        throw new Error('今日参与次数不足')
+      }
+      
+      if (state.userStatus.hasEverWon) {
+        throw new Error('您已经中过奖了，无法再次参与')
       }
       
       try {
         commit('SET_DRAWING', true)
         
-        const res = await drawLottery()
+        // 使用传入的点击数量或当前会话的点击数量
+        const finalClickedCount = clickedCount || state.currentGameSession.clickedCount
+        
+        const res = await drawLottery({
+          clickedCount: finalClickedCount,
+          sessionId: state.currentGameSession.sessionId
+        })
         
         if (res.code === 200) {
-          // 抽奖成功
+          // 参与成功
           commit('SET_DRAW_RESULT', res.data)
           commit('DECREASE_DRAW_COUNT')
           commit('ADD_RECORD', res.data)
           
+          // 如果中奖了，更新用户状态
+          if (res.data.isWin) {
+            commit('SET_USER_STATUS', { hasEverWon: true })
+          }
+          
+          // 重置游戏会话
+          commit('RESET_GAME_SESSION')
+          
           // 更新今日统计
           await dispatch('fetchTodayStats')
+          await dispatch('fetchUserStatus')
           
           return res.data
         } else {
-          throw new Error(res.msg || '抽奖失败')
+          throw new Error(res.msg || '参与红包雨失败')
         }
         
       } catch (error) {
-        console.error('抽奖失败:', error)
+        console.error('参与红包雨失败:', error)
         throw error
       } finally {
         commit('SET_DRAWING', false)

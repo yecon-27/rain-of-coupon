@@ -1,222 +1,208 @@
 /**
  * 红包雨路由守卫
- * 按照用户流程设计的权限控制和状态检查
+ * 控制用户在不同页面间的流转逻辑
  */
+
 import store from '@/store'
-import { Message } from 'element-ui'
+import { getToken } from '@/utils/auth'
 
 /**
- * 红包雨路由守卫配置
+ * 检查用户登录状态
  */
-export const redpacketGuards = {
-  // 需要登录的路由
-  requireAuth: [
-    '/loading',
-    '/countdown', 
-    '/redpacket',
-    '/coupon'
-  ],
-  
-  // 需要检查活动状态的路由
-  requireActivity: [
-    '/loading',
-    '/countdown',
-    '/redpacket'
-  ],
-  
-  // 公开访问的路由（无需登录）
-  publicRoutes: [
-    '/rule'
-  ]
-}
-
-/**
- * 检查用户是否已登录
- */
-export const checkUserLogin = () => {
-  return store.getters.token && store.getters.roles.length > 0
+function checkAuth() {
+  const token = getToken()
+  return !!token
 }
 
 /**
  * 检查活动状态
  */
-export const checkActivityStatus = async () => {
+async function checkActivityStatus() {
   try {
     await store.dispatch('lottery/checkActivity')
-    const status = store.getters.lotteryActivityStatus
-    
-    switch (status) {
-      case 0:
-        return { valid: false, message: '红包雨活动尚未开始' }
-      case 1:
-        return { valid: true, message: '红包雨活动进行中' }
-      case 2:
-        return { valid: false, message: '红包雨活动已结束' }
-      default:
-        return { valid: false, message: '活动状态异常' }
-    }
+    return store.getters['lottery/isActivityActive']
   } catch (error) {
     console.error('检查活动状态失败:', error)
-    return { valid: false, message: '无法获取活动状态' }
+    return false
   }
 }
 
 /**
- * 加载页面守卫 - 登录成功后的第一个页面
+ * 检查用户参与资格
  */
-export const beforeEnterLoading = async (to, from, next) => {
-  // 1. 必须已登录
-  if (!checkUserLogin()) {
-    Message.warning('请先登录')
+async function checkUserEligibility() {
+  try {
+    await store.dispatch('lottery/fetchUserStatus')
+    const userStatus = store.state.lottery.userStatus
+    
+    return {
+      canDraw: userStatus.canDraw,
+      hasEverWon: userStatus.hasEverWon,
+      remainingCount: userStatus.remainingCount,
+      isCrowded: userStatus.isCrowded
+    }
+  } catch (error) {
+    console.error('检查用户资格失败:', error)
+    return {
+      canDraw: false,
+      hasEverWon: false,
+      remainingCount: 0,
+      isCrowded: true
+    }
+  }
+}
+
+/**
+ * 加载页面路由守卫
+ */
+export async function beforeEnterLoading(to, from, next) {
+  // 检查登录状态
+  if (!checkAuth()) {
     next('/login')
     return
   }
+
+  // 检查活动状态
+  const isActive = await checkActivityStatus()
+  if (!isActive) {
+    next('/')
+    return
+  }
+
+  // 检查用户资格
+  const eligibility = await checkUserEligibility()
   
-  // 2. 检查用户是否已中奖
-  try {
-    const userStatus = await store.dispatch('lottery/fetchUserStatus')
-    
-    // 如果已中奖，不需要进入加载页面，直接显示中奖弹窗
-    if (userStatus.hasWon) {
-      // 跳转到首页并显示中奖弹窗
-      next('/?showPrize=true')
-      return
-    }
-    
-    // 检查活动状态
-    const activityCheck = await checkActivityStatus()
-    if (!activityCheck.valid) {
-      Message.warning(activityCheck.message)
-      next('/rule')
-      return
-    }
-    
-  } catch (error) {
-    console.error('检查用户状态失败:', error)
-    Message.error('数据加载失败')
+  // 如果已经中过奖，直接跳转到首页显示中奖弹窗
+  if (eligibility.hasEverWon) {
     next('/')
     return
   }
   
-  next()
+  // 如果没有剩余次数，跳转到首页
+  if (eligibility.remainingCount <= 0) {
+    next('/')
+    return
+  }
+  
+  // 如果人数拥挤，停留在加载页面显示拥挤提示
+  if (eligibility.isCrowded) {
+    next()
+    return
+  }
+  
+  // 正常情况下，自动跳转到倒计时页面
+  next('/countdown')
 }
 
 /**
- * 倒计时页面守卫
+ * 倒计时页面路由守卫
  */
-export const beforeEnterCountdown = async (to, from, next) => {
-  // 1. 必须已登录
-  if (!checkUserLogin()) {
-    Message.warning('请先登录')
+export async function beforeEnterCountdown(to, from, next) {
+  // 检查登录状态
+  if (!checkAuth()) {
     next('/login')
     return
   }
+
+  // 检查活动状态
+  const isActive = await checkActivityStatus()
+  if (!isActive) {
+    next('/')
+    return
+  }
+
+  // 检查用户资格
+  const eligibility = await checkUserEligibility()
   
-  // 2. 必须从加载页面跳转而来
-  if (from.path !== '/loading') {
-    Message.warning('请按流程参与活动')
+  // 如果已经中过奖或没有剩余次数，跳转到首页
+  if (eligibility.hasEverWon || eligibility.remainingCount <= 0) {
+    next('/')
+    return
+  }
+  
+  // 如果人数拥挤，跳转到加载页面
+  if (eligibility.isCrowded) {
     next('/loading')
     return
   }
   
-  // 3. 检查活动状态
-  const activityCheck = await checkActivityStatus()
-  if (!activityCheck.valid) {
-    Message.warning(activityCheck.message)
-    next('/rule')
-    return
-  }
-  
+  // 正常进入倒计时页面
   next()
 }
 
 /**
- * 红包雨页面守卫
+ * 红包雨页面路由守卫
  */
-export const beforeEnterRedPacket = async (to, from, next) => {
-  // 1. 必须已登录
-  if (!checkUserLogin()) {
-    Message.warning('请先登录')
+export async function beforeEnterRedPacket(to, from, next) {
+  // 检查登录状态
+  if (!checkAuth()) {
     next('/login')
     return
   }
+
+  // 检查活动状态
+  const isActive = await checkActivityStatus()
+  if (!isActive) {
+    next('/')
+    return
+  }
+
+  // 检查用户资格
+  const eligibility = await checkUserEligibility()
   
-  // 2. 必须从倒计时页面跳转而来
-  if (from.path !== '/countdown') {
-    Message.warning('请按流程参与活动')
+  // 如果已经中过奖或没有剩余次数，跳转到首页
+  if (eligibility.hasEverWon || eligibility.remainingCount <= 0) {
+    next('/')
+    return
+  }
+  
+  // 如果人数拥挤，跳转到加载页面
+  if (eligibility.isCrowded) {
     next('/loading')
     return
   }
   
-  // 3. 检查活动状态和用户状态
-  try {
-    const activityCheck = await checkActivityStatus()
-    if (!activityCheck.valid) {
-      Message.warning(activityCheck.message)
-      next('/rule')
-      return
-    }
-    
-    // 初始化红包雨数据
-    await store.dispatch('lottery/initLotteryData')
-    
-  } catch (error) {
-    console.error('初始化红包雨数据失败:', error)
-    Message.error('数据加载失败，请刷新重试')
-    next('/loading')
+  // 只允许从倒计时页面进入红包雨页面
+  if (from.name !== 'Countdown') {
+    next('/countdown')
     return
   }
   
+  // 正常进入红包雨页面
   next()
 }
 
 /**
- * 我的优惠券页面守卫
+ * 优惠券页面路由守卫
  */
-export const beforeEnterCoupon = async (to, from, next) => {
-  // 1. 必须已登录
-  if (!checkUserLogin()) {
-    Message.warning('请先登录查看优惠券')
-    next(`/login?redirect=${encodeURIComponent(to.fullPath)}`)
+export async function beforeEnterCoupon(to, from, next) {
+  // 检查登录状态
+  if (!checkAuth()) {
+    next('/login')
     return
   }
-  
-  // 2. 预加载用户优惠券记录
-  try {
-    await store.dispatch('lottery/fetchUserRecords', { pageNum: 1, pageSize: 10 })
-  } catch (error) {
-    console.error('加载用户优惠券记录失败:', error)
-  }
-  
+
+  // 优惠券页面不需要检查活动状态，用户随时可以查看
   next()
 }
 
 /**
- * 检查用户今日参与次数
+ * 全局路由守卫配置
  */
-export const checkDailyLimit = async () => {
-  try {
-    const todayStats = await store.dispatch('lottery/fetchTodayStats')
-    const dailyLimit = store.state.lottery.activityConfig.dailyLimit
+export function setupRedPacketGuards(router) {
+  router.beforeEach(async (to, from, next) => {
+    // 如果是红包雨相关页面，初始化数据
+    const redPacketPages = ['Loading', 'Countdown', 'RedPacket', 'Coupon']
     
-    return {
-      canParticipate: todayStats.drawCount < dailyLimit,
-      remaining: dailyLimit - todayStats.drawCount,
-      total: dailyLimit
+    if (redPacketPages.includes(to.name) && checkAuth()) {
+      try {
+        // 初始化红包雨数据
+        await store.dispatch('lottery/initLotteryData')
+      } catch (error) {
+        console.error('初始化红包雨数据失败:', error)
+      }
     }
-  } catch (error) {
-    console.error('检查每日限制失败:', error)
-    return { canParticipate: false, remaining: 0, total: 0 }
-  }
-}
-
-/**
- * 检查用户是否有剩余次数
- */
-export const checkRemainingCount = () => {
-  const drawCount = store.getters.lotteryDrawCount
-  return {
-    hasRemaining: drawCount > 0,
-    count: drawCount
-  }
+    
+    next()
+  })
 }

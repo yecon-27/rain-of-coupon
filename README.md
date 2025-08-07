@@ -99,6 +99,8 @@ Developed a mini program using Vue 2 and the Ruoyi Framework. Key features inclu
 ├── ruoyi-ui/                    # Admin frontend (Vue 2 based)
 │   ├── src/
 │   │   ├── api/                  # API definitions for backend
+|   │   │   ├── redpacket/
+│   │   │   └── lottery.js        # rain-of-redpacket api encapsulation
 │   │   ├── assets/               # Static assets
 │   │   ├── components/           # Common UI components
 │   │   ├── directive/            # Custom Vue directives

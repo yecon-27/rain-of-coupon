@@ -100,7 +100,9 @@
 │       └── main.js               # 应用入口文件（Vue 2 + Vuex 初始化）
 ├── ruoyi-ui/                    # 后台管理前端（基于 Vue 2）
 │   ├── src/
-│   │   ├── api/                  # 后台接口定义
+│   │   ├── api/                  # 后台API接口层定义
+│   │   ├── redpacket/
+│   │   │   └── lottery.js        # 红包雨API接口封装
 │   │   ├── assets/               # 静态资源
 │   │   ├── components/           # 通用组件
 │   │   ├── directive/            # 自定义指令
