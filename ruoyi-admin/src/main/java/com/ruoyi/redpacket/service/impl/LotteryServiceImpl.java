@@ -67,6 +67,18 @@ public class LotteryServiceImpl implements ILotteryService {
     @Override
     @Transactional
     public DrawResult executeDraw(Long userId) {
+        // 默认点击数量为1（兼容原有接口）
+        return executeDraw(userId, 1);
+    }
+    
+    /**
+     * 执行抽奖 - 基于红包雨点击数量
+     * @param userId 用户ID
+     * @param clickedCount 本轮游戏中点击的红包数量（1-100）
+     * @return 抽奖结果
+     */
+    @Transactional
+    public DrawResult executeDraw(Long userId, int clickedCount) {
         // 获取所有可用奖品
         List<RedpacketPrize> availablePrizes = getAvailablePrizes();
         
@@ -80,8 +92,8 @@ public class LotteryServiceImpl implements ILotteryService {
             return new DrawResult(false, "感谢参与，继续体验红包雨吧！");
         }
         
-        // 执行概率抽奖算法
-        RedpacketPrize wonPrize = executeWeightedRandom(availablePrizes);
+        // 执行基于点击数量的概率抽奖算法
+        RedpacketPrize wonPrize = executeClickBasedProbabilityDraw(clickedCount, availablePrizes);
         
         if (wonPrize != null) {
             // 扣减奖品库存
@@ -184,7 +196,58 @@ public class LotteryServiceImpl implements ILotteryService {
     }
     
     /**
-     * 执行加权随机抽奖算法
+     * 执行基于点击数量的概率抽奖算法 - 红包雨模式
+     * @param clickedCount 本轮游戏中点击的红包数量（1-100）
+     * @param prizes 可用奖品列表
+     * @return 中奖奖品，null表示未中奖
+     */
+    private RedpacketPrize executeClickBasedProbabilityDraw(int clickedCount, List<RedpacketPrize> prizes) {
+        // 限制点击数量范围
+        clickedCount = Math.max(1, Math.min(100, clickedCount));
+        
+        // 基于点击数量计算概率加成系数
+        // 使用对数函数，让概率增长更平滑且有上限
+        // 点击1个：1.0倍，点击10个：约1.5倍，点击50个：约2.5倍，点击100个：约3.0倍
+        double probabilityMultiplier = 1.0 + Math.log(clickedCount) / Math.log(10) * 0.8;
+        
+        // 额外的线性加成，鼓励多点击
+        // 每点击10个红包，额外增加0.1倍概率
+        double linearBonus = (clickedCount / 10.0) * 0.1;
+        
+        // 最终概率系数
+        double finalMultiplier = probabilityMultiplier + linearBonus;
+        
+        // 设置概率上限，避免过高
+        finalMultiplier = Math.min(finalMultiplier, 4.0);
+        
+        // 计算调整后的总概率权重
+        BigDecimal totalWeight = BigDecimal.ZERO;
+        for (RedpacketPrize prize : prizes) {
+            BigDecimal adjustedProbability = prize.getProbability()
+                    .multiply(BigDecimal.valueOf(finalMultiplier));
+            totalWeight = totalWeight.add(adjustedProbability);
+        }
+        
+        // 生成随机数
+        double randomValue = random.nextDouble();
+        BigDecimal randomWeight = totalWeight.multiply(BigDecimal.valueOf(randomValue));
+        
+        // 根据调整后的权重选择奖品
+        BigDecimal currentWeight = BigDecimal.ZERO;
+        for (RedpacketPrize prize : prizes) {
+            BigDecimal adjustedProbability = prize.getProbability()
+                    .multiply(BigDecimal.valueOf(finalMultiplier));
+            currentWeight = currentWeight.add(adjustedProbability);
+            if (randomWeight.compareTo(currentWeight) <= 0) {
+                return prize;
+            }
+        }
+        
+        return null; // 未中奖
+    }
+    
+    /**
+     * 执行加权随机抽奖算法（原始版本，保留备用）
      */
     private RedpacketPrize executeWeightedRandom(List<RedpacketPrize> prizes) {
         // 计算总概率权重
