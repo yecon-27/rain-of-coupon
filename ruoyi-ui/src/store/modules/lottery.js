@@ -11,28 +11,33 @@ import {
 } from '@/api/redpacket/lottery'
 
 /**
- * 抽奖状态管理模块
- * 管理用户抽奖相关的所有状态和业务逻辑
+ * 红包雨状态管理模块
+ * 管理用户红包雨优惠券相关的所有状态和业务逻辑
  */
 const lottery = {
   namespaced: true,
   
   state: {
-    // 用户抽奖状态
+    // 用户红包雨状态 - 基于数据库表结构设计
     userStatus: {
-      canDraw: false,           // 是否可以抽奖
-      drawCount: 0,             // 剩余抽奖次数
-      totalDrawCount: 0,        // 总抽奖次数
-      todayDrawCount: 0,        // 今日已抽奖次数
+      canDraw: false,           // 是否可以参与红包雨（根据活动状态和用户次数计算）
+      remainingCount: null,     // 剩余参与次数（从后端计算：max_draws_per_day - 今日已参与次数）
+      todayDrawCount: null,     // 今日已参与次数（从redpacket_user_prize_log表统计）
+      totalDrawCount: null,     // 历史总参与次数（从redpacket_user_prize_log表统计）
+      maxDrawsPerDay: null,     // 每日最大参与次数（从redpacket_event_config表读取）
       isLogin: false,           // 是否已登录
-      userId: null              // 用户ID
+      userId: null,             // 用户ID
+      hasWon: false,            // 是否已中奖（从redpacket_user_prize_log表查询is_win=1的记录）
+      isCrowded: false,         // 当前是否拥挤（根据max_users和当前在线用户数计算）
+      canEnterCountdown: false, // 是否可以进入倒计时
+      winRecords: []            // 用户中奖记录列表（从redpacket_user_prize_log表查询is_win=1）
     },
     
-    // 奖品信息
-    prizes: [],                 // 奖品列表
-    prizeMap: {},              // 奖品映射表（便于快速查找）
+    // 优惠券信息
+    prizes: [],                 // 优惠券列表
+    prizeMap: {},              // 优惠券映射表（便于快速查找）
     
-    // 抽奖记录
+    // 领取记录
     records: {
       list: [],                // 记录列表
       total: 0,                // 总记录数
@@ -53,19 +58,19 @@ const lottery = {
       rules: ''                // 活动规则
     },
     
-    // 中奖公告
-    announcements: [],         // 中奖公告列表
+    // 领取公告
+    announcements: [],         // 领取公告列表
     
-    // 抽奖相关状态
-    drawing: false,            // 是否正在抽奖
-    drawResult: null,          // 抽奖结果
+    // 红包雨相关状态
+    drawing: false,            // 是否正在参与红包雨
+    drawResult: null,          // 领取结果
     showResult: false,         // 是否显示结果弹窗
     
     // 今日统计
     todayStats: {
-      drawCount: 0,            // 今日抽奖次数
-      winCount: 0,             // 今日中奖次数
-      winRate: 0               // 今日中奖率
+      drawCount: 0,            // 今日参与次数
+      winCount: 0,             // 今日获得优惠券次数
+      winRate: 0               // 今日获得率
     }
   },
 

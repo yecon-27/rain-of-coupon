@@ -19,8 +19,91 @@
 - **API**：RESTful API
 - **部署**：Nginx + Docker
 
-## 用户流 & 路由页面结构（Page层级）
-1. 
+## 项目结构
+```
+├── .gitignore                    # Git 忽略文件
+├── LICENSE                       # 开源许可证
+├── README.md                     # 项目文档说明
+├── pom.xml                       # Maven 根配置文件
+├── ry.bat                        # 后端启动脚本（Windows）
+├── ry.sh                         # 后端启动脚本（Linux/Mac）
+├── backend-sql                   # MySQL 数据库文件
+├── bin/                          # Shell/批处理脚本目录
+│   ├── clean.bat                 # 清理脚本
+│   ├── package.bat               # 构建/打包脚本
+│   └── run.bat                   # 启动脚本
+├── doc/                          # 文档目录
+│   └── ruoyi-code-generation-config   # 代码生成器导出配置
+├── sql/                          # 数据库初始化 SQL 文件
+│   ├── ry_20250522.sql               # 若依框架基础表
+│   ├── coupon_activity_simplified.sql # 活动相关表：奖品、日志、配置、图片资源、食品等
+│   ├── README.sql.md                 # SQL 文件说明
+│   └── quartz.sql                    # Quartz 定时任务相关表
+├── rain-of-coupon/              # 小程序前端项目
+│   ├── public/                   # 公共静态资源
+│   ├── docs/                     # 项目特有文档
+│   ├── package.json              # NPM 依赖与脚本配置
+│   ├── vercel.json               # Vercel 部署配置（可选）
+│   └── src/
+│       ├── api/                  # API 请求封装（基于 Axios）
+│       ├── assets/               # 静态资源（图片 / mock 数据等）
+│       ├── components/           # 可复用组件
+│       │   ├── PrizeModal.vue          # 中奖弹窗
+│       │   ├── EncourageTip.vue        # 未中奖时鼓励提示
+│       │   ├── RedPacket.vue           # 红包动画逻辑
+│       │   ├── CountDown.vue           # 倒计时动画（3,2,1）
+│       │   ├── RulePopup.vue           # 活动规则弹窗或信息块
+│       │   ├── CouponCard.vue          # 优惠券展示组件（在 /coupon 页面使用）
+│       │   ├── CrowdingTip.vue         # “人数过多”提示组件
+│       │   ├── LoadingAnim.vue         # 火箭 / 加载动画组件
+│       │   ├── BackButton.vue          # 返回按钮组件
+│       │   ├── LoginForm.vue           # 登录表单组件
+│       ├── directives/           # 自定义指令（如自动聚焦等）
+│       ├── router/               # Vue Router 路由配置
+│       │   └── index.js              # 路由定义文件
+│       ├── store/                # Vuex 状态管理目录
+│       │   ├── index.js              # Vuex 主入口
+│       │   └── modules/              # 模块化状态管理
+│       ├── utils/                # 工具函数
+│       │   └── request.js            # Axios 请求封装与拦截器
+│       ├── views/                # 页面级组件（对应路由）
+│       │   ├── HomePage.vue          # 首页
+│       │   ├── LoginPage.vue         # 登录页
+│       │   ├── LoadingPage.vue       # 加载动画页
+│       │   ├── CountDownPage.vue     # 倒计时页
+│       │   ├── RedPacketPage.vue     # 红包抽奖页
+│       │   ├── RulePage.vue          # 活动规则页
+│       │   └── CouponPage.vue        # 优惠券 / 奖品列表页
+│       ├── App.vue               # 根组件
+│       └── main.js               # 应用入口文件（Vue 2 + Vuex 初始化）
+├── ruoyi-ui/                    # 后台管理前端（基于 Vue 2）
+│   ├── src/
+│   │   ├── api/                  # 后台接口定义
+│   │   ├── assets/               # 静态资源
+│   │   ├── components/           # 通用组件
+│   │   ├── directive/            # 自定义指令
+│   │   ├── layout/               # 页面布局结构
+│   │   ├── router/               # 路由设置
+│   │   ├── store/                # Vuex 状态管理
+│   │   ├── utils/                # 工具函数
+│   │   └── views/                # 页面视图（后台）
+│   ├── bin/                      # 启动/构建脚本
+│   ├── package.json              # NPM 配置文件
+│   └── vue.config.js             # Vue CLI 配置文件
+├── ruoyi-admin/                 # 后端主模块
+│   ├── src/main/java/com/ruoyi/  # Java 源码
+│   ├── src/main/resources/       # 配置文件与资源
+│   │   ├──image/redpacket        # 红包图片资源目录
+│   │   │   ├── README.image.md   # 图片资源说明
+│   │   │   ├── ...
+│   └── pom.xml                   # 模块专属 Maven 配置
+├── ruoyi-common/                # 通用工具模块（Java）
+├── ruoyi-framework/             # 框架核心模块（Java）
+```
+## 用户流 & 路由页面结构（Page 层级）
+
+1.
+
 ```
 首页 (/)
 ├─ 点击“加入活动” → 登录页面 (/login)
@@ -36,7 +119,8 @@
 ├─ 点击“活动规则” → 规则页面 (/rule)
 └─ 抽奖结束或用户登录后 → 优惠券页面 (/coupon)
 ```
-2. 
+
+2.
 
 ```
 /
@@ -71,7 +155,6 @@
 
 ```
 
-
 ## 开发进展
 
 第一阶段和第二阶段可并行进行，优先完成 MVP。
@@ -83,15 +166,17 @@
 **数据库设计** `8/5 - 8/6`
 
 **代码生成** `8/6`
+
 - ✅ 实体类已生成
 - ✅ Mapper 接口已生成
 - ✅ 基础 CRUD Service 和 Controller 层已生成
 - ✅ 菜单配置 SQL 文件已生成
 
- **抽奖控制器和服务层的核心业务逻辑**`8/6`
-- ✅ 每日3次限制
+  **抽奖控制器和服务层的核心业务逻辑**`8/6`
+
+- ✅ 每日 3 次限制
 - ✅ 中奖后停止抽奖
-- ✅ IP频率限制（1小时10次）
+- ✅ IP 频率限制（1 小时 10 次）
 - ✅ 活动时间控制
 - ✅ 加权随机概率算法
 - ✅ 自动库存扣减
@@ -99,45 +184,52 @@
 - ✅ 事务保证数据一致性
 
   **API 接口规范**`8/6`
+
 1. POST /api/lottery/draw ✅
+
 - 执行抽奖逻辑
 - 检查用户资格
 - 保存抽奖记录
 - 返回抽奖结果
 
 2. GET /api/lottery/records ✅
+
 - 获取用户历史抽奖记录
 - 需要用户登录
 
 3. GET /api/lottery/drawCount ✅
+
 - 获取剩余抽奖次数
 - 检查是否已中奖
 - 返回是否可以抽奖
 
 4. GET /api/lottery/prizes ✅
+
 - 获取所有可用奖品列表
-- 自动过滤库存为0的奖品
+- 自动过滤库存为 0 的奖品
 
 5. GET /api/lottery/status ✅
+
 - 检查用户抽奖资格
 - 返回详细的状态信息
 - 包含不能抽奖的原因
 
 6. GET /api/activity/config ✅
+
 - 获取活动配置信息
 - 活动时间、限制等
 - 活动状态判断
-
 
 ### 第二阶段：前端页面结构与 API 集成（进行中：3 天）
 
 [README.frontend.md](doc\frontend-development-guide.md)
 
 - **LoginPage.vue**
+
   1. 用户状态检测（通过 token 登录）
   2. 配置 Axios 请求拦截器
 
-- **红包逻辑**：*下落红包动画*，*点击触发抽奖请求*，*弹窗显示中奖或未中奖*
+- **红包逻辑**：_下落红包动画_，_点击触发抽奖请求_，_弹窗显示中奖或未中奖_
 
 ```javascript
 let totalRedPackets = 100;
@@ -169,14 +261,14 @@ if (isWin) {
 ```
 
 **可配置的奖品分配算法**：
+
 - 使用 Redis 进行库存扣减（防止并发超发）
 - 奖品概率存储在数据库的可配置字段中
 
-### 第三阶段：测试（1天）
+### 第三阶段：测试（1 天）
 
 - 连接前端和后端抽奖逻辑
 - 验证抽奖限制和中奖逻辑
-
 
 ## 许可证
 

@@ -22,85 +22,84 @@ Developed a mini program using Vue 3 and the Ruoyi Framework. Key features inclu
 ## Project Structure
 
 ```
-├── .gitignore                    # Git ignore file
-├── LICENSE                       # Open source license
+├── .gitignore                    # Git ignore rules
+├── LICENSE                       # Open-source license
 ├── README.md                     # Project documentation
-├── pom.xml                       # Root Maven configuration
+├── pom.xml                       # Root-level Maven configuration
 ├── ry.bat                        # Backend startup script (Windows)
 ├── ry.sh                         # Backend startup script (Linux/Mac)
 ├── backend-sql                   # MySQL database files
 ├── bin/                          # Shell/batch script directory
-│   ├── clean.bat                 # Clean script
+│   ├── clean.bat                 # Clean-up script
 │   ├── package.bat               # Build/package script
-│   └── run.bat                   # Run script
-├── doc/                          # Documentation
-│   └── ruoyi-code-generation-config   #Code generator export configuration
-├── sql/                          # SQL files for database setup
-│   ├── ry_20250522.sql           # RuoYi base tables
-│   ├── coupon_activity_simplified.sql # prize, log, config, image_resource, food(2)
-│   ├── README.sql.md             # Info of sql
-│   └── quartz.sql                # Quartz scheduled tasks
-├── rain-of-coupon/
-│   ├── public/                   # Public static files
-│   ├── docs/                     # Project-specific documentation
+│   └── run.bat                   # Run/start script
+├── doc/                          # Documentation directory
+│   └── ruoyi-code-generation-config   # Export config for code generator
+├── sql/                          # SQL scripts for database initialization
+│   ├── ry_20250522.sql               # Base tables for RuoYi framework
+│   ├── coupon_activity_simplified.sql # Tables: prize, log, config, image, food
+│   ├── README.sql.md                 # Description of SQL files
+│   └── quartz.sql                    # Quartz scheduled task tables
+├── rain-of-coupon/              # Frontend project (e.g., mini-game or web)
+│   ├── public/                   # Public static resources
+│   ├── docs/                     # Project-specific documents
 │   ├── package.json              # NPM dependencies and scripts
-│   ├── vite.config.ts            # Vite configuration
-│   ├── vercel.json               # Vercel deployment config
+│   ├── vercel.json               # Vercel deployment config (optional)
 │   └── src/
-│       ├── api/                  # API abstraction layer (Axios)
-│       ├── assets/               # Static assets (mock data)
-│       ├── components/           # Reusable UI components
-│       ├── components/             # Reusable UI components
-│       │   ├── PrizeModal.vue          # Modal when user wins a prize
-│       │   ├── EncourageTip.vue        # Popup for encouragement on loss
+│       ├── api/                  # API abstraction layer (based on Axios)
+│       ├── assets/               # Static assets (images, mock data, etc.)
+│       ├── components/           # Reusable Vue components
+│       │   ├── PrizeModal.vue          # Modal displayed on prize win
+│       │   ├── EncourageTip.vue        # Encouragement popup when user loses
 │       │   ├── RedPacket.vue           # Red envelope animation logic
-│       │   ├── CountDown.vue           # Countdown animation (3,2,1)
-│       │   ├── RulePopup.vue           # Popup or static block for activity rules
-│       │   ├── CouponCard.vue          # Single coupon display block (in /coupon)
-│       │   ├── CrowdingTip.vue         # UI hint for "Too many users"
-│       │   ├── LoadingAnim.vue         # Rocket animation / loading animation
-│       │   ├── BackButton.vue          # Back button used in /coupon or others
-│       │   ├── LoginForm.vue           # Encapsulated login form block
-│       ├── composables/          # Vue 3 composable functions (e.g., useUser)
-│       ├── directives/           # Custom Vue directives
-│       ├── router/               # Vue Router setup
+│       │   ├── CountDown.vue           # Countdown animation (3, 2, 1)
+│       │   ├── RulePopup.vue           # Rule popup or static display
+│       │   ├── CouponCard.vue          # Coupon display component (for /coupon)
+│       │   ├── CrowdingTip.vue         # "Too many users" warning UI
+│       │   ├── LoadingAnim.vue         # Rocket or loading animation
+│       │   ├── BackButton.vue          # Back button used in pages
+│       │   ├── LoginForm.vue           # Login form block
+│       ├── directives/           # Custom Vue directives (e.g., auto-focus)
+│       ├── router/               # Vue Router configuration
 │       │   └── index.js              # Route definitions
-│       ├── stores/               # State management (Pinia)
+│       ├── store/                # Vuex store configuration
+│       │   ├── index.js              # Vuex main entry
+│       │   └── modules/              # Vuex modules
 │       ├── utils/                # Utility functions
-│       │   └── request.js            # Axios interceptor and config
-│       ├── views/                # Page-level components (routes)
-│       │   ├── HomePage.vue          # Landing page
+│       │   └── request.js            # Axios configuration and interceptors
+│       ├── views/                # Page-level components (linked to routes)
+│       │   ├── HomePage.vue          # Home / landing page
 │       │   ├── LoginPage.vue         # Login screen
 │       │   ├── LoadingPage.vue       # Loading animation screen
-│       │   ├── CountDownPage.vue     # Countdown page
-│       │   ├── RedPacketPage.vue     # Red envelope draw page
+│       │   ├── CountDownPage.vue     # Countdown screen
+│       │   ├── RedPacketPage.vue     # Red envelope draw screen
 │       │   ├── RulePage.vue          # Event rules page
-│       │   └── CouponPage.vue        # Coupon/prize list page
+│       │   └── CouponPage.vue        # Coupon / prize list page
 │       ├── App.vue               # Root Vue component
-│       └── main.js               # Application entry point
-├── ruoyi-ui/
+│       └── main.js               # Application entry point (Vue 2 + Vuex init)
+├── ruoyi-ui/                    # Admin frontend (Vue 2 based)
 │   ├── src/
-│   │   ├── api/                  # API definitions
+│   │   ├── api/                  # API definitions for backend
 │   │   ├── assets/               # Static assets
-│   │   ├── components/           # UI components
-│   │   ├── directive/            # Custom directives
-│   │   ├── layout/               # Page layout system
-│   │   ├── router/               # Vue Router configuration
+│   │   ├── components/           # Common UI components
+│   │   ├── directive/            # Custom Vue directives
+│   │   ├── layout/               # Layout system (headers, sidebar, etc.)
+│   │   ├── router/               # Routing configuration
 │   │   ├── store/                # Vuex state management
 │   │   ├── utils/                # Utility functions and helpers
-│   │   └── views/                # Page views (admin)
-│   ├── bin/                      # Admin start/build scripts
-│   ├── package.json              # NPM configuration
+│   │   └── views/                # Admin page views
+│   ├── bin/                      # Admin build/start scripts
+│   ├── package.json              # NPM config for admin
 │   └── vue.config.js             # Vue CLI configuration
-├── ruoyi-admin/                  # Main backend module
+├── ruoyi-admin/                 # Main backend module
 │   ├── src/main/java/com/ruoyi/  # Java source code
-│   ├── src/main/resources/       # Application configs
-│   │   ├──image/redpacket        # Image resources
-|   │   │   ├── README.image.md   # Info of image
-|   │   │   ├── ...
-│   └── pom.xml                   # Module-specific Maven config
-├── ruoyi-common/                 # Shared utility module
-├── ruoyi-framework/             
+│   ├── src/main/resources/       # Config files and resources
+│   │   ├──image/redpacket        # Red packet image resources
+│   │   │   ├── README.image.md   # Image description file
+│   │   │   ├── ...
+│   └── pom.xml                   # Maven config specific to this module
+├── ruoyi-common/                # Shared Java utility module
+├── ruoyi-framework/             # Core backend framework module            
 ```
 ## Userflow & Page-Level Route Structure
 1. 
