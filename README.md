@@ -1,7 +1,7 @@
 🌐 Language Switch | 语言切换:  [English](./README.md) | [中文](./README.cn.md)
 
 ## Red Envelope Rain Mini Program
-Developed a mini program using Vue 3 and the Ruoyi Framework. Key features include:
+Developed a mini program using Vue 2 and the Ruoyi Framework. Key features include:
 
 - **Red Envelope Rain System**: Up to 3 games per user per day; ends automatically upon winning. The more red envelopes clicked, the higher the winning probability.
 
