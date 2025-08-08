@@ -60,6 +60,12 @@ spring:
       max-file-size: 10MB
       # 设置总上传的文件大小
       max-request-size: 20MB
+  # 静态资源配置
+  web:
+    resources:
+      static-locations:
+        - classpath:/image/
+      add-mappings: true
   # 服务模块
   devtools:
     restart:

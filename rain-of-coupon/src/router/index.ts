@@ -1,13 +1,13 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
-// 导入路由守卫
-import { 
-  beforeEnterLoading, 
-  beforeEnterCountdown, 
-  beforeEnterRedPacket, 
-  beforeEnterCoupon,
-  setupRedPacketGuards 
-} from './redpacket-guards'
+// 临时注释掉路由守卫导入
+// import { 
+//   beforeEnterLoading, 
+//   beforeEnterCountdown, 
+//   beforeEnterRedPacket, 
+//   beforeEnterCoupon,
+//   setupRedPacketGuards 
+// } from './redpacket-guards'
 
 const routes: RouteRecordRaw[] = [
   {
@@ -24,22 +24,24 @@ const routes: RouteRecordRaw[] = [
     path: '/loading',
     name: 'loading',
     component: () => import('@/views/LoadingPage.vue'),
-    meta: { requiresAuth: true },
-    beforeEnter: beforeEnterLoading
+    // 临时注释掉认证要求
+    // meta: { requiresAuth: true },
+    // beforeEnter: beforeEnterLoading
   },
   {
     path: '/countdown',
     name: 'countdown',
     component: () => import('@/views/CountDownPage.vue'),
-    meta: { requiresAuth: true },
-    beforeEnter: beforeEnterCountdown
+    // 临时注释掉认证要求
+    // meta: { requiresAuth: true },
+    // beforeEnter: beforeEnterCountdown
   },
   {
     path: '/redpacket',
     name: 'redpacket',
     component: () => import('@/views/RedPacketPage.vue'),
-    meta: { requiresAuth: true, requiresActivity: true },
-    beforeEnter: beforeEnterRedPacket
+    // meta: { requiresAuth: true, requiresActivity: true },
+    // beforeEnter: beforeEnterRedPacket
   },
   {
     path: '/rule',
@@ -50,8 +52,8 @@ const routes: RouteRecordRaw[] = [
     path: '/coupon',
     name: 'coupon',
     component: () => import('@/views/CouponPage.vue'),
-    meta: { requiresAuth: true },
-    beforeEnter: beforeEnterCoupon
+    // meta: { requiresAuth: true },
+    // beforeEnter: beforeEnterCoupon
   }
 ]
 
@@ -60,7 +62,7 @@ const router = createRouter({
   routes
 })
 
-// 设置全局路由守卫
-setupRedPacketGuards(router)
+// 临时注释掉全局路由守卫
+// setupRedPacketGuards(router)
 
 export default router
