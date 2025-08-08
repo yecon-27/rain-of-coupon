@@ -27,6 +27,7 @@
 
 <script setup lang="ts">
 import { ref, onUnmounted } from 'vue'
+import { API_CONFIG } from '@/config/api'
 
 type Phase = 'prepare' | 'countdown'
 
@@ -43,9 +44,9 @@ const emit = defineEmits<{
 }>()
 
 // 获取图片URL - 修复后端图片路径
+// 获取图片URL
 const getImageUrl = (filename: string) => {
-  // 尝试多个可能的路径
-  return `http://localhost:8080/image/coupon/${filename}`
+  return `${API_CONFIG.imageURL}${filename}`
 }
 
 // 图片加载错误处理
@@ -84,21 +85,24 @@ const startCountdownPhase = () => {
   const countdown = () => {
     isAnimating.value = true
     
+    // 延长闪烁动画时间，让用户能看到完整的1秒效果
     setTimeout(() => {
       isAnimating.value = false
       
-      // 修复倒计时逻辑：只在大于1时继续倒计时
-      if (currentNumber.value > 1) {
-        currentNumber.value--
-        timer = setTimeout(countdown, 1000)
-      } else {
-        // 倒计时结束（显示完1后结束）
-        setTimeout(() => {
-          isVisible.value = false
-          emit('finished')
-        }, 1000)
-      }
-    }, 500)
+      // 修复倒计时逻辑：确保每个数字显示完整的1秒
+      setTimeout(() => {
+        if (currentNumber.value > 1) {
+          currentNumber.value--
+          timer = setTimeout(countdown, 0) // 立即开始下一个数字
+        } else {
+          // 倒计时结束（显示完1后结束）
+          setTimeout(() => {
+            isVisible.value = false
+            emit('finished')
+          }, 500)
+        }
+      }, 500) // 静止显示500ms
+    }, 500) // 闪烁动画500ms
   }
   
   countdown()
@@ -158,10 +162,10 @@ onUnmounted(() => {
 
 /* 准备阶段图片样式 */
 .prepare-image {
-  width: 300px;
-  height: 200px;
+  width: 600px;  /* 从300px放大到600px */
+  height: 400px; /* 从200px放大到400px */
   object-fit: contain;
-  transform: translateX(100vw); /* 初始位置在屏幕右侧外 */
+  transform: translateX(100vw);
   transition: transform 0.5s ease-in-out;
 }
 
@@ -175,8 +179,8 @@ onUnmounted(() => {
 
 /* 倒计时图片样式 */
 .countdown-image {
-  width: 200px;
-  height: 200px;
+  width: 400px;
+  height: 400px;
   object-fit: contain;
   transition: all 0.5s ease;
 }
@@ -189,25 +193,25 @@ onUnmounted(() => {
 /* 响应式设计 */
 @media (max-width: 768px) {
   .prepare-image {
-    width: 250px;
-    height: 150px;
+    width: 500px;  /* 平板设备尺寸调整 */
+    height: 300px;
   }
   
   .countdown-image {
-    width: 150px;
-    height: 150px;
+    width: 300px;
+    height: 300px;
   }
 }
 
 @media (max-width: 480px) {
   .prepare-image {
-    width: 200px;
-    height: 120px;
+    width: 400px;  /* 手机设备尺寸调整 */
+    height: 240px;
   }
   
   .countdown-image {
-    width: 120px;
-    height: 120px;
+    width: 240px;
+    height: 240px;
   }
 }
 </style>
