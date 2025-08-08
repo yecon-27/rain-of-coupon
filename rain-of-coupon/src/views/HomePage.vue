@@ -2,23 +2,23 @@
   <div class="home-page">
     <!-- 第一部分：home.png 背景和按钮 -->
     <div class="home-section">
-      <img src="/images/coupon/home.png" alt="首页背景" class="home-bg" />
+      <img :src="getImageUrl('home.png')" alt="首页背景" class="home-bg" />
       
       <!-- 右侧按钮组 -->
       <div class="right-buttons">
-        <img src="/images/coupon/gz.png" alt="规则" class="rule-btn" @click="showRules" />
-        <img src="/images/coupon/qb.png" alt="券包" class="coupon-btn" @click="myCoupons" />
+        <img :src="getImageUrl('gz.png')" alt="规则" class="rule-btn" @click="showRules" />
+        <img :src="getImageUrl('qb.png')" alt="券包" class="coupon-btn" @click="myCoupons" />
       </div>
       
       <!-- 底部居中按钮 -->
       <div class="center-button">
-        <img src="/images/coupon/button.png" alt="立即挑战" class="challenge-btn" @click="joinActivity" />
+        <img :src="getImageUrl('button.png')" alt="立即挑战" class="challenge-btn" @click="joinActivity" />
       </div>
     </div>
 
     <!-- 第二部分：zscp.png 展示菜品 -->
     <div class="food-display-section">
-      <img src="/images/coupon/zscp.png" alt="展示菜品" class="food-display-img" />
+      <img :src="getImageUrl('zscp.png')" alt="展示菜品" class="food-display-img" />
     </div>
 
     <!-- 第三部分：TOP10网络人气特色美食 -->
@@ -119,6 +119,11 @@ const myCoupons = () => {
 onMounted(() => {
   fetchFoodData()
 })
+
+// 获取图片URL
+const getImageUrl = (filename: string) => {
+  return `${API_CONFIG.imageURL}${filename}`
+}
 </script>
 
 <style scoped>
