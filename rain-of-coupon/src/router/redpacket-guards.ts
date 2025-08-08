@@ -3,7 +3,9 @@
  * 控制用户在不同页面间的流转逻辑
  */
 
-import store from '@/store'
+import type { NavigationGuardNext, RouteLocationNormalized, Router } from 'vue-router'
+// 正确导入 Pinia store
+import { useLotteryStore } from '@/stores/lottery'
 import { getToken } from '@/utils/auth'
 
 /**
@@ -19,8 +21,8 @@ function checkAuth() {
  */
 async function checkActivityStatus() {
   try {
-    await store.dispatch('lottery/checkActivity')
-    return store.getters['lottery/isActivityActive']
+    const lotteryStore = useLotteryStore()
+    return lotteryStore.isActivityActive  // 使用 computed 或 getter
   } catch (error) {
     console.error('检查活动状态失败:', error)
     return false
@@ -32,8 +34,8 @@ async function checkActivityStatus() {
  */
 async function checkUserEligibility() {
   try {
-    await store.dispatch('lottery/fetchUserStatus')
-    const userStatus = store.state.lottery.userStatus
+    const lotteryStore = useLotteryStore()
+    const userStatus = lotteryStore.userStatus
     
     return {
       canDraw: userStatus.canDraw,
@@ -52,10 +54,31 @@ async function checkUserEligibility() {
   }
 }
 
+// 在全局守卫中也需要修改
+export function setupRedPacketGuards(router: Router) {
+  router.beforeEach(async (to, from, next) => {
+    const redPacketPages = ['loading', 'countdown', 'redpacket', 'coupon']
+    
+    if (redPacketPages.includes(to.name as string) && checkAuth()) {
+      try {
+        const lotteryStore = useLotteryStore()
+      } catch (error) {
+        console.error('初始化红包雨数据失败:', error)
+      }
+    }
+    
+    next()
+  })
+}
+
 /**
  * 加载页面路由守卫
  */
-export async function beforeEnterLoading(to, from, next) {
+export async function beforeEnterLoading(
+  to: RouteLocationNormalized,
+  from: RouteLocationNormalized,
+  next: NavigationGuardNext
+) {
   // 检查登录状态
   if (!checkAuth()) {
     next('/login')
@@ -97,7 +120,11 @@ export async function beforeEnterLoading(to, from, next) {
 /**
  * 倒计时页面路由守卫
  */
-export async function beforeEnterCountdown(to, from, next) {
+export async function beforeEnterCountdown(
+  to: RouteLocationNormalized,
+  from: RouteLocationNormalized,
+  next: NavigationGuardNext
+) {
   // 检查登录状态
   if (!checkAuth()) {
     next('/login')
@@ -133,7 +160,11 @@ export async function beforeEnterCountdown(to, from, next) {
 /**
  * 红包雨页面路由守卫
  */
-export async function beforeEnterRedPacket(to, from, next) {
+export async function beforeEnterRedPacket(
+  to: RouteLocationNormalized,
+  from: RouteLocationNormalized,
+  next: NavigationGuardNext
+) {
   // 检查登录状态
   if (!checkAuth()) {
     next('/login')
@@ -163,10 +194,10 @@ export async function beforeEnterRedPacket(to, from, next) {
   }
   
   // 只允许从倒计时页面进入红包雨页面
-  if (from.name !== 'Countdown') {
-    next('/countdown')
-    return
-  }
+    if (from.name !== 'countdown') {  // 小写，与路由配置一致
+        next('/countdown')
+        return
+    }
   
   // 正常进入红包雨页面
   next()
@@ -175,7 +206,11 @@ export async function beforeEnterRedPacket(to, from, next) {
 /**
  * 优惠券页面路由守卫
  */
-export async function beforeEnterCoupon(to, from, next) {
+export async function beforeEnterCoupon(
+  to: RouteLocationNormalized,
+  from: RouteLocationNormalized,
+  next: NavigationGuardNext
+) {
   // 检查登录状态
   if (!checkAuth()) {
     next('/login')
@@ -184,25 +219,4 @@ export async function beforeEnterCoupon(to, from, next) {
 
   // 优惠券页面不需要检查活动状态，用户随时可以查看
   next()
-}
-
-/**
- * 全局路由守卫配置
- */
-export function setupRedPacketGuards(router) {
-  router.beforeEach(async (to, from, next) => {
-    // 如果是红包雨相关页面，初始化数据
-    const redPacketPages = ['Loading', 'Countdown', 'RedPacket', 'Coupon']
-    
-    if (redPacketPages.includes(to.name) && checkAuth()) {
-      try {
-        // 初始化红包雨数据
-        await store.dispatch('lottery/initLotteryData')
-      } catch (error) {
-        console.error('初始化红包雨数据失败:', error)
-      }
-    }
-    
-    next()
-  })
 }

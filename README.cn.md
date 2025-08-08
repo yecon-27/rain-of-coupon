@@ -2,7 +2,7 @@
 
 # 红包雨小程序
 
-基于 Vue 2 和若依框架开发了一个小程序。主要功能包括：
+基于 Vue 3 和若依框架开发了一个小程序。主要功能包括：
 
 - **红包雨抢红包系统**：每位用户每天最多参与 3 次，获奖后自动结束。点击红包数量越多，中奖概率越大。
 - **流量控制**：检测高用户流量并显示拥堵通知。
@@ -13,7 +13,7 @@
 
 ## 技术栈
 
-- **前端**：Vue 2, Vuex, Vite
+- **前端**：Vue 3, Pinia, Vite
 - **后端**：若依框架（Spring Boot）
 - **数据库**：MySQL
 - **API**：RESTful API
@@ -61,15 +61,18 @@
 │   ├── business_log.sql              # 业务日志表
 │   ├── README.sql.md                 # SQL 文件说明（包含红包雨表结构）
 │   └── quartz.sql                    # Quartz 定时任务相关表
-├── rain-of-coupon/              # 小程序前端项目
+├── rain-of-coupon/              # 前端项目（Vue 3 + TypeScript + Pinia）
 │   ├── public/                   # 公共静态资源
-│   ├── docs/                     # 项目特有文档
-│   ├── package.json              # NPM 依赖与脚本配置
-│   ├── vercel.json               # Vercel 部署配置（可选）
-│   └── src/
-│       ├── api/                  # API 请求封装（基于 Axios）
-│       ├── assets/               # 静态资源（图片 / mock 数据等）
-│       ├── components/           # 可复用组件
+│   ├── src/
+│   │   ├── api/                  # API 请求封装（TypeScript + Fetch）
+│   │   │   ├── lottery.ts              # 🔹 API 层：HTTP 请求
+│   │   ├── stores/lottery.ts           # 🔸 状态层：纯状态管理
+│   │   ├── services/lotteryService.ts  # 🔹 服务层：业务逻辑
+│   │   │── composables/useLottery.ts   # 🔸 组合层：组件接口
+│   │   └── examples/                   # 📋 使用示例
+│   │   │   └── LotteryUsageExample.vue
+│   │   ├── assets/               # 静态资源（图片、样式等）
+│   │   ├── components/           # 可复用 Vue 3 组件
 │       │   ├── PrizeModal.vue          # 中奖弹窗
 │       │   ├── EncourageTip.vue        # 未中奖时鼓励提示
 │       │   ├── RedPacket.vue           # 红包动画逻辑

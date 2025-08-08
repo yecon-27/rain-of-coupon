@@ -1,7 +1,7 @@
 🌐 Language Switch | 语言切换:  [English](./README.md) | [中文](./README.cn.md)
 
 ## Red Envelope Rain Mini Program
-Developed a mini program using Vue 2 and the Ruoyi Framework. Key features include:
+Developed a mini program using Vue 3 and the Ruoyi Framework. Key features include:
 
 - **Red Envelope Rain System**: Up to 3 games per user per day; ends automatically upon winning. The more red envelopes clicked, the higher the winning probability.
 
@@ -13,7 +13,7 @@ Developed a mini program using Vue 2 and the Ruoyi Framework. Key features inclu
 <img width="1199" height="756" alt="642b289e022901a99b5f68f1a5e94f4" src="https://github.com/user-attachments/assets/ee03551b-73a5-4565-862b-7016bc432df9" />
 
 ### Tech Stack
-- Frontend: Vue 2, Vuex, Vite
+- Frontend: Vue 3, Vuex, Vite
 - Backend: Ruoyi Framework (Spring Boot)
 - Database: MySQL
 - API: RESTful API
@@ -59,43 +59,46 @@ Developed a mini program using Vue 2 and the Ruoyi Framework. Key features inclu
 │   ├── business_log.sql              # Business log table
 │   ├── README.sql.md                 # Description of SQL files (includes red envelope rain table structure)
 │   └── quartz.sql                    # Quartz scheduled task tables
-├── rain-of-coupon/              # Frontend project (e.g., mini-game or web)
+├── rain-of-coupon/              # Frontend project (Vue 3 + TypeScript + Pinia)
 │   ├── public/                   # Public static resources
-│   ├── docs/                     # Project-specific documents
+│   ├── src/
+│   │   ├── api/                  # API abstraction layer (TypeScript + Fetch)
+│   │   │   └── lottery.ts            # Red envelope rain API interfaces
+│   │   ├── assets/               # Static assets (images, styles, etc.)
+│   │   ├── components/           # Reusable Vue 3 components
+│   │   │   ├── PrizeModal.vue          # Modal displayed on prize win
+│   │   │   ├── EncourageTip.vue        # Encouragement popup when user loses
+│   │   │   ├── RedPacket.vue           # Red envelope animation logic
+│   │   │   ├── CountDown.vue           # Countdown animation (3, 2, 1)
+│   │   │   ├── RulePopup.vue           # Rule popup or static display
+│   │   │   ├── CouponCard.vue          # Coupon display component
+│   │   │   ├── CrowdingTip.vue         # "Too many users" warning UI
+│   │   │   ├── LoadingAnim.vue         # Loading animation component
+│   │   │   ├── BackButton.vue          # Back button component
+│   │   │   └── LoginForm.vue           # Login form component
+│   │   ├── router/               # Vue Router 4 configuration
+│   │   │   └── index.ts              # Route definitions (TypeScript)
+│   │   ├── stores/               # Pinia store configuration
+│   │   │   ├── counter.ts            # Example store
+│   │   │   └── lottery.ts            # Red envelope rain state management
+│   │   ├── utils/                # Utility functions
+│   │   │   └── auth.ts               # Authentication utilities
+│   │   ├── views/                # Page-level components (linked to routes)
+│   │   │   ├── HomePage.vue          # Home / landing page
+│   │   │   ├── LoginPage.vue         # Login screen
+│   │   │   ├── LoadingPage.vue       # Loading animation screen
+│   │   │   ├── CountDownPage.vue     # Countdown screen
+│   │   │   ├── RedPacketPage.vue     # Red envelope rain game screen
+│   │   │   ├── RulePage.vue          # Event rules page
+│   │   │   └── CouponPage.vue        # Coupon / prize list page
+│   │   ├── App.vue               # Root Vue 3 component
+│   │   └── main.ts               # Application entry point (Vue 3 + Pinia + TypeScript)
 │   ├── package.json              # NPM dependencies and scripts
-│   ├── vercel.json               # Vercel deployment config (optional)
-│   └── src/
-│       ├── api/                  # API abstraction layer (based on Axios)
-│       ├── assets/               # Static assets (images, mock data, etc.)
-│       ├── components/           # Reusable Vue components
-│       │   ├── PrizeModal.vue          # Modal displayed on prize win
-│       │   ├── EncourageTip.vue        # Encouragement popup when user loses
-│       │   ├── RedPacket.vue           # Red envelope animation logic
-│       │   ├── CountDown.vue           # Countdown animation (3, 2, 1)
-│       │   ├── RulePopup.vue           # Rule popup or static display
-│       │   ├── CouponCard.vue          # Coupon display component (for /coupon)
-│       │   ├── CrowdingTip.vue         # "Too many users" warning UI
-│       │   ├── LoadingAnim.vue         # Rocket or loading animation
-│       │   ├── BackButton.vue          # Back button used in pages
-│       │   ├── LoginForm.vue           # Login form block
-│       ├── directives/           # Custom Vue directives (e.g., auto-focus)
-│       ├── router/               # Vue Router configuration
-│       │   └── index.js              # Route definitions
-│       ├── store/                # Vuex store configuration
-│       │   ├── index.js              # Vuex main entry
-│       │   └── modules/              # Vuex modules
-│       ├── utils/                # Utility functions
-│       │   └── request.js            # Axios configuration and interceptors
-│       ├── views/                # Page-level components (linked to routes)
-│       │   ├── HomePage.vue          # Home / landing page
-│       │   ├── LoginPage.vue         # Login screen
-│       │   ├── LoadingPage.vue       # Loading animation screen
-│       │   ├── CountDownPage.vue     # Countdown screen
-│       │   ├── RedPacketPage.vue     # Red envelope draw screen
-│       │   ├── RulePage.vue          # Event rules page
-│       │   └── CouponPage.vue        # Coupon / prize list page
-│       ├── App.vue               # Root Vue component
-│       └── main.js               # Application entry point (Vue 2 + Vuex init)
+│   ├── vite.config.ts            # Vite configuration (TypeScript)
+│   ├── tsconfig.json             # TypeScript configuration
+│   ├── .env                      # Environment variables
+│   ├── .env.development          # Development environment config
+│   └── .env.production           # Production environment config
 ├── ruoyi-ui/                    # Admin frontend (Vue 2 based)
 │   ├── src/
 │   │   ├── api/                  # API definitions for backend
