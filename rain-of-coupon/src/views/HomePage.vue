@@ -132,20 +132,31 @@ const getImageUrl = (filename: string) => {
   width: 100vw;
   min-height: 100vh;
   background-color: #f5f5f5;
+  margin: 0;
+  padding: 0;
 }
 
 /* 第一部分：home.png 背景和按钮 */
 .home-section {
   position: relative;
-  width: 100%;
+  width: 100vw;
   height: 100vh;
   overflow: hidden;
+  margin: 0;
+  padding: 0;
 }
 
 .home-bg {
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
   object-fit: cover;
+  object-position: center top; /* 确保图片顶部内容优先显示 */
+  display: block;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
 .right-buttons {
@@ -155,6 +166,7 @@ const getImageUrl = (filename: string) => {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  z-index: 10;
 }
 
 .rule-btn, .coupon-btn {
@@ -162,6 +174,7 @@ const getImageUrl = (filename: string) => {
   height: 60px;
   cursor: pointer;
   transition: transform 0.2s;
+  display: block;
 }
 
 .rule-btn:hover, .coupon-btn:hover {
@@ -173,6 +186,7 @@ const getImageUrl = (filename: string) => {
   bottom: 20%;
   left: 50%;
   transform: translateX(-50%);
+  z-index: 10;
 }
 
 .challenge-btn {
@@ -180,6 +194,7 @@ const getImageUrl = (filename: string) => {
   height: 80px;
   cursor: pointer;
   transition: transform 0.2s;
+  display: block;
 }
 
 .challenge-btn:hover {
@@ -188,20 +203,26 @@ const getImageUrl = (filename: string) => {
 
 /* 第二部分：zscp.png 展示菜品 */
 .food-display-section {
-  width: 100%;
-  text-align: center;
-  padding: 20px 0;
+  width: 100vw;
+  margin: 0;
+  padding: 0;
+  display: block;
 }
 
 .food-display-img {
-  max-width: 100%;
+  width: 100vw;
   height: auto;
+  display: block;
+  margin: 0;
+  padding: 0;
+  object-fit: cover;
 }
 
 /* 第三、四部分：美食列表 */
 .food-list-section {
   width: 100%;
   padding: 20px;
+  margin: 0;
 }
 
 .food-list-container {
@@ -278,10 +299,85 @@ const getImageUrl = (filename: string) => {
   background: linear-gradient(135deg, #B22222, #CD5C5C);
 }
 
-/* 响应式设计 */
+.overlay-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+/* 响应式设计 - 多断点适配 */
+
+/* 大屏幕 (1200px+) */
+@media (min-width: 1200px) {
+  .home-bg {
+    object-fit: fill; /* 大屏幕可以使用fill避免裁剪 */
+  }
+  
+  .food-list-container {
+    max-width: 1000px;
+    padding: 30px;
+  }
+  
+  .food-list-header h2 {
+    font-size: 28px;
+  }
+}
+
+/* 中等屏幕 (992px - 1199px) */
+@media (max-width: 1199px) and (min-width: 992px) {
+  .food-list-container {
+    max-width: 900px;
+  }
+  
+  .food-list-header h2 {
+    font-size: 26px;
+  }
+}
+
+/* 小屏幕 (768px - 991px) */
+@media (max-width: 991px) and (min-width: 768px) {
+  .home-bg {
+    object-fit: cover;
+    object-position: center top;
+  }
+  
+  .right-buttons {
+    top: 15px;
+    right: 15px;
+  }
+  
+  .rule-btn, .coupon-btn {
+    width: 55px;
+    height: 55px;
+  }
+  
+  .challenge-btn {
+    width: 180px;
+    height: 72px;
+  }
+  
+  .food-list-section {
+    padding: 15px;
+  }
+  
+  .food-list-header h2 {
+    font-size: 22px;
+  }
+}
+
+/* 移动端 (最大768px) */
 @media (max-width: 768px) {
+  .home-bg {
+    object-fit: cover;
+    object-position: center top; /* 确保重要内容在顶部显示 */
+  }
+  
   .food-list-content {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr; /* 单列布局 */
   }
   
   .food-list-header h2 {
@@ -302,15 +398,100 @@ const getImageUrl = (filename: string) => {
     width: 160px;
     height: 64px;
   }
+  
+  .food-list-section {
+    padding: 10px;
+  }
+  
+  .food-list-container {
+    padding: 15px;
+    border-radius: 10px;
+  }
+  
+  .food-item {
+    padding: 10px;
+  }
+  
+  .ranking-badge {
+    width: 35px;
+    height: 35px;
+    margin-right: 12px;
+  }
+  
+  .food-name {
+    font-size: 14px;
+  }
 }
 
-.overlay-mask {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 1000;
+/* 超小屏幕 (最大480px) */
+@media (max-width: 480px) {
+  .home-section {
+    height: 100vh;
+    min-height: 600px; /* 确保最小高度 */
+  }
+  
+  .home-bg {
+    object-fit: cover;
+    object-position: center top;
+  }
+  
+  .right-buttons {
+    top: 8px;
+    right: 8px;
+    gap: 8px;
+  }
+  
+  .rule-btn, .coupon-btn {
+    width: 45px;
+    height: 45px;
+  }
+  
+  .challenge-btn {
+    width: 140px;
+    height: 56px;
+  }
+  
+  .center-button {
+    bottom: 15%;
+  }
+  
+  .food-list-header h2 {
+    font-size: 18px;
+  }
+  
+  .food-list-container {
+    padding: 12px;
+  }
+  
+  .food-item {
+    padding: 8px;
+  }
+  
+  .ranking-badge {
+    width: 30px;
+    height: 30px;
+    margin-right: 10px;
+    font-size: 12px;
+  }
+  
+  .food-name {
+    font-size: 13px;
+  }
+}
+
+/* 横屏适配 */
+@media (max-height: 500px) and (orientation: landscape) {
+  .home-section {
+    height: 100vh;
+  }
+  
+  .center-button {
+    bottom: 10%;
+  }
+  
+  .challenge-btn {
+    width: 120px;
+    height: 48px;
+  }
 }
 </style>
