@@ -22,7 +22,7 @@ function checkAuth() {
 async function checkActivityStatus() {
   try {
     const lotteryStore = useLotteryStore()
-    return lotteryStore.isActivityActive  // 使用 computed 或 getter
+    return lotteryStore.isActivityActive // 使用 computed 或 getter
   } catch (error) {
     console.error('检查活动状态失败:', error)
     return false
@@ -36,12 +36,12 @@ async function checkUserEligibility() {
   try {
     const lotteryStore = useLotteryStore()
     const userStatus = lotteryStore.userStatus
-    
+
     return {
       canDraw: userStatus.canDraw,
       hasEverWon: userStatus.hasEverWon,
       remainingCount: userStatus.remainingCount,
-      isCrowded: userStatus.isCrowded
+      isCrowded: userStatus.isCrowded,
     }
   } catch (error) {
     console.error('检查用户资格失败:', error)
@@ -49,7 +49,7 @@ async function checkUserEligibility() {
       canDraw: false,
       hasEverWon: false,
       remainingCount: 0,
-      isCrowded: true
+      isCrowded: true,
     }
   }
 }
@@ -58,7 +58,7 @@ async function checkUserEligibility() {
 export function setupRedPacketGuards(router: Router) {
   router.beforeEach(async (to, from, next) => {
     const redPacketPages = ['loading', 'countdown', 'redpacket', 'coupon']
-    
+
     if (redPacketPages.includes(to.name as string) && checkAuth()) {
       try {
         const lotteryStore = useLotteryStore()
@@ -66,7 +66,7 @@ export function setupRedPacketGuards(router: Router) {
         console.error('初始化红包雨数据失败:', error)
       }
     }
-    
+
     next()
   })
 }
@@ -77,7 +77,7 @@ export function setupRedPacketGuards(router: Router) {
 export async function beforeEnterLoading(
   to: RouteLocationNormalized,
   from: RouteLocationNormalized,
-  next: NavigationGuardNext
+  next: NavigationGuardNext,
 ) {
   // 检查登录状态
   if (!checkAuth()) {
@@ -94,25 +94,25 @@ export async function beforeEnterLoading(
 
   // 检查用户资格
   const eligibility = await checkUserEligibility()
-  
+
   // 如果已经中过奖，直接跳转到首页显示中奖弹窗
   if (eligibility.hasEverWon) {
     next('/')
     return
   }
-  
+
   // 如果没有剩余次数，跳转到首页
   if (eligibility.remainingCount <= 0) {
     next('/')
     return
   }
-  
+
   // 如果人数拥挤，停留在加载页面显示拥挤提示
   if (eligibility.isCrowded) {
     next()
     return
   }
-  
+
   // 正常情况下，自动跳转到倒计时页面
   next('/countdown')
 }
@@ -123,7 +123,7 @@ export async function beforeEnterLoading(
 export async function beforeEnterCountdown(
   to: RouteLocationNormalized,
   from: RouteLocationNormalized,
-  next: NavigationGuardNext
+  next: NavigationGuardNext,
 ) {
   // 检查登录状态
   if (!checkAuth()) {
@@ -140,19 +140,19 @@ export async function beforeEnterCountdown(
 
   // 检查用户资格
   const eligibility = await checkUserEligibility()
-  
+
   // 如果已经中过奖或没有剩余次数，跳转到首页
   if (eligibility.hasEverWon || eligibility.remainingCount <= 0) {
     next('/')
     return
   }
-  
+
   // 如果人数拥挤，跳转到加载页面
   if (eligibility.isCrowded) {
     next('/loading')
     return
   }
-  
+
   // 正常进入倒计时页面
   next()
 }
@@ -163,7 +163,7 @@ export async function beforeEnterCountdown(
 export async function beforeEnterRedPacket(
   to: RouteLocationNormalized,
   from: RouteLocationNormalized,
-  next: NavigationGuardNext
+  next: NavigationGuardNext,
 ) {
   // 检查登录状态
   if (!checkAuth()) {
@@ -180,25 +180,26 @@ export async function beforeEnterRedPacket(
 
   // 检查用户资格
   const eligibility = await checkUserEligibility()
-  
+
   // 如果已经中过奖或没有剩余次数，跳转到首页
   if (eligibility.hasEverWon || eligibility.remainingCount <= 0) {
     next('/')
     return
   }
-  
+
   // 如果人数拥挤，跳转到加载页面
   if (eligibility.isCrowded) {
     next('/loading')
     return
   }
-  
+
   // 只允许从倒计时页面进入红包雨页面
-    if (from.name !== 'countdown') {  // 小写，与路由配置一致
-        next('/countdown')
-        return
-    }
-  
+  if (from.name !== 'countdown') {
+    // 小写，与路由配置一致
+    next('/countdown')
+    return
+  }
+
   // 正常进入红包雨页面
   next()
 }
@@ -209,7 +210,7 @@ export async function beforeEnterRedPacket(
 export async function beforeEnterCoupon(
   to: RouteLocationNormalized,
   from: RouteLocationNormalized,
-  next: NavigationGuardNext
+  next: NavigationGuardNext,
 ) {
   // 检查登录状态
   if (!checkAuth()) {

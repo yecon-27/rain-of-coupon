@@ -17,7 +17,7 @@ const router = useRouter()
 <style scoped>
 .left-button {
   position: fixed;
-  top: 15%;
+  top: 50%;
   right: 0;
   transform: translateY(-50%);
   display: flex;
@@ -29,7 +29,7 @@ const router = useRouter()
 .back-btn {
   background: linear-gradient(135deg, #4A90E2, #357ABD);
   border: none;
-  border-radius: 5px;
+  border-radius: 8px 0 0 8px;
   padding: 8px 4px;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -37,14 +37,15 @@ const router = useRouter()
   color: white;
   font-size: 14px;
   font-weight: 500;
-  box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
-  width: 32px;
-  height: 64px;
+  box-shadow: -4px 0 15px rgba(74, 144, 226, 0.3);
+  width: 48px;
+  height: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 0;
-  /* 改为0，去除右边距 */
+  margin: 0;
+  position: relative;
+  right: 0;
 }
 
 .back-text {
@@ -55,14 +56,18 @@ const router = useRouter()
   letter-spacing: 5px;
 }
 @media (max-width: 768px) {
-  .left-buttons {
-    left: -1px;
-    
+  .back-btn {
+    width: 44px;
+    height: 72px;
+    font-size: 13px;
   }
 }
+
 @media (max-width: 480px) {
-  .left-buttons {
-    left: -1px;
+  .back-btn {
+    width: 40px;
+    height: 64px;
+    font-size: 12px;
   }
 }
 </style>

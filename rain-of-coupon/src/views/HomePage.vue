@@ -160,30 +160,35 @@ const getImageUrl = (filename: string) => {
 }
 
 .right-buttons {
-  position: absolute;
-  top: 20px;
-  right: 20px;
+  position: fixed;
+  top: 50vh;
+  right: -1px;
+  transform: translateY(-50%);
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  z-index: 10;
+  gap: 15px;
+  z-index: 1000;
 }
 
 .rule-btn, .coupon-btn {
-  width: 60px;
-  height: 60px;
   cursor: pointer;
-  transition: transform 0.2s;
   display: block;
+  object-fit: contain;
 }
 
-.rule-btn:hover, .coupon-btn:hover {
-  transform: scale(1.1);
+.rule-btn {
+  width: 96px;
+  height: 96px;
+}
+
+.coupon-btn {
+  width: 120px;
+  height: 120px;
 }
 
 .center-button {
   position: absolute;
-  bottom: 20%;
+  bottom: 5%;
   left: 50%;
   transform: translateX(-50%);
   z-index: 10;
@@ -346,13 +351,17 @@ const getImageUrl = (filename: string) => {
   }
   
   .right-buttons {
-    top: 15px;
-    right: 15px;
+    right: -1px;
   }
   
-  .rule-btn, .coupon-btn {
-    width: 55px;
-    height: 55px;
+  .rule-btn {
+    width: 84px;
+    height: 84px;
+  }
+  
+  .coupon-btn {
+    width: 105px;
+    height: 105px;
   }
   
   .challenge-btn {
@@ -385,13 +394,13 @@ const getImageUrl = (filename: string) => {
   }
   
   .right-buttons {
-    top: 10px;
-    right: 10px;
+    right: -1px;
   }
   
   .rule-btn, .coupon-btn {
-    width: 50px;
-    height: 50px;
+    width: 98px;
+    height: 98px;
+    object-fit: contain;
   }
   
   .challenge-btn {
@@ -436,14 +445,14 @@ const getImageUrl = (filename: string) => {
   }
   
   .right-buttons {
-    top: 8px;
-    right: 8px;
-    gap: 8px;
+    right: -1px;
+    gap: 12px;
   }
   
   .rule-btn, .coupon-btn {
-    width: 45px;
-    height: 45px;
+    width: 90px;
+    height: 90px;
+    object-fit: contain;
   }
   
   .challenge-btn {
@@ -452,7 +461,7 @@ const getImageUrl = (filename: string) => {
   }
   
   .center-button {
-    bottom: 15%;
+    bottom: 5%;
   }
   
   .food-list-header h2 {
@@ -486,7 +495,7 @@ const getImageUrl = (filename: string) => {
   }
   
   .center-button {
-    bottom: 10%;
+    bottom: 5%;
   }
   
   .challenge-btn {
