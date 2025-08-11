@@ -44,7 +44,7 @@ public class PublicFoodController extends BaseController
     @GetMapping("/townFood/list")
     public TableDataInfo getTownFoodList()
     {
-        startPage();
+        // 移除 startPage(); 以获取全部数据
         List<RedpacketTownSpecialtyFood> list = redpacketTownSpecialtyFoodService.selectRedpacketTownSpecialtyFoodList(new RedpacketTownSpecialtyFood());
         return getDataTable(list);
     }

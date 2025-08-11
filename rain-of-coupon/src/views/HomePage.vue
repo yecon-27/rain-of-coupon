@@ -555,4 +555,97 @@ const getImageUrl = (filename: string) => {
     top: calc(50vh + 5px);
   }
 }
+/* 针对town-section的特殊布局：两列布局，左右等宽 */
+.town-section .food-list-content {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.town-section .left-column {
+  flex: 1; /* 左列 */
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.town-section .right-column {
+  flex: 1; /* 右列，与左列相等 */
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.town-section .food-item {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 12px;
+  transition: all 0.3s ease;
+}
+
+.town-section .food-item:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.town-section .ranking-badge {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(45deg, #FFD700, #FFA500);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: #8B0000;
+  margin-right: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  flex-shrink: 0;
+}
+
+.town-section .food-name {
+  color: white;
+  font-size: 16px;
+  font-weight: 500;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  flex: 1;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .town-section .food-list-content {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .town-section .left-column,
+  .town-section .right-column {
+    flex: 1;
+  }
+  
+  .town-section .ranking-badge {
+    width: 35px;
+    height: 35px;
+    margin-right: 12px;
+  }
+  
+  .town-section .food-name {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .town-section .ranking-badge {
+    width: 30px;
+    height: 30px;
+    margin-right: 10px;
+    font-size: 12px;
+  }
+  
+  .town-section .food-name {
+    font-size: 13px;
+  }
+}
 </style>
