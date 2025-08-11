@@ -196,15 +196,27 @@ const getImageUrl = (filename: string) => {
 }
 
 .challenge-btn {
-  width: 200px;
-  height: 80px;
+  width: 300px;
+  height: 120px;
   cursor: pointer;
-  transition: transform 0.2s;
   display: block;
+  animation: breathe 2s ease-in-out infinite;
+}
+
+@keyframes breathe {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
 }
 
 .challenge-btn:hover {
-  transform: scale(1.05);
+  animation-play-state: paused;
+  transform: scale(1.08);
 }
 
 /* 第二部分：zscp.png 展示菜品 */
@@ -229,12 +241,13 @@ const getImageUrl = (filename: string) => {
   width: 100%;
   padding: 20px;
   margin: 0;
+  background: #DC143C; /* 红色背景 */
 }
 
 .food-list-container {
   max-width: 800px;
   margin: 0 auto;
-  background: linear-gradient(135deg, #8B0000, #DC143C);
+  background: #F5DEB3; /* 米黄色内部背景 */
   border-radius: 15px;
   padding: 20px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
@@ -246,10 +259,10 @@ const getImageUrl = (filename: string) => {
 }
 
 .food-list-header h2 {
-  color: #FFD700;
+  color: #8B0000;
   font-size: 24px;
   font-weight: bold;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
   margin: 0;
 }
 
@@ -269,14 +282,14 @@ const getImageUrl = (filename: string) => {
 .food-item {
   display: flex;
   align-items: center;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(139, 0, 0, 0.1);
   border-radius: 10px;
   padding: 12px;
   transition: all 0.3s ease;
 }
 
 .food-item:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(139, 0, 0, 0.2);
   transform: translateY(-2px);
 }
 
@@ -296,10 +309,10 @@ const getImageUrl = (filename: string) => {
 }
 
 .food-name {
-  color: white;
+  color: #8B0000;
   font-size: 16px;
   font-weight: 500;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
   flex: 1;
 }
 
@@ -384,8 +397,8 @@ const getImageUrl = (filename: string) => {
   }
   
   .challenge-btn {
-    width: 180px;
-    height: 72px;
+    width: 270px;
+    height: 108px;
   }
   
   .food-list-section {
@@ -428,8 +441,8 @@ const getImageUrl = (filename: string) => {
   }
   
   .challenge-btn {
-    width: 160px;
-    height: 64px;
+    width: 240px;
+    height: 96px;
   }
   
   .food-list-section {
@@ -480,8 +493,8 @@ const getImageUrl = (filename: string) => {
   }
   
   .challenge-btn {
-    width: 140px;
-    height: 56px;
+    width: 210px;
+    height: 84px;
   }
   
   .center-button {
@@ -523,8 +536,8 @@ const getImageUrl = (filename: string) => {
   }
   
   .challenge-btn {
-    width: 120px;
-    height: 48px;
+    width: 180px;
+    height: 72px;
   }
 }
 @media (max-width: 1200px) {
@@ -560,8 +573,8 @@ const getImageUrl = (filename: string) => {
   }
   
   .challenge-btn {
-    width: 160px;
-    height: 64px;
+    width: 240px;
+    height: 96px;
   }
 }
 
