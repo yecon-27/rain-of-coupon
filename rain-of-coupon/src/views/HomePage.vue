@@ -66,13 +66,13 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { getTop10PopularFood, getTownSpecialtyFood } from '@/api/food'
+import { getTop10PopularFood, getTownSpecialtyFood, type FoodItem } from '@/api/food'
 import { API_CONFIG } from '@/config/api'
 
 // 响应式数据
 const showOverlay = ref(false)
-const top10Foods = ref([])
-const townFoods = ref([])
+const top10Foods = ref<FoodItem[]>([])
+const townFoods = ref<FoodItem[]>([])
 const loading = ref(false)
 
 // 获取美食列表数据

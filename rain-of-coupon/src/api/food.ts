@@ -2,7 +2,7 @@
 import { API_CONFIG } from '@/config/api'
 
 // 美食项接口定义
-interface FoodItem {
+export interface FoodItem {
   id: number
   foodName: string
   ranking: number
