@@ -312,6 +312,17 @@ const getImageUrl = (filename: string) => {
   background: linear-gradient(135deg, #B22222, #CD5C5C);
 }
 
+/* 第四部分特殊布局：第一个菜品独占一行，其余左右排序 */
+.town-section .food-list-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.town-section .food-item:first-child {
+  grid-column: 1 / -1; /* 第一个菜品跨越所有列 */
+}
+
 .overlay-mask {
   position: fixed;
   top: 0;
