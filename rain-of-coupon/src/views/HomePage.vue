@@ -150,7 +150,7 @@ const getImageUrl = (filename: string) => {
   width: 100vw;
   height: 100vh;
   object-fit: cover;
-  object-position: center top; /* 确保图片顶部内容优先显示 */
+  object-position: center top;
   display: block;
   margin: 0;
   padding: 0;
@@ -159,32 +159,33 @@ const getImageUrl = (filename: string) => {
   left: 0;
 }
 
-.right-buttons {
+/* 分开定义右侧按钮 */
+.rule-btn {
   position: fixed;
-  top: 50vh;
-  right: -1px;
-  transform: translateY(-50%);
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  z-index: 1000;
-}
-
-.rule-btn, .coupon-btn {
+  top: calc(50vh - 60px); /* 上方按钮位置 */
+  right: 0;
+  width: 80px; /* 较小尺寸 */
+  height: 80px;
   cursor: pointer;
   display: block;
   object-fit: contain;
-}
-
-.rule-btn {
-  width: 96px;
-  height: 96px;
+  z-index: 1000;
 }
 
 .coupon-btn {
-  width: 120px;
-  height: 120px;
+  position: fixed;
+  top: calc(50vh + 10px); /* 下方按钮位置，距离更近 */
+  right: 0;
+  width: 100px; /* 较大尺寸 */
+  height: 100px;
+  cursor: pointer;
+  display: block;
+  object-fit: contain;
+  z-index: 1000;
 }
+
+/* 移除原来的 right-buttons 样式 */
+/* .right-buttons 样式可以删除或注释掉 */
 
 .center-button {
   position: absolute;
@@ -501,6 +502,57 @@ const getImageUrl = (filename: string) => {
   .challenge-btn {
     width: 120px;
     height: 48px;
+  }
+}
+@media (max-width: 1200px) {
+  .rule-btn {
+    width: 80px;
+    height: 80px;
+    top: calc(50vh - 50px);
+  }
+  
+  .coupon-btn {
+    width: 90px;
+    height: 90px;
+    top: calc(50vh + 8px);
+  }
+}
+
+@media (max-width: 768px) {
+  .home-bg {
+    object-fit: cover;
+    object-position: center top;
+  }
+  
+  .rule-btn {
+    width: 75px;
+    height: 75px;
+    top: calc(50vh - 45px);
+  }
+  
+  .coupon-btn {
+    width: 85px;
+    height: 85px;
+    top: calc(50vh + 6px);
+  }
+  
+  .challenge-btn {
+    width: 160px;
+    height: 64px;
+  }
+}
+
+@media (max-width: 480px) {
+  .rule-btn {
+    width: 70px;
+    height: 70px;
+    top: calc(50vh - 40px);
+  }
+  
+  .coupon-btn {
+    width: 80px;
+    height: 80px;
+    top: calc(50vh + 5px);
   }
 }
 </style>
