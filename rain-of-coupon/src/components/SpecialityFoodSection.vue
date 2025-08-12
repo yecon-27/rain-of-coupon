@@ -37,8 +37,8 @@ defineProps<Props>()
 .food-list-container {
   max-width: 800px;
   margin: 0 auto;
-  background: #F5DEB3;
-  /* 米黄色内部背景 */
+  background: oldlace;
+  /* 浅黄色内部背景 */
   border-radius: 15px;
   padding: 20px;
 }
@@ -90,7 +90,7 @@ defineProps<Props>()
   font-weight: bold;
   color: #8B0000;
   margin-right: 15px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+
   flex-shrink: 0;
 }
 
