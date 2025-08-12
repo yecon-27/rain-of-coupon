@@ -1,13 +1,11 @@
 <template>
   <div class="activity-section">
     <img :src="getImageUrl('home.png')" alt="首页背景" class="activity-bg" />
-    
+
     <!-- 右侧按钮组 -->
-    <div class="side-buttons">
-      <img :src="getImageUrl('gz.png')" alt="规则" class="rule-btn" @click="$emit('showRules')" />
-      <img :src="getImageUrl('qb.png')" alt="券包" class="coupon-btn" @click="$emit('myCoupons')" />
-    </div>
-    
+    <img :src="getImageUrl('gz.png')" alt="规则" class="rule-btn" @click="$emit('showRules')" />
+    <img :src="getImageUrl('qb.png')" alt="券包" class="coupon-btn" @click="$emit('myCoupons')" />
+
     <!-- 底部居中按钮 -->
     <div class="center-button">
       <img :src="getImageUrl('button.png')" alt="立即挑战" class="challenge-btn" @click="$emit('joinActivity')" />
@@ -54,31 +52,30 @@ const getImageUrl = (filename: string) => {
   left: 0;
 }
 
-.side-buttons {
+.rule-btn {
   position: fixed;
-  top: 50vh;
-  right: -1px;
-  transform: translateY(-50%);
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
+  top: calc(50vh - 40px);
+  right: -2px;
+  width: 96px;
+  /* 96px * 1.5 */
+  height: 96px;
+  /* 96px * 1.5 */
+  cursor: pointer;
+  display: block;
+  object-fit: contain;
   z-index: 1000;
 }
 
-.rule-btn {
-  width: 96px;
-  height: 96px;
-  cursor: pointer;
-  display: block;
-  object-fit: contain;
-}
-
 .coupon-btn {
-  width: 120px;
-  height: 120px;
+  position: fixed;
+  top: calc(50vh + 15px);
+  right: -2px;
+  width: 110px;
+  height: 110px;
   cursor: pointer;
   display: block;
   object-fit: contain;
+  z-index: 1000;
 }
 
 .center-button {
@@ -98,10 +95,13 @@ const getImageUrl = (filename: string) => {
 }
 
 @keyframes breathe {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: scale(1);
     opacity: 1;
   }
+
   50% {
     transform: scale(1.05);
     opacity: 0.9;
@@ -126,17 +126,20 @@ const getImageUrl = (filename: string) => {
     object-fit: cover;
     object-position: center top;
   }
-  
+
   .rule-btn {
-    width: 84px;
-    height: 84px;
+    width: 90px;
+    /* 84px * 1.5 */
+    height: 90px;
+    top: calc(50vh - 45px);
   }
-  
+
   .coupon-btn {
-    width: 105px;
-    height: 105px;
+    width: 100px;
+    height: 100px;
+    top: calc(50vh + 10px);
   }
-  
+
   .challenge-btn {
     width: 270px;
     height: 108px;
@@ -148,17 +151,20 @@ const getImageUrl = (filename: string) => {
     object-fit: cover;
     object-position: center top;
   }
-  
+
   .rule-btn {
-    width: 78px;
-    height: 78px;
+    width: 85px;
+    /* 78px * 1.5 */
+    height: 85px;
+    top: calc(50vh - 48px);
   }
-  
+
   .coupon-btn {
-    width: 98px;
-    height: 98px;
+    width: 95px;
+    height: 95px;
+    top: calc(50vh + 8px);
   }
-  
+
   .challenge-btn {
     width: 240px;
     height: 96px;
@@ -169,27 +175,30 @@ const getImageUrl = (filename: string) => {
   .activity-section {
     min-height: 600px;
   }
-  
+
   .activity-bg {
     object-fit: cover;
     object-position: center top;
   }
-  
+
   .rule-btn {
-    width: 72px;
-    height: 72px;
+    width: 80px;
+    /* 72px * 1.5 */
+    height: 80px;
+    top: calc(50vh - 50px);
   }
-  
+
   .coupon-btn {
     width: 90px;
     height: 90px;
+    top: calc(50vh + 5px);
   }
-  
+
   .challenge-btn {
     width: 210px;
     height: 84px;
   }
-  
+
   .center-button {
     bottom: 5%;
   }
@@ -199,11 +208,11 @@ const getImageUrl = (filename: string) => {
   .activity-section {
     height: 100vh;
   }
-  
+
   .center-button {
     bottom: 5%;
   }
-  
+
   .challenge-btn {
     width: 180px;
     height: 72px;

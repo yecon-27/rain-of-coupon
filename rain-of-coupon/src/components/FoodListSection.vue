@@ -5,11 +5,7 @@
         <h2>{{ title }}</h2>
       </div>
       <div class="food-list-content">
-        <div 
-          v-for="item in foodItems" 
-          :key="item.id" 
-          class="food-item"
-        >
+        <div v-for="item in foodItems" :key="item.id" class="food-item">
           <div class="ranking-badge">{{ item.ranking }}</div>
           <div class="food-name">{{ item.foodName }}</div>
         </div>
@@ -36,16 +32,17 @@ defineProps<Props>()
   width: 100%;
   padding: 20px;
   margin: 0;
-  background: #DC143C; /* 红色背景 */
+  background: #DC143C;
+  /* 红色背景 */
 }
 
 .food-list-container {
   max-width: 800px;
   margin: 0 auto;
-  background: #F5DEB3; /* 米黄色内部背景 */
+  background: #F5DEB3;
+  /* 米黄色内部背景 */
   border-radius: 15px;
   padding: 20px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
 .food-list-header {
@@ -72,8 +69,7 @@ defineProps<Props>()
 .food-item {
   display: flex;
   align-items: center;
-  background: rgba(139, 0, 0, 0.1);
-  border-radius: 10px;
+  background: transparent;
   padding: 12px;
   transition: all 0.3s ease;
   width: 100%;
@@ -81,7 +77,7 @@ defineProps<Props>()
 }
 
 .food-item:hover {
-  background: rgba(139, 0, 0, 0.2);
+  background: transparent;
   transform: translateY(-2px);
 }
 
@@ -110,8 +106,10 @@ defineProps<Props>()
 
 /* 第四部分特殊布局：第一个菜品独占一行，其余两列布局 */
 .town-section .food-item:first-child {
-  grid-column: 1 / -1 !important; /* 第一个菜品跨越所有列 */
-  margin-bottom: 10px; /* 与下面的项目保持间距 */
+  grid-column: 1 / -1 !important;
+  /* 第一个菜品跨越所有列 */
+  margin-bottom: 3px;
+  /* 缩小与下面项目的间距 */
 }
 
 /* 确保第四部分的网格布局正确 */
@@ -128,7 +126,7 @@ defineProps<Props>()
     max-width: 1000px;
     padding: 30px;
   }
-  
+
   .food-list-header h2 {
     font-size: 28px;
   }
@@ -138,7 +136,7 @@ defineProps<Props>()
   .food-list-container {
     max-width: 900px;
   }
-  
+
   .food-list-header h2 {
     font-size: 26px;
   }
@@ -148,7 +146,7 @@ defineProps<Props>()
   .food-list-section {
     padding: 15px;
   }
-  
+
   .food-list-header h2 {
     font-size: 22px;
   }
@@ -157,36 +155,40 @@ defineProps<Props>()
 /* 移动端单列布局 */
 @media (max-width: 768px) {
   .food-list-content {
-    grid-template-columns: 1fr; /* 移动端改为单列 */
+    grid-template-columns: 1fr;
+    /* 移动端改为单列 */
   }
-  
+
   .town-section .food-item:first-child {
-    grid-column: 1; /* 移动端重置为正常列跨度 */
+    grid-column: 1;
+    /* 移动端重置为正常列跨度 */
+    margin-bottom: 1px;
+    /* 移动端也缩小间距 */
   }
-  
+
   .food-list-header h2 {
     font-size: 20px;
   }
-  
+
   .food-list-section {
     padding: 10px;
   }
-  
+
   .food-list-container {
     padding: 15px;
     border-radius: 10px;
   }
-  
+
   .food-item {
     padding: 10px;
   }
-  
+
   .ranking-badge {
     width: 35px;
     height: 35px;
     margin-right: 12px;
   }
-  
+
   .food-name {
     font-size: 14px;
   }
@@ -196,22 +198,22 @@ defineProps<Props>()
   .food-list-header h2 {
     font-size: 18px;
   }
-  
+
   .food-list-container {
     padding: 12px;
   }
-  
+
   .food-item {
     padding: 8px;
   }
-  
+
   .ranking-badge {
     width: 30px;
     height: 30px;
     margin-right: 10px;
     font-size: 12px;
   }
-  
+
   .food-name {
     font-size: 13px;
   }
