@@ -95,18 +95,16 @@ defineProps<Props>()
 }
 
 .ranking-badge {
-  width: 40px;
-  height: 40px;
+  width: 60px; /* 40px * 1.5 */
+  height: 60px; /* 40px * 1.5 */
   background: linear-gradient(45deg, Tomato, OrangeRed);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: bold;
-  color: oldLace;
-  /* 从#8B0000改为#FFD700，与背景渐变色一致 */
-  font-size: 20px;
-  /* 增加字体大小，原来默认大小约14px */
+  font-weight: 900; /* 从bold改为900，更粗的字体 */
+  color: #FFFFFF;
+  font-size: 22px;
   margin-right: 15px;
   flex-shrink: 0;
 }
@@ -176,8 +174,8 @@ defineProps<Props>()
   }
 
   .ranking-badge {
-    width: 35px;
-    height: 35px;
+    width: 52.5px; /* 35px * 1.5 */
+    height: 52.5px; /* 35px * 1.5 */
     margin-right: 12px;
     font-size: 14px;
     /* 移动端也相应增大 */
