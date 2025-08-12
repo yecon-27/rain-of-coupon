@@ -6,17 +6,13 @@
         <!-- 可以使用旋转的红包图标或其他加载动画 -->
         <div class="spinner"></div>
       </div>
-      
+
       <h2 class="loading-title">正在为您准备红包雨...</h2>
       <p class="loading-text">{{ loadingText }}</p>
     </div>
 
     <!-- 拥挤提示组件 -->
-    <CrowdedTip 
-      v-if="showCrowdedTip" 
-      @retry="checkActivityStatus"
-      @back="goBack"
-    />
+    <CrowdedTip v-if="showCrowdedTip" @retry="checkActivityStatus" @back="goBack" />
   </div>
 </template>
 
@@ -28,17 +24,17 @@ import CrowdedTip from '@/components/CrowdedTip.vue'
 const router = useRouter()
 const showCrowdedTip = ref(false)
 const loadingText = ref('检查活动状态中...')
-const checkInterval: NodeJS.Timeout | null = null
+const checkInterval = ref<number | null>(null)
 
 // 检查活动状态
 const checkActivityStatus = async () => {
   try {
     loadingText.value = '检查活动人数...'
-    
+
     // 调用API检查活动状态
     const response = await fetch('/api/activity/status')
     const data = await response.json()
-    
+
     if (data.isCrowded) {
       // 人数拥挤，显示拥挤提示
       showCrowdedTip.value = true
@@ -50,7 +46,7 @@ const checkActivityStatus = async () => {
         router.push('/countdown')
       }, 1000)
     }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('检查活动状态失败:', error)
     loadingText.value = '网络异常，请重试'
     // 可以显示重试按钮或自动重试
@@ -67,15 +63,15 @@ const goBack = () => {
 onMounted(() => {
   // 延迟一下再检查，给用户看到加载动画的时间
   setTimeout(checkActivityStatus, 1500)
-  
+
   // 可以设置定期检查（如果需要实时更新状态）
-  // checkInterval = setInterval(checkActivityStatus, 10000)
+  // checkInterval.value = setInterval(checkActivityStatus, 10000)
 })
 
 // 清理定时器
 onUnmounted(() => {
-  if (checkInterval) {
-    clearInterval(checkInterval)
+  if (checkInterval.value) {
+    clearInterval(checkInterval.value)
   }
 })
 </script>
@@ -114,8 +110,13 @@ onUnmounted(() => {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .loading-title {
@@ -136,11 +137,11 @@ onUnmounted(() => {
   .loading-container {
     padding: 20px;
   }
-  
+
   .loading-title {
     font-size: 20px;
   }
-  
+
   .spinner {
     width: 50px;
     height: 50px;

@@ -64,9 +64,9 @@ const joinActivity = () => {
   // 检查是否已登录
   const isLoggedIn = localStorage.getItem('isLoggedIn')
   if (isLoggedIn === 'true') {
-    // 已登录，跳转到活动页面或显示倒计时
-    console.log('用户已登录，开始活动')
-    // 这里可以跳转到活动页面或显示倒计时overlay
+    // 已登录，跳转到加载页面
+    console.log('用户已登录，跳转到加载页面')
+    router.push('/loading')
   } else {
     // 未登录，跳转到登录页面
     router.push('/login?redirect=/')
