@@ -6,11 +6,11 @@
     <!-- 第二部分：展示菜品 -->
     <FoodDisplaySection />
 
-    <!-- 第三部分：TOP10网络人气特色美食 -->
-    <FoodListSection title="2024年网络人气票选特色美食TOP10" :food-items="top10Foods" section-class="top10-section" />
+    <!-- 第三部分：Top10Food -->
+    <Top10FoodSection :food-items="top10Foods" />
 
-    <!-- 第四部分："一镇一品"特色菜 -->
-    <FoodListSection title="2024年网络人气票选'一镇一品'特色菜" :food-items="townFoods" section-class="town-section" />
+    <!-- 第四部分：SpecialityFood -->
+    <SpecialityFoodSection :food-items="specialityFoods" />
 
     <!-- 蒙版层（当有overlay时显示） -->
     <div v-if="showOverlay" class="overlay-mask"></div>
@@ -19,15 +19,16 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { getTop10PopularFood, getTownSpecialtyFood, type FoodItem } from '@/api/food'
+import { getTop10Food, getSpecialityFood, type FoodItem } from '@/api/food'
 import ActivitySection from '@/components/ActivitySection.vue'
 import FoodDisplaySection from '@/components/FoodDisplaySection.vue'
-import FoodListSection from '@/components/FoodListSection.vue'
+import Top10FoodSection from '@/components/Top10FoodSection.vue'
+import SpecialityFoodSection from '@/components/SpecialityFoodSection.vue'
 
 // 响应式数据
 const showOverlay = ref(false)
 const top10Foods = ref<FoodItem[]>([])
-const townFoods = ref<FoodItem[]>([])
+const specialityFoods = ref<FoodItem[]>([])
 const loading = ref(false)
 
 // 获取美食列表数据
@@ -35,17 +36,17 @@ const fetchFoodData = async () => {
   loading.value = true
   try {
     // 并行获取两个列表的数据
-    const [top10Response, townResponse] = await Promise.all([
-      getTop10PopularFood(),
-      getTownSpecialtyFood()
+    const [top10Response, specialityResponse] = await Promise.all([
+      getTop10Food(),
+      getSpecialityFood()
     ])
 
     if (top10Response.code === 200) {
       top10Foods.value = top10Response.rows
     }
 
-    if (townResponse.code === 200) {
-      townFoods.value = townResponse.rows
+    if (specialityResponse.code === 200) {
+      specialityFoods.value = specialityResponse.rows
     }
   } catch (error) {
     console.error('获取美食数据失败:', error)

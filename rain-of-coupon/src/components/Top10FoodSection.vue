@@ -1,8 +1,8 @@
 <template>
-  <div class="food-list-section" :class="sectionClass">
+  <div class="top10-food-section">
     <div class="food-list-container">
       <div class="food-list-header">
-        <h2>{{ title }}</h2>
+        <h2>2024年网络人气票选特色美食TOP10</h2>
       </div>
       <div class="food-list-content">
         <div v-for="item in foodItems" :key="item.id" class="food-item">
@@ -19,16 +19,14 @@ import type { FoodItem } from '@/api/food'
 
 // 定义props
 interface Props {
-  title: string
   foodItems: FoodItem[]
-  sectionClass?: string
 }
 
 defineProps<Props>()
 </script>
 
 <style scoped>
-.food-list-section {
+.top10-food-section {
   width: 100%;
   padding: 20px;
   margin: 0;
@@ -58,7 +56,7 @@ defineProps<Props>()
   margin: 0;
 }
 
-/* 默认两列网格布局 */
+/* 两列网格布局 */
 .food-list-content {
   display: grid !important;
   grid-template-columns: 1fr 1fr !important;
@@ -104,22 +102,6 @@ defineProps<Props>()
   flex: 1;
 }
 
-/* 第四部分特殊布局：第一个菜品独占一行，其余两列布局 */
-.town-section .food-item:first-child {
-  grid-column: 1 / -1 !important;
-  /* 第一个菜品跨越所有列 */
-  margin-bottom: 3px;
-  /* 缩小与下面项目的间距 */
-}
-
-/* 确保第四部分的网格布局正确 */
-.town-section .food-list-content {
-  display: grid !important;
-  grid-template-columns: 1fr 1fr !important;
-  gap: 15px;
-  align-items: start;
-}
-
 /* 响应式设计 */
 @media (min-width: 1200px) {
   .food-list-container {
@@ -143,7 +125,7 @@ defineProps<Props>()
 }
 
 @media (max-width: 991px) and (min-width: 768px) {
-  .food-list-section {
+  .top10-food-section {
     padding: 15px;
   }
 
@@ -159,18 +141,11 @@ defineProps<Props>()
     /* 移动端改为单列 */
   }
 
-  .town-section .food-item:first-child {
-    grid-column: 1;
-    /* 移动端重置为正常列跨度 */
-    margin-bottom: 1px;
-    /* 移动端也缩小间距 */
-  }
-
   .food-list-header h2 {
     font-size: 20px;
   }
 
-  .food-list-section {
+  .top10-food-section {
     padding: 10px;
   }
 

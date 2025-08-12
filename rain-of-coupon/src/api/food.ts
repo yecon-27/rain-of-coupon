@@ -41,12 +41,12 @@ const request = async (url: string, options: RequestInit = {}) => {
   }
 }
 
-// 获取TOP10网络人气特色美食列表
-export const getTop10PopularFood = async (): Promise<FoodListResponse> => {
+// 获取Top10Food列表
+export const getTop10Food = async (): Promise<FoodListResponse> => {
   return request('/public/redpacket/top10Food/list')
 }
 
-// 获取"一镇一品"特色菜列表
-export const getTownSpecialtyFood = async (): Promise<FoodListResponse> => {
+// 获取SpecialityFood列表
+export const getSpecialityFood = async (): Promise<FoodListResponse> => {
   return request('/public/redpacket/townFood/list')
 }
