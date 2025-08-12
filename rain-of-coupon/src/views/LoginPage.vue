@@ -19,35 +19,19 @@
       <form @submit.prevent="handleLogin" class="login-form">
         <div class="form-group">
           <label for="username">用户名</label>
-          <input
-            id="username"
-            v-model="loginForm.username"
-            type="text"
-            placeholder="请输入用户名"
-            required
-            class="form-input"
-          />
+          <input id="username" v-model="loginForm.username" type="text" placeholder="请输入用户名" required
+            class="form-input" />
         </div>
-        
+
         <div class="form-group">
           <label for="password">密码</label>
-          <input
-            id="password"
-            v-model="loginForm.password"
-            type="password"
-            placeholder="请输入密码"
-            required
-            class="form-input"
-          />
+          <input id="password" v-model="loginForm.password" type="password" placeholder="请输入密码" required
+            class="form-input" />
         </div>
 
         <!-- 登录按钮 -->
         <div class="login-actions">
-          <button
-            type="submit"
-            :disabled="loading"
-            class="login-btn"
-          >
+          <button type="submit" :disabled="loading" class="login-btn">
             {{ loading ? '登录中...' : '登录' }}
           </button>
         </div>
@@ -55,11 +39,7 @@
 
       <!-- 其他操作 -->
       <div class="other-actions">
-        <button
-          type="button"
-          @click="showRegisterDialog = true"
-          class="register-btn"
-        >
+        <button type="button" @click="showRegisterDialog = true" class="register-btn">
           还没有账号？立即注册
         </button>
       </div>
@@ -72,55 +52,32 @@
           <h3>用户注册</h3>
           <button @click="closeRegisterDialog" class="close-btn">×</button>
         </div>
-        
+
         <form @submit.prevent="handleRegister" class="register-form">
           <div class="form-group">
             <label for="reg-username">用户名</label>
-            <input
-              id="reg-username"
-              v-model="registerForm.username"
-              type="text"
-              placeholder="请输入用户名"
-              required
-              class="form-input"
-            />
+            <input id="reg-username" v-model="registerForm.username" type="text" placeholder="请输入用户名" required
+              class="form-input" />
           </div>
-          
+
           <div class="form-group">
             <label for="reg-password">密码</label>
-            <input
-              id="reg-password"
-              v-model="registerForm.password"
-              type="password"
-              placeholder="请输入密码"
-              required
-              class="form-input"
-            />
+            <input id="reg-password" v-model="registerForm.password" type="password" placeholder="请输入密码" required
+              class="form-input" />
           </div>
-          
+
           <div class="form-group">
             <label for="reg-confirm">确认密码</label>
-            <input
-              id="reg-confirm"
-              v-model="registerForm.confirmPassword"
-              type="password"
-              placeholder="请再次输入密码"
-              required
-              class="form-input"
-            />
+            <input id="reg-confirm" v-model="registerForm.confirmPassword" type="password" placeholder="请再次输入密码"
+              required class="form-input" />
           </div>
-          
+
           <div class="form-group">
             <label for="reg-nickname">昵称</label>
-            <input
-              id="reg-nickname"
-              v-model="registerForm.nickname"
-              type="text"
-              placeholder="请输入昵称（可选）"
-              class="form-input"
-            />
+            <input id="reg-nickname" v-model="registerForm.nickname" type="text" placeholder="请输入昵称（可选）"
+              class="form-input" />
           </div>
-          
+
           <div class="dialog-actions">
             <button type="button" @click="closeRegisterDialog" class="cancel-btn">取消</button>
             <button type="submit" :disabled="loading" class="confirm-btn">
@@ -158,7 +115,7 @@ const showRegisterDialog = ref(false)
 const loading = ref(false)
 
 // 模拟用户数据存储
-const users = ref<Array<{username: string, password: string, nickname: string}>>([])
+const users = ref<Array<{ username: string, password: string, nickname: string }>>([])
 
 // 处理登录
 const handleLogin = async () => {
@@ -168,21 +125,21 @@ const handleLogin = async () => {
   }
 
   loading.value = true
-  
+
   try {
     // 模拟API调用
     await new Promise(resolve => setTimeout(resolve, 1000))
-    
+
     // 简单验证（实际项目中应该调用后端API）
     const user = users.value.find(u => u.username === loginForm.username && u.password === loginForm.password)
-    
+
     if (user) {
       // 存储登录状态
       localStorage.setItem('isLoggedIn', 'true')
       localStorage.setItem('currentUser', JSON.stringify(user))
-      
+
       alert('登录成功！')
-      
+
       // 登录成功后跳转
       const redirect = route.query.redirect as string
       if (redirect) {
@@ -193,7 +150,8 @@ const handleLogin = async () => {
     } else {
       alert('用户名或密码错误')
     }
-  } catch (error) {
+  } catch (error: unknown) {
+    console.error('登录错误:', error)
     alert('登录失败，请重试')
   } finally {
     loading.value = false
@@ -218,26 +176,26 @@ const handleRegister = async () => {
   }
 
   loading.value = true
-  
+
   try {
     // 模拟API调用
     await new Promise(resolve => setTimeout(resolve, 1000))
-    
+
     // 添加新用户
     users.value.push({
       username: registerForm.username,
       password: registerForm.password,
       nickname: registerForm.nickname || registerForm.username
     })
-    
+
     alert('注册成功！')
-    
+
     // 关闭注册对话框
     showRegisterDialog.value = false
-    
+
     // 自动填入登录表单
     loginForm.username = registerForm.username
-    
+
     // 清空注册表单
     Object.assign(registerForm, {
       username: '',
@@ -245,8 +203,9 @@ const handleRegister = async () => {
       confirmPassword: '',
       nickname: ''
     })
-    
-  } catch (error) {
+
+  } catch (error: unknown) {
+    console.error('注册错误:', error)
     alert('注册失败，请重试')
   } finally {
     loading.value = false
@@ -275,7 +234,7 @@ onMounted(() => {
     const redirect = route.query.redirect as string
     router.push(redirect || '/')
   }
-  
+
   // 初始化一些测试用户
   users.value = [
     { username: 'admin', password: '123456', nickname: '管理员' },
@@ -530,7 +489,8 @@ onMounted(() => {
   margin-top: 30px;
 }
 
-.cancel-btn, .confirm-btn {
+.cancel-btn,
+.confirm-btn {
   flex: 1;
   padding: 12px;
   border: none;
@@ -568,15 +528,15 @@ onMounted(() => {
   .login-container {
     padding: 16px;
   }
-  
+
   .logo {
     font-size: 50px;
   }
-  
+
   .app-title {
     font-size: 20px;
   }
-  
+
   .dialog-content {
     width: 95%;
   }
