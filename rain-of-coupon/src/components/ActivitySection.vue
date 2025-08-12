@@ -87,8 +87,8 @@ const getImageUrl = (filename: string) => {
 }
 
 .challenge-btn {
-  width: 300px;
-  height: 120px;
+  width: 375px; /* 300px * 1.25 */
+  height: 125px; /* 100px * 1.25 */
   cursor: pointer;
   display: block;
   animation: breathe 2s ease-in-out infinite;
@@ -116,8 +116,8 @@ const getImageUrl = (filename: string) => {
 /* 响应式设计 */
 @media (max-width: 1199px) and (min-width: 992px) {
   .challenge-btn {
-    width: 270px;
-    height: 108px;
+    width: 337.5px; /* 270px * 1.25 */
+    height: 112.5px; /* 90px * 1.25 */
   }
 }
 
@@ -141,8 +141,8 @@ const getImageUrl = (filename: string) => {
   }
 
   .challenge-btn {
-    width: 270px;
-    height: 108px;
+    width: 337.5px; /* 270px * 1.25 */
+    height: 112.5px; /* 90px * 1.25 */
   }
 }
 
@@ -166,8 +166,8 @@ const getImageUrl = (filename: string) => {
   }
 
   .challenge-btn {
-    width: 240px;
-    height: 96px;
+    width: 300px; /* 240px * 1.25 */
+    height: 100px; /* 80px * 1.25 */
   }
 }
 
@@ -195,8 +195,8 @@ const getImageUrl = (filename: string) => {
   }
 
   .challenge-btn {
-    width: 210px;
-    height: 84px;
+    width: 262.5px; /* 210px * 1.25 */
+    height: 87.5px; /* 70px * 1.25 */
   }
 
   .center-button {
@@ -215,7 +215,7 @@ const getImageUrl = (filename: string) => {
 
   .challenge-btn {
     width: 180px;
-    height: 72px;
+    height: 60px; /* 从72px减小到60px */
   }
 }
 </style>

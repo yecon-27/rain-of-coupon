@@ -28,50 +28,67 @@ defineProps<Props>()
 <style scoped>
 .speciality-food-section {
   width: 100%;
-  padding: 20px;
+  padding: 60px 0 0 0;
   margin: 0;
-  background: #DC143C;
+  background: rgb(205 51 51);
   /* 红色背景 */
 }
 
 .food-list-container {
   max-width: 800px;
-  margin: 0 auto;
+  margin: 35px auto 0 auto;
   background: oldlace;
   /* 浅黄色内部背景 */
   border-radius: 15px;
-  padding: 20px;
+  /* 从0改为15px，与第三部分保持一致 */
+  padding: 45px 20px 20px 20px;
+  position: relative;
 }
 
 .food-list-header {
   text-align: center;
   margin-bottom: 20px;
+  width: 100vw;
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
 }
 
 .food-list-header h2 {
-  color: #8B0000;
+  color: white;
   font-size: 24px;
   font-weight: bold;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
-  margin: 0;
+  margin: 0 auto;
+  background: linear-gradient(135deg, #FF6B35, #FF8E53, #FFB366);
+  padding: 8px 30px;
+  border-radius: 50px;
+  white-space: nowrap;
+  display: inline-block;
+  text-align: center;
 }
 
 /* 两列网格布局 */
 .food-list-content {
   display: grid !important;
   grid-template-columns: 1fr 1fr !important;
-  gap: 15px;
-  align-items: start;
+  gap: 6px;
+  align-items: stretch;
+  grid-auto-rows: 55px;
+  margin-top: 15px;
 }
 
 .food-item {
   display: flex;
   align-items: center;
   background: transparent;
-  padding: 12px;
+  padding: 8px;
   transition: all 0.3s ease;
   width: 100%;
   box-sizing: border-box;
+  height: 55px;
+  min-height: 55px;
 }
 
 .food-item:hover {
@@ -80,34 +97,40 @@ defineProps<Props>()
 }
 
 .ranking-badge {
-  width: 40px;
-  height: 40px;
-  background: linear-gradient(45deg, #FFD700, #FFA500);
+  width: 35px;
+  height: 35px;
+  background: linear-gradient(45deg, Tomato, OrangeRed);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: bold;
-  color: #8B0000;
-  margin-right: 15px;
-
+  color: oldLace;
+  /* 从#8B0000改为#FFD700，与背景渐变色一致 */
+  font-size: 20px;
+  /* 增加字体大小，原来默认大小约13px */
+  margin-right: 12px;
+  margin-top: 2px;
   flex-shrink: 0;
 }
 
 .food-name {
-  color: #8B0000;
-  font-size: 16px;
+  color: rgb(178, 34, 34);
+  font-size: 18px;
+  /* 从20px减小到18px */
   font-weight: 500;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
   flex: 1;
+  line-height: 1.3;
+  /* 从1.4减小到1.3 */
+  padding-top: 2px;
+  /* 从4px减小到2px */
 }
 
 /* SpecialityFood特殊布局：第一个菜品独占一行，其余两列布局 */
 .speciality-food-section .food-item:first-child {
   grid-column: 1 / -1 !important;
-  /* 第一个菜品跨越所有列 */
-  margin-bottom: 3px;
-  /* 缩小与下面项目的间距 */
+  margin-bottom: 0px;
+  /* 使用网格固定间距 */
 }
 
 /* 响应式设计 */
@@ -177,10 +200,8 @@ defineProps<Props>()
     width: 35px;
     height: 35px;
     margin-right: 12px;
-  }
-
-  .food-name {
-    font-size: 14px;
+    font-size: 13px;
+    /* 移动端也相应增大 */
   }
 }
 
@@ -202,10 +223,11 @@ defineProps<Props>()
     height: 30px;
     margin-right: 10px;
     font-size: 12px;
+    /* 小屏幕也相应增大 */
   }
 
   .food-name {
-    font-size: 13px;
+    font-size: 16.25px;
   }
 }
 </style>
