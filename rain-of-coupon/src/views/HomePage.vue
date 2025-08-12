@@ -19,11 +19,15 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { getTop10Food, getSpecialityFood, type FoodItem } from '@/api/food'
 import ActivitySection from '@/components/ActivitySection.vue'
 import FoodDisplaySection from '@/components/FoodDisplaySection.vue'
 import Top10FoodSection from '@/components/Top10FoodSection.vue'
 import SpecialityFoodSection from '@/components/SpecialityFoodSection.vue'
+
+// 路由
+const router = useRouter()
 
 // 响应式数据
 const showOverlay = ref(false)
@@ -57,8 +61,16 @@ const fetchFoodData = async () => {
 
 // 按钮点击事件
 const joinActivity = () => {
-  // 跳转到倒计时页面或直接显示倒计时overlay
-  console.log('加入活动')
+  // 检查是否已登录
+  const isLoggedIn = localStorage.getItem('isLoggedIn')
+  if (isLoggedIn === 'true') {
+    // 已登录，跳转到活动页面或显示倒计时
+    console.log('用户已登录，开始活动')
+    // 这里可以跳转到活动页面或显示倒计时overlay
+  } else {
+    // 未登录，跳转到登录页面
+    router.push('/login?redirect=/')
+  }
 }
 
 const showRules = () => {
