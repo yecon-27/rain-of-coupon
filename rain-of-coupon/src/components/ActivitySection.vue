@@ -214,8 +214,8 @@ const getImageUrl = (filename: string) => {
   }
 
   .challenge-btn {
-    width: 180px;
-    height: 60px; /* 从72px减小到60px */
+    width: 225px; /* 180px * 1.25 */
+    height: 75px; /* 60px * 1.25 */
   }
 }
 </style>
