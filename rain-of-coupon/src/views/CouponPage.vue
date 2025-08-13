@@ -141,13 +141,13 @@ const checkUserStatus = async () => {
     hasWon.value = mockWinStatus
     
     if (hasWon.value) {
-      // 模拟数据库返回的优惠券数据（包含完整路径）
-      userCoupons.value = [
+      // 模拟用户中奖的单张优惠券（随机选择一种）
+      const couponTypes = [
         {
           id: 1,
           name: '满500元优惠券',
           description: '满500元且消费一道特色菜可使用',
-          image: '/image/coupon/满500元且消费一道特色菜可使用.png', // 数据库存储的路径
+          image: '/image/coupon/满500元且消费一道特色菜可使用.png',
           expireDate: '2024-12-31',
           isUsed: false,
           isExpired: false
@@ -156,7 +156,7 @@ const checkUserStatus = async () => {
           id: 2,
           name: '满1500元优惠券',
           description: '满1500元且消费一道特色菜可使用',
-          image: '/image/coupon/满1500元且消费一道特色菜可使用.png', // 数据库存储的路径
+          image: '/image/coupon/满1500元且消费一道特色菜可使用.png',
           expireDate: '2024-12-31',
           isUsed: false,
           isExpired: false
@@ -165,12 +165,16 @@ const checkUserStatus = async () => {
           id: 3,
           name: '满2500元优惠券',
           description: '满2500元且消费一道特色菜可使用',
-          image: '/image/coupon/满2500元且消费一道特色菜可使用.png', // 数据库存储的路径
+          image: '/image/coupon/满2500元且消费一道特色菜可使用.png',
           expireDate: '2024-12-31',
-          isUsed: true,
+          isUsed: false,
           isExpired: false
         }
       ]
+      
+      // 随机选择一张优惠券
+      const randomIndex = Math.floor(Math.random() * couponTypes.length)
+      userCoupons.value = [couponTypes[randomIndex]]
     }
     
   } catch (error: unknown) {
@@ -342,17 +346,22 @@ onMounted(() => {
 }
 
 .coupon-grid {
-  display: grid;
-  gap: 15px;
+  display: flex;
+  justify-content: center;
+  padding: 20px 0;
 }
 
 .coupon-item {
   background: rgba(255, 255, 255, 0.95);
   border-radius: 15px;
-  padding: 15px;
+  padding: 20px;
   display: flex;
+  flex-direction: column;
   align-items: center;
+  text-align: center;
   transition: all 0.3s ease;
+  max-width: 300px;
+  width: 100%;
 }
 
 .coupon-item:hover {
