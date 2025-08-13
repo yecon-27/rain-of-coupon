@@ -2,6 +2,7 @@ import { ref } from 'vue'
 import { defineStore } from 'pinia'
 
 export interface User {
+  id: string
   username: string
   nickname: string
   // 不存储密码！
@@ -25,6 +26,7 @@ export const useAuthStore = defineStore('auth', () => {
         // 只存储安全信息
         isLoggedIn.value = true
         currentUser.value = {
+          id: response.user.id,
           username: response.user.username,
           nickname: response.user.nickname
         }
@@ -116,6 +118,7 @@ export const useAuthStore = defineStore('auth', () => {
 interface LoginResponse {
   success: boolean
   user?: {
+    id: string
     username: string
     nickname: string
   }
@@ -134,8 +137,8 @@ async function mockLoginAPI(username: string, password: string): Promise<LoginRe
   
   // 模拟用户数据库
   const users = [
-    { username: 'admin', password: 'Admin@2024', nickname: '管理员' },
-    { username: 'test', password: 'Test@2024', nickname: '测试用户' }
+    { id: 'user_001', username: 'admin', password: 'Admin@2024', nickname: '管理员' },
+    { id: 'user_002', username: 'test', password: 'Test@2024', nickname: '测试用户' }
   ]
   
   const user = users.find(u => u.username === username && u.password === password)
@@ -144,6 +147,7 @@ async function mockLoginAPI(username: string, password: string): Promise<LoginRe
     return {
       success: true,
       user: {
+        id: user.id,
         username: user.username,
         nickname: user.nickname
         // 不返回密码！
