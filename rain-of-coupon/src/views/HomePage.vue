@@ -79,8 +79,17 @@ const showRules = () => {
 }
 
 const myCoupons = () => {
-  // 跳转到我的优惠券
-  console.log('我的优惠券')
+  // 检查是否已登录
+  const isLoggedIn = localStorage.getItem('isLoggedIn')
+  if (isLoggedIn === 'true') {
+    // 已登录，跳转到券包页面
+    console.log('用户已登录，跳转到券包页面')
+    router.push('/coupon')
+  } else {
+    // 未登录，跳转到登录页面，登录成功后回到券包页面
+    console.log('用户未登录，跳转到登录页面')
+    router.push('/login?redirect=/coupon')
+  }
 }
 
 // 组件挂载时获取数据
