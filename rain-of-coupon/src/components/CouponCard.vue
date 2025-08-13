@@ -2,26 +2,16 @@
   <div class="coupon-card">
     <!-- 未中奖状态 - 只显示图片 -->
     <div v-if="!hasRewards" class="no-coupon">
-      <img 
-        :src="getCouponImageUrl('cytzhq.png')" 
-        alt="参与挑战获取" 
-        class="coupon-image" 
-        @error="handleImageError" 
-        @load="handleImageLoad" 
-      />
+      <img :src="getCouponImageUrl('cytzhq.png')" alt="参与挑战获取" class="coupon-image" @error="handleImageError"
+        @load="handleImageLoad" />
     </div>
 
     <!-- 中奖状态 - 显示获得的优惠券 -->
     <div v-else class="coupon-display">
       <div v-for="reward in rewards" :key="reward.id" class="coupon-item">
         <div class="coupon-content">
-          <img 
-            :src="getCouponImageUrl(reward.image)" 
-            :alt="reward.name" 
-            class="coupon-image" 
-            @error="handleImageError" 
-            @load="handleImageLoad" 
-          />
+          <img :src="getCouponImageUrl(reward.image)" :alt="reward.name" class="coupon-image" @error="handleImageError"
+            @load="handleImageLoad" />
           <div class="coupon-expiry">
             使用期限：{{ formatExpireDate(reward.expireDate) }}前
           </div>
@@ -85,7 +75,7 @@ const handleImageLoad = (event: Event) => {
 // 格式化有效期日期
 const formatExpireDate = (dateString?: string) => {
   if (!dateString) return '永久有效'
-  
+
   try {
     const date = new Date(dateString)
     return date.toLocaleDateString('zh-CN', {
@@ -118,7 +108,7 @@ const formatExpireDate = (dateString?: string) => {
 }
 
 .no-coupon .coupon-image {
-  width: 50vw;
+  width: calc(100vw - 40px);
   max-height: 80vh;
   height: auto;
   object-fit: contain;
@@ -196,22 +186,22 @@ const formatExpireDate = (dateString?: string) => {
 /* 响应式设计 */
 @media (max-width: 768px) {
   .no-coupon .coupon-image {
-    width: 50vw;
+    width: calc(100vw - 30px);
     max-height: 75vh;
   }
-  
+
   .coupon-item .coupon-image {
     width: 100%;
     max-height: 55vh;
   }
-  
+
   .coupon-expiry {
     font-size: 13px;
     bottom: 30%;
     padding: 3px 6px;
     white-space: nowrap;
   }
-  
+
   .coupon-status-btn {
     font-size: 12px;
     bottom: 8%;

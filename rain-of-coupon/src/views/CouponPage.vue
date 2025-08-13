@@ -88,13 +88,9 @@ const checkUserStatus = async () => {
   }
 }
 
-// 返回上一页
+// 返回主页
 const goBack = () => {
-  if (window.history.length > 1) {
-    router.go(-1)
-  } else {
-    router.push('/')
-  }
+  router.push('/')
 }
 
 // 页面初始化
