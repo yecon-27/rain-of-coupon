@@ -19,27 +19,43 @@
       <form @submit.prevent="handleLogin" class="login-form">
         <div class="form-group">
           <label for="username">用户名</label>
-          <input id="username" v-model="loginForm.username" type="text" placeholder="请输入用户名" required
-            class="form-input" />
+          <input
+            id="username"
+            v-model="loginForm.username"
+            type="text"
+            placeholder="请输入用户名"
+            required
+            class="form-input"
+          />
         </div>
-
+        
         <div class="form-group">
           <label for="password">密码</label>
-          <input id="password" v-model="loginForm.password" type="password" placeholder="请输入密码" required
-            class="form-input" />
+          <input
+            id="password"
+            v-model="loginForm.password"
+            type="password"
+            placeholder="请输入密码"
+            required
+            class="form-input"
+          />
         </div>
 
         <!-- 登录按钮 -->
         <div class="login-actions">
-          <button type="submit" :disabled="loading" class="login-btn">
-            {{ loading ? '登录中...' : '登录' }}
+          <button type="submit" :disabled="authStore.loading" class="login-btn">
+            {{ authStore.loading ? '登录中...' : '登录' }}
           </button>
         </div>
       </form>
 
       <!-- 其他操作 -->
       <div class="other-actions">
-        <button type="button" @click="showRegisterDialog = true" class="register-btn">
+        <button
+          type="button"
+          @click="showRegisterDialog = true"
+          class="register-btn"
+        >
           还没有账号？立即注册
         </button>
       </div>
@@ -52,36 +68,59 @@
           <h3>用户注册</h3>
           <button @click="closeRegisterDialog" class="close-btn">×</button>
         </div>
-
+        
         <form @submit.prevent="handleRegister" class="register-form">
           <div class="form-group">
             <label for="reg-username">用户名</label>
-            <input id="reg-username" v-model="registerForm.username" type="text" placeholder="请输入用户名" required
-              class="form-input" />
+            <input
+              id="reg-username"
+              v-model="registerForm.username"
+              type="text"
+              placeholder="请输入用户名"
+              required
+              class="form-input"
+            />
           </div>
-
+          
           <div class="form-group">
             <label for="reg-password">密码</label>
-            <input id="reg-password" v-model="registerForm.password" type="password" placeholder="请输入密码" required
-              class="form-input" />
+            <input
+              id="reg-password"
+              v-model="registerForm.password"
+              type="password"
+              placeholder="请输入密码"
+              required
+              class="form-input"
+            />
           </div>
-
+          
           <div class="form-group">
             <label for="reg-confirm">确认密码</label>
-            <input id="reg-confirm" v-model="registerForm.confirmPassword" type="password" placeholder="请再次输入密码"
-              required class="form-input" />
+            <input
+              id="reg-confirm"
+              v-model="registerForm.confirmPassword"
+              type="password"
+              placeholder="请再次输入密码"
+              required
+              class="form-input"
+            />
           </div>
-
+          
           <div class="form-group">
             <label for="reg-nickname">昵称</label>
-            <input id="reg-nickname" v-model="registerForm.nickname" type="text" placeholder="请输入昵称（可选）"
-              class="form-input" />
+            <input
+              id="reg-nickname"
+              v-model="registerForm.nickname"
+              type="text"
+              placeholder="请输入昵称（可选）"
+              class="form-input"
+            />
           </div>
-
+          
           <div class="dialog-actions">
             <button type="button" @click="closeRegisterDialog" class="cancel-btn">取消</button>
-            <button type="submit" :disabled="loading" class="confirm-btn">
-              {{ loading ? '注册中...' : '注册' }}
+            <button type="submit" :disabled="authStore.loading" class="confirm-btn">
+              {{ authStore.loading ? '注册中...' : '注册' }}
             </button>
           </div>
         </form>
@@ -93,9 +132,11 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
 const route = useRoute()
+const authStore = useAuthStore()
 
 // 表单数据
 const loginForm = reactive({
@@ -112,10 +153,6 @@ const registerForm = reactive({
 
 // 状态
 const showRegisterDialog = ref(false)
-const loading = ref(false)
-
-// 模拟用户数据存储
-const users = ref<Array<{ username: string, password: string, nickname: string }>>([])
 
 // 处理登录
 const handleLogin = async () => {
@@ -124,37 +161,21 @@ const handleLogin = async () => {
     return
   }
 
-  loading.value = true
-
   try {
-    // 模拟API调用
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    await authStore.login(loginForm.username, loginForm.password)
+    
+    alert('登录成功！')
 
-    // 简单验证（实际项目中应该调用后端API）
-    const user = users.value.find(u => u.username === loginForm.username && u.password === loginForm.password)
-
-    if (user) {
-      // 存储登录状态
-      localStorage.setItem('isLoggedIn', 'true')
-      localStorage.setItem('currentUser', JSON.stringify(user))
-
-      alert('登录成功！')
-
-      // 登录成功后跳转
-      const redirect = route.query.redirect as string
-      if (redirect) {
-        router.push(redirect)
-      } else {
-        router.push('/')
-      }
+    // 登录成功后跳转
+    const redirect = route.query.redirect as string
+    if (redirect) {
+      router.push(redirect)
     } else {
-      alert('用户名或密码错误')
+      router.push('/')
     }
   } catch (error: unknown) {
-    console.error('登录错误:', error)
-    alert('登录失败，请重试')
-  } finally {
-    loading.value = false
+    const errorMessage = error instanceof Error ? error.message : '登录失败'
+    alert(errorMessage)
   }
 }
 
@@ -170,32 +191,21 @@ const handleRegister = async () => {
     return
   }
 
-  if (users.value.find(u => u.username === registerForm.username)) {
-    alert('用户名已存在')
-    return
-  }
-
-  loading.value = true
-
   try {
-    // 模拟API调用
-    await new Promise(resolve => setTimeout(resolve, 1000))
-
-    // 添加新用户
-    users.value.push({
+    await authStore.register({
       username: registerForm.username,
       password: registerForm.password,
       nickname: registerForm.nickname || registerForm.username
     })
-
+    
     alert('注册成功！')
-
+    
     // 关闭注册对话框
     showRegisterDialog.value = false
-
+    
     // 自动填入登录表单
     loginForm.username = registerForm.username
-
+    
     // 清空注册表单
     Object.assign(registerForm, {
       username: '',
@@ -203,12 +213,10 @@ const handleRegister = async () => {
       confirmPassword: '',
       nickname: ''
     })
-
+    
   } catch (error: unknown) {
-    console.error('注册错误:', error)
-    alert('注册失败，请重试')
-  } finally {
-    loading.value = false
+    const errorMessage = error instanceof Error ? error.message : '注册失败'
+    alert(errorMessage)
   }
 }
 
@@ -228,18 +236,13 @@ const goBack = () => {
 
 // 页面初始化
 onMounted(() => {
-  // 如果已经登录，直接跳转
-  const isLoggedIn = localStorage.getItem('isLoggedIn')
-  if (isLoggedIn === 'true') {
+  // 检查是否已经登录
+  authStore.checkAuthStatus()
+  
+  if (authStore.isLoggedIn) {
     const redirect = route.query.redirect as string
     router.push(redirect || '/')
   }
-
-  // 初始化一些测试用户
-  users.value = [
-    { username: 'admin', password: '123456', nickname: '管理员' },
-    { username: 'test', password: '123456', nickname: '测试用户' }
-  ]
 })
 </script>
 
@@ -489,8 +492,7 @@ onMounted(() => {
   margin-top: 30px;
 }
 
-.cancel-btn,
-.confirm-btn {
+.cancel-btn, .confirm-btn {
   flex: 1;
   padding: 12px;
   border: none;
@@ -528,15 +530,15 @@ onMounted(() => {
   .login-container {
     padding: 16px;
   }
-
+  
   .logo {
     font-size: 50px;
   }
-
+  
   .app-title {
     font-size: 20px;
   }
-
+  
   .dialog-content {
     width: 95%;
   }

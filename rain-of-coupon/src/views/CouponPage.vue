@@ -16,7 +16,7 @@
     <div v-else class="coupon-container">
       <!-- 用户信息 -->
       <div class="user-info">
-        <h3>{{ currentUser?.nickname || '用户' }}，欢迎查看您的券包！</h3>
+        <h3>{{ authStore.currentUser?.nickname || '用户' }}，欢迎查看您的券包！</h3>
       </div>
 
       <!-- 优惠券列表 -->
@@ -80,13 +80,14 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 import { API_CONFIG } from '@/config/api'
 
 const router = useRouter()
+const authStore = useAuthStore()
 
 // 状态管理
 const loading = ref(true)
-const currentUser = ref<{username: string, nickname: string} | null>(null)
 const hasWon = ref(false)
 const userCoupons = ref<Array<{
   id: number
@@ -127,16 +128,9 @@ const formatDate = (dateString: string) => {
 const checkUserStatus = async () => {
   try {
     // 检查登录状态
-    const isLoggedIn = localStorage.getItem('isLoggedIn')
-    if (isLoggedIn !== 'true') {
+    if (!authStore.isLoggedIn) {
       router.push('/login?redirect=/coupon')
       return
-    }
-
-    // 获取当前用户信息
-    const userStr = localStorage.getItem('currentUser')
-    if (userStr) {
-      currentUser.value = JSON.parse(userStr)
     }
 
     // 模拟API调用检查中奖状态

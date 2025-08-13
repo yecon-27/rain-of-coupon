@@ -2,6 +2,12 @@
   <div class="activity-section">
     <img :src="getImageUrl('home.png')" alt="首页背景" class="activity-bg" />
 
+    <!-- 登录状态显示 -->
+    <div v-if="authStore.isLoggedIn" class="login-status">
+      <span class="user-info">{{ authStore.currentUser?.nickname || '用户' }}</span>
+      <button @click="authStore.logout" class="logout-btn">登出</button>
+    </div>
+
     <!-- 右侧按钮组 -->
     <img :src="getImageUrl('gz.png')" alt="规则" class="rule-btn" @click="$emit('showRules')" />
     <img :src="getImageUrl('qb.png')" alt="券包" class="coupon-btn" @click="$emit('myCoupons')" />
@@ -14,6 +20,8 @@
 </template>
 
 <script setup lang="ts">
+import { onMounted } from 'vue'
+import { useAuthStore } from '@/stores/auth'
 import { API_CONFIG } from '@/config/api'
 
 // 定义事件
@@ -23,10 +31,18 @@ defineEmits<{
   joinActivity: []
 }>()
 
+// 认证store
+const authStore = useAuthStore()
+
 // 获取图片URL
 const getImageUrl = (filename: string) => {
   return `${API_CONFIG.imageURL}${filename}`
 }
+
+// 组件挂载时检查登录状态
+onMounted(() => {
+  authStore.checkAuthStatus()
+})
 </script>
 
 <style scoped>
@@ -37,6 +53,42 @@ const getImageUrl = (filename: string) => {
   overflow: hidden;
   margin: 0;
   padding: 0;
+}
+
+.login-status {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 8px 15px;
+  border-radius: 20px;
+  z-index: 1001;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.user-info {
+  color: #333;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.logout-btn {
+  background: #DC143C;
+  color: white;
+  border: none;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.logout-btn:hover {
+  background: #B91C3C;
+  transform: translateY(-1px);
 }
 
 .activity-bg {
@@ -87,8 +139,10 @@ const getImageUrl = (filename: string) => {
 }
 
 .challenge-btn {
-  width: 375px; /* 300px * 1.25 */
-  height: 125px; /* 100px * 1.25 */
+  width: 375px;
+  /* 300px * 1.25 */
+  height: 125px;
+  /* 100px * 1.25 */
   cursor: pointer;
   display: block;
   animation: breathe 2s ease-in-out infinite;
@@ -116,8 +170,10 @@ const getImageUrl = (filename: string) => {
 /* 响应式设计 */
 @media (max-width: 1199px) and (min-width: 992px) {
   .challenge-btn {
-    width: 337.5px; /* 270px * 1.25 */
-    height: 112.5px; /* 90px * 1.25 */
+    width: 337.5px;
+    /* 270px * 1.25 */
+    height: 112.5px;
+    /* 90px * 1.25 */
   }
 }
 
@@ -141,8 +197,10 @@ const getImageUrl = (filename: string) => {
   }
 
   .challenge-btn {
-    width: 337.5px; /* 270px * 1.25 */
-    height: 112.5px; /* 90px * 1.25 */
+    width: 337.5px;
+    /* 270px * 1.25 */
+    height: 112.5px;
+    /* 90px * 1.25 */
   }
 }
 
@@ -166,8 +224,10 @@ const getImageUrl = (filename: string) => {
   }
 
   .challenge-btn {
-    width: 300px; /* 240px * 1.25 */
-    height: 100px; /* 80px * 1.25 */
+    width: 300px;
+    /* 240px * 1.25 */
+    height: 100px;
+    /* 80px * 1.25 */
   }
 }
 
@@ -195,8 +255,10 @@ const getImageUrl = (filename: string) => {
   }
 
   .challenge-btn {
-    width: 262.5px; /* 210px * 1.25 */
-    height: 87.5px; /* 70px * 1.25 */
+    width: 262.5px;
+    /* 210px * 1.25 */
+    height: 87.5px;
+    /* 70px * 1.25 */
   }
 
   .center-button {
@@ -214,8 +276,10 @@ const getImageUrl = (filename: string) => {
   }
 
   .challenge-btn {
-    width: 225px; /* 180px * 1.25 */
-    height: 75px; /* 60px * 1.25 */
+    width: 225px;
+    /* 180px * 1.25 */
+    height: 75px;
+    /* 60px * 1.25 */
   }
 }
 </style>

@@ -20,14 +20,16 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 import { getTop10Food, getSpecialityFood, type FoodItem } from '@/api/food'
 import ActivitySection from '@/components/ActivitySection.vue'
 import FoodDisplaySection from '@/components/FoodDisplaySection.vue'
 import Top10FoodSection from '@/components/Top10FoodSection.vue'
 import SpecialityFoodSection from '@/components/SpecialityFoodSection.vue'
 
-// 路由
+// 路由和认证
 const router = useRouter()
+const authStore = useAuthStore()
 
 // 响应式数据
 const showOverlay = ref(false)
@@ -62,8 +64,7 @@ const fetchFoodData = async () => {
 // 按钮点击事件
 const joinActivity = () => {
   // 检查是否已登录
-  const isLoggedIn = localStorage.getItem('isLoggedIn')
-  if (isLoggedIn === 'true') {
+  if (authStore.isLoggedIn) {
     // 已登录，跳转到加载页面
     console.log('用户已登录，跳转到加载页面')
     router.push('/loading')
@@ -78,10 +79,18 @@ const showRules = () => {
   console.log('显示规则')
 }
 
+// 登出功能
+const logout = () => {
+  localStorage.removeItem('isLoggedIn')
+  localStorage.removeItem('currentUser')
+  console.log('用户已登出')
+  // 可以选择刷新页面或显示提示
+  window.location.reload()
+}
+
 const myCoupons = () => {
   // 检查是否已登录
-  const isLoggedIn = localStorage.getItem('isLoggedIn')
-  if (isLoggedIn === 'true') {
+  if (authStore.isLoggedIn) {
     // 已登录，跳转到券包页面
     console.log('用户已登录，跳转到券包页面')
     router.push('/coupon')
@@ -94,6 +103,8 @@ const myCoupons = () => {
 
 // 组件挂载时获取数据
 onMounted(() => {
+  // 检查认证状态
+  authStore.checkAuthStatus()
   fetchFoodData()
 })
 </script>
