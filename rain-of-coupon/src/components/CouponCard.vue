@@ -14,13 +14,21 @@
     <!-- 中奖状态 - 显示获得的优惠券 -->
     <div v-else class="coupon-display">
       <div v-for="reward in rewards" :key="reward.id" class="coupon-item">
-        <img 
-          :src="getCouponImageUrl(reward.image)" 
-          :alt="reward.name" 
-          class="coupon-image" 
-          @error="handleImageError" 
-          @load="handleImageLoad" 
-        />
+        <div class="coupon-content">
+          <img 
+            :src="getCouponImageUrl(reward.image)" 
+            :alt="reward.name" 
+            class="coupon-image" 
+            @error="handleImageError" 
+            @load="handleImageLoad" 
+          />
+          <div class="coupon-expiry">
+            使用期限：{{ formatExpireDate(reward.expireDate) }}前
+          </div>
+          <div class="coupon-status-btn" :class="{ 'used': reward.isUsed }">
+            {{ reward.isUsed ? '已使用' : '未使用' }}
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -73,28 +81,44 @@ const handleImageLoad = (event: Event) => {
   const img = event.target as HTMLImageElement
   console.log('图片加载成功:', img.src)
 }
+
+// 格式化有效期日期
+const formatExpireDate = (dateString?: string) => {
+  if (!dateString) return '永久有效'
+  
+  try {
+    const date = new Date(dateString)
+    return date.toLocaleDateString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    })
+  } catch (error) {
+    console.error('日期格式化失败:', error)
+    return dateString
+  }
+}
 </script>
 
 <style scoped>
 .coupon-card {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   width: 100%;
-  height: 100%;
+  min-height: 100%;
 }
 
 /* 未中奖状态 - 只显示图片，无padding */
 .no-coupon {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   width: 100%;
-  height: 100%;
 }
 
 .no-coupon .coupon-image {
-  max-width: 90vw;
+  width: 50vw;
   max-height: 80vh;
   height: auto;
   object-fit: contain;
@@ -103,33 +127,95 @@ const handleImageLoad = (event: Event) => {
 /* 中奖状态 - 显示优惠券，无padding */
 .coupon-display {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: flex-start;
+  justify-content: flex-start;
   flex-wrap: wrap;
-  gap: 20px;
   width: 100%;
-  height: 100%;
+  gap: 0;
 }
 
 .coupon-item {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
+  width: 50%;
+  box-sizing: border-box;
+}
+
+.coupon-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  position: relative;
 }
 
 .coupon-item .coupon-image {
-  max-width: 90vw;
-  max-height: 80vh;
+  width: 100%;
+  max-height: 60vh;
   height: auto;
   object-fit: contain;
 }
 
+.coupon-expiry {
+  position: absolute;
+  bottom: 30%;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgb(178, 34, 34);
+  font-size: 20px;
+  font-weight: 500;
+  text-align: center;
+  white-space: nowrap;
+  border-radius: 4px;
+}
+
+.coupon-status-btn {
+  position: absolute;
+  bottom: 8%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
+  padding: 6px 16px;
+  border-radius: 20px;
+  background: #4CAF50;
+  color: white;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  cursor: default;
+  user-select: none;
+}
+
+.coupon-status-btn.used {
+  background: #2196F3;
+  color: white;
+}
+
 /* 响应式设计 */
 @media (max-width: 768px) {
-  .no-coupon .coupon-image,
-  .coupon-item .coupon-image {
-    max-width: 95vw;
+  .no-coupon .coupon-image {
+    width: 50vw;
     max-height: 75vh;
+  }
+  
+  .coupon-item .coupon-image {
+    width: 100%;
+    max-height: 55vh;
+  }
+  
+  .coupon-expiry {
+    font-size: 13px;
+    bottom: 30%;
+    padding: 3px 6px;
+    white-space: nowrap;
+  }
+  
+  .coupon-status-btn {
+    font-size: 12px;
+    bottom: 8%;
+    padding: 4px 12px;
   }
 }
 </style>

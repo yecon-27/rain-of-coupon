@@ -54,6 +54,33 @@ const checkUserStatus = async () => {
     const userId = authStore.currentUser?.id || ''
     await gameStore.getUserRewards(userId)
 
+    // 临时mock中奖数据用于测试视图 - 已注释
+    // const mockRewards = [
+    //   {
+    //     id: 'mock_coupon_001',
+    //     type: 'coupon' as const,
+    //     name: '满500元优惠券',
+    //     description: '满500元且消费一道特色菜可使用',
+    //     image: '/image/coupon/满500元且消费一道特色菜可使用.png',
+    //     value: 500,
+    //     expireDate: '2024-12-31',
+    //     isUsed: false
+    //   },
+    //   {
+    //     id: 'mock_coupon_002',
+    //     type: 'coupon' as const,
+    //     name: '满1500元优惠券',
+    //     description: '满1500元且消费一道特色菜可使用',
+    //     image: '/image/coupon/满1500元且消费一道特色菜可使用.png',
+    //     value: 1500,
+    //     expireDate: '2024-11-30',
+    //     isUsed: true
+    //   }
+    // ]
+
+    // 添加mock数据到gameStore - 已注释
+    // gameStore.userRewards.push(...mockRewards)
+
   } catch (error: unknown) {
     console.error('获取用户奖励失败:', error)
   } finally {
