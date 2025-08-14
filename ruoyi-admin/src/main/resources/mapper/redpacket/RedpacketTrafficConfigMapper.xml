@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.redpacket.mapper.RedpacketTrafficConfigMapper">
+    
+    <resultMap type="RedpacketTrafficConfig" id="RedpacketTrafficConfigResult">
+        <result property="id"    column="id"    />
+        <result property="configKey"    column="config_key"    />
+        <result property="configValue"    column="config_value"    />
+        <result property="description"    column="description"    />
+        <result property="isActive"    column="is_active"    />
+        <result property="createdAt"    column="created_at"    />
+        <result property="updatedAt"    column="updated_at"    />
+    </resultMap>
+
+    <sql id="selectRedpacketTrafficConfigVo">
+        select id, config_key, config_value, description, is_active, created_at, updated_at from redpacket_traffic_config
+    </sql>
+
+    <select id="selectRedpacketTrafficConfigList" parameterType="RedpacketTrafficConfig" resultMap="RedpacketTrafficConfigResult">
+        <include refid="selectRedpacketTrafficConfigVo"/>
+        <where>  
+            <if test="configKey != null  and configKey != ''"> and config_key like concat('%', #{configKey}, '%')</if>
+            <if test="description != null  and description != ''"> and description like concat('%', #{description}, '%')</if>
+            <if test="isActive != null "> and is_active = #{isActive}</if>
+            <if test="params.beginCreatedAt != null and params.beginCreatedAt != '' and params.endCreatedAt != null and params.endCreatedAt != ''"> and created_at between #{params.beginCreatedAt} and #{params.endCreatedAt}</if>
+            <if test="updatedAt != null "> and updated_at = #{updatedAt}</if>
+        </where>
+    </select>
+    
+    <select id="selectRedpacketTrafficConfigById" parameterType="Long" resultMap="RedpacketTrafficConfigResult">
+        <include refid="selectRedpacketTrafficConfigVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertRedpacketTrafficConfig" parameterType="RedpacketTrafficConfig" useGeneratedKeys="true" keyProperty="id">
+        insert into redpacket_traffic_config
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="configKey != null and configKey != ''">config_key,</if>
+            <if test="configValue != null and configValue != ''">config_value,</if>
+            <if test="description != null">description,</if>
+            <if test="isActive != null">is_active,</if>
+            <if test="createdAt != null">created_at,</if>
+            <if test="updatedAt != null">updated_at,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="configKey != null and configKey != ''">#{configKey},</if>
+            <if test="configValue != null and configValue != ''">#{configValue},</if>
+            <if test="description != null">#{description},</if>
+            <if test="isActive != null">#{isActive},</if>
+            <if test="createdAt != null">#{createdAt},</if>
+            <if test="updatedAt != null">#{updatedAt},</if>
+         </trim>
+    </insert>
+
+    <update id="updateRedpacketTrafficConfig" parameterType="RedpacketTrafficConfig">
+        update redpacket_traffic_config
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="configKey != null and configKey != ''">config_key = #{configKey},</if>
+            <if test="configValue != null and configValue != ''">config_value = #{configValue},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="isActive != null">is_active = #{isActive},</if>
+            <if test="createdAt != null">created_at = #{createdAt},</if>
+            <if test="updatedAt != null">updated_at = #{updatedAt},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteRedpacketTrafficConfigById" parameterType="Long">
+        delete from redpacket_traffic_config where id = #{id}
+    </delete>
+
+    <delete id="deleteRedpacketTrafficConfigByIds" parameterType="String">
+        delete from redpacket_traffic_config where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

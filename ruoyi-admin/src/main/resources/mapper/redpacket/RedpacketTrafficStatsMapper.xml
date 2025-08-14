@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.redpacket.mapper.RedpacketTrafficStatsMapper">
+    
+    <resultMap type="RedpacketTrafficStats" id="RedpacketTrafficStatsResult">
+        <result property="id"    column="id"    />
+        <result property="statTime"    column="stat_time"    />
+        <result property="activeUsers"    column="active_users"    />
+        <result property="queuedUsers"    column="queued_users"    />
+        <result property="totalRequests"    column="total_requests"    />
+        <result property="rejectedRequests"    column="rejected_requests"    />
+        <result property="averageSessionTime"    column="average_session_time"    />
+        <result property="createdAt"    column="created_at"    />
+    </resultMap>
+
+    <sql id="selectRedpacketTrafficStatsVo">
+        select id, stat_time, active_users, queued_users, total_requests, rejected_requests, average_session_time, created_at from redpacket_traffic_stats
+    </sql>
+
+    <select id="selectRedpacketTrafficStatsList" parameterType="RedpacketTrafficStats" resultMap="RedpacketTrafficStatsResult">
+        <include refid="selectRedpacketTrafficStatsVo"/>
+        <where>  
+            <if test="params.beginStatTime != null and params.beginStatTime != '' and params.endStatTime != null and params.endStatTime != ''"> and stat_time between #{params.beginStatTime} and #{params.endStatTime}</if>
+            <if test="params.beginActiveUsers != null and params.beginActiveUsers != '' and params.endActiveUsers != null and params.endActiveUsers != ''"> and active_users between #{params.beginActiveUsers} and #{params.endActiveUsers}</if>
+            <if test="queuedUsers != null "> and queued_users like concat('%', #{queuedUsers}, '%')</if>
+            <if test="params.beginTotalRequests != null and params.beginTotalRequests != '' and params.endTotalRequests != null and params.endTotalRequests != ''"> and total_requests between #{params.beginTotalRequests} and #{params.endTotalRequests}</if>
+            <if test="params.beginRejectedRequests != null and params.beginRejectedRequests != '' and params.endRejectedRequests != null and params.endRejectedRequests != ''"> and rejected_requests between #{params.beginRejectedRequests} and #{params.endRejectedRequests}</if>
+            <if test="params.beginCreatedAt != null and params.beginCreatedAt != '' and params.endCreatedAt != null and params.endCreatedAt != ''"> and created_at between #{params.beginCreatedAt} and #{params.endCreatedAt}</if>
+        </where>
+    </select>
+    
+    <select id="selectRedpacketTrafficStatsById" parameterType="Long" resultMap="RedpacketTrafficStatsResult">
+        <include refid="selectRedpacketTrafficStatsVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertRedpacketTrafficStats" parameterType="RedpacketTrafficStats" useGeneratedKeys="true" keyProperty="id">
+        insert into redpacket_traffic_stats
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="statTime != null">stat_time,</if>
+            <if test="activeUsers != null">active_users,</if>
+            <if test="queuedUsers != null">queued_users,</if>
+            <if test="totalRequests != null">total_requests,</if>
+            <if test="rejectedRequests != null">rejected_requests,</if>
+            <if test="averageSessionTime != null">average_session_time,</if>
+            <if test="createdAt != null">created_at,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="statTime != null">#{statTime},</if>
+            <if test="activeUsers != null">#{activeUsers},</if>
+            <if test="queuedUsers != null">#{queuedUsers},</if>
+            <if test="totalRequests != null">#{totalRequests},</if>
+            <if test="rejectedRequests != null">#{rejectedRequests},</if>
+            <if test="averageSessionTime != null">#{averageSessionTime},</if>
+            <if test="createdAt != null">#{createdAt},</if>
+         </trim>
+    </insert>
+
+    <update id="updateRedpacketTrafficStats" parameterType="RedpacketTrafficStats">
+        update redpacket_traffic_stats
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="statTime != null">stat_time = #{statTime},</if>
+            <if test="activeUsers != null">active_users = #{activeUsers},</if>
+            <if test="queuedUsers != null">queued_users = #{queuedUsers},</if>
+            <if test="totalRequests != null">total_requests = #{totalRequests},</if>
+            <if test="rejectedRequests != null">rejected_requests = #{rejectedRequests},</if>
+            <if test="averageSessionTime != null">average_session_time = #{averageSessionTime},</if>
+            <if test="createdAt != null">created_at = #{createdAt},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteRedpacketTrafficStatsById" parameterType="Long">
+        delete from redpacket_traffic_stats where id = #{id}
+    </delete>
+
+    <delete id="deleteRedpacketTrafficStatsByIds" parameterType="String">
+        delete from redpacket_traffic_stats where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>
