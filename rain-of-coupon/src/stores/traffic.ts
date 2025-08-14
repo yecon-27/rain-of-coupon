@@ -99,29 +99,33 @@ export const useTrafficStore = defineStore('traffic', () => {
         state.value.sessionId = `session_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`
       }
       
-      // 开发阶段使用模拟服务
-      const { trafficService } = await import('@/services/trafficService')
-      
-      // 模拟网络延迟
-      await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 1000))
-      
-      const result = trafficService.joinActivity(state.value.sessionId, userId)
-      
-      state.value.currentUsers = result.currentUsers
-      state.value.userStatus = result.userStatus
-      state.value.isInActivity = result.userStatus === 'active'
-      
-      if (result.userStatus === 'queued') {
-        state.value.queuePosition = (result as any).queuePosition || null
+      const request: UserActivityRequest = {
+        action: 'join',
+        userId,
+        sessionId: state.value.sessionId
       }
       
-      // 如果成功加入，开始心跳
-      if (result.userStatus === 'active') {
-        startHeartbeat()
-        return true
-      }
+      const response = await joinActivity(request)
       
-      return false
+      if (response.code === 200) {
+        state.value.currentUsers = response.data.currentUsers
+        state.value.userStatus = response.data.userStatus
+        state.value.isInActivity = response.data.userStatus === 'active'
+        
+        if (response.data.userStatus === 'queued') {
+          state.value.queuePosition = (response.data as any).queuePosition || null
+        }
+        
+        // 如果成功加入，开始心跳
+        if (response.data.userStatus === 'active') {
+          startHeartbeat()
+          return true
+        }
+        
+        return false
+      } else {
+        throw new Error(response.msg || '加入活动失败')
+      }
     } catch (err) {
       error.value = err instanceof Error ? err.message : '网络错误'
       return false
@@ -136,17 +140,21 @@ export const useTrafficStore = defineStore('traffic', () => {
     }
     
     try {
-      // 开发阶段使用模拟服务
-      const { trafficService } = await import('@/services/trafficService')
+      const request: UserActivityRequest = {
+        action: 'leave',
+        sessionId: state.value.sessionId
+      }
       
-      const result = trafficService.leaveActivity(state.value.sessionId)
+      const response = await leaveActivity(request)
       
-      // 清理状态
-      state.value.userStatus = 'idle'
-      state.value.isInActivity = false
-      state.value.queuePosition = null
-      state.value.estimatedWaitTime = null
-      state.value.currentUsers = result.currentUsers
+      if (response.code === 200) {
+        // 清理状态
+        state.value.userStatus = 'idle'
+        state.value.isInActivity = false
+        state.value.queuePosition = null
+        state.value.estimatedWaitTime = null
+        state.value.currentUsers = response.data.currentUsers
+      }
       
       // 停止心跳
       stopHeartbeat()
@@ -167,18 +175,20 @@ export const useTrafficStore = defineStore('traffic', () => {
       }
       
       try {
-        // 开发阶段使用模拟服务
-        const { trafficService } = await import('@/services/trafficService')
+        const request: UserActivityRequest = {
+          action: 'heartbeat',
+          sessionId: state.value.sessionId
+        }
         
-        const result = trafficService.handleHeartbeat(state.value.sessionId)
+        const response = await sendHeartbeat(request)
         
-        if (result.success) {
+        if (response.code === 200) {
           state.value.lastHeartbeat = new Date()
-          state.value.currentUsers = result.currentUsers
+          state.value.currentUsers = response.data.currentUsers
           
           // 如果心跳失败，用户可能被踢出
-          if (result.userStatus !== 'active') {
-            state.value.userStatus = result.userStatus
+          if (response.data.userStatus !== 'active') {
+            state.value.userStatus = response.data.userStatus
             state.value.isInActivity = false
             stopHeartbeat()
           }
@@ -214,33 +224,41 @@ export const useTrafficStore = defineStore('traffic', () => {
     stopHeartbeat()
   }
 
-  // 模拟后端限流逻辑（开发阶段使用）
-  const simulateTrafficCheck = async (): Promise<boolean> => {
+  // 智能流量检测（结合后端真实数据和降级处理）
+  const smartTrafficCheck = async (): Promise<boolean> => {
     loading.value = true
     
     try {
-      // 动态导入服务
-      const { trafficService } = await import('@/services/trafficService')
-      
-      // 模拟网络延迟
-      await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000))
-      
-      // 使用真实的流量检测逻辑
-      const result = trafficService.checkTrafficStatus()
-      
-      state.value.status = result.status
-      state.value.currentUsers = result.currentUsers
-      state.value.maxUsers = result.maxUsers
-      state.value.queuePosition = result.queuePosition || null
-      state.value.estimatedWaitTime = result.estimatedWaitTime || null
-      state.value.retryAfter = result.retryAfter || null
-      
-      return result.status === 'ok'
+      // 首先尝试使用真实的后端API
+      const canJoin = await checkTraffic()
+      return canJoin
     } catch (err) {
-      console.error('流量检测模拟失败:', err)
-      // 降级处理
-      state.value.status = 'maintenance'
-      return false
+      console.warn('后端API调用失败，使用降级处理:', err)
+      
+      // 降级到模拟服务
+      try {
+        const { trafficService } = await import('@/services/trafficService')
+        
+        // 模拟网络延迟
+        await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1000))
+        
+        // 使用模拟的流量检测逻辑
+        const result = trafficService.checkTrafficStatus()
+        
+        state.value.status = result.status
+        state.value.currentUsers = result.currentUsers
+        state.value.maxUsers = result.maxUsers
+        state.value.queuePosition = result.queuePosition || null
+        state.value.estimatedWaitTime = result.estimatedWaitTime || null
+        state.value.retryAfter = result.retryAfter || null
+        
+        return result.status === 'ok'
+      } catch (fallbackErr) {
+        console.error('模拟服务也失败了:', fallbackErr)
+        // 最终降级处理
+        state.value.status = 'maintenance'
+        return false
+      }
     } finally {
       loading.value = false
     }
@@ -265,6 +283,6 @@ export const useTrafficStore = defineStore('traffic', () => {
     startHeartbeat,
     stopHeartbeat,
     resetState,
-    simulateTrafficCheck
+    smartTrafficCheck
   }
 })

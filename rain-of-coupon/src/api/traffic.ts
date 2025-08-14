@@ -1,7 +1,7 @@
 // 流量检测和限流API接口封装
 import { getToken } from '@/utils/auth'
 
-// HTTP请求配置
+// HTTP请求配置 - 使用若依后端的API地址
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
 
 // 流量检测响应接口

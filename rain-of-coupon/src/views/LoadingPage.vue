@@ -9,9 +9,23 @@
 
       <!-- 进度条组件 -->
       <ProgressBar ref="progressBarRef" @progress-complete="onProgressComplete" />
+      
+      <!-- 流量检测状态显示 -->
+      <div v-if="checkingTraffic" class="traffic-status">
+        <div class="status-text">正在检测活动流量...</div>
+        <div class="status-detail">
+          <span v-if="trafficStore.state.currentUsers > 0">
+            当前在线: {{ trafficStore.state.currentUsers }} / {{ trafficStore.state.maxUsers }}
+          </span>
+        </div>
+      </div>
+      
+      <!-- 错误重试 -->
+      <div v-if="trafficStore.error && !checkingTraffic" class="error-retry">
+        <div class="error-message">{{ trafficStore.error }}</div>
+        <button @click="retryTrafficCheck" class="retry-btn">重试</button>
+      </div>
     </div>
-
-
   </div>
 </template>
 
@@ -45,9 +59,8 @@ const performTrafficCheck = async () => {
   try {
     console.log('开始流量检测...')
     
-    // 使用模拟流量检测（开发阶段）
-    // 生产环境应该使用: const canJoin = await trafficStore.checkTraffic()
-    const canJoin = await trafficStore.simulateTrafficCheck()
+    // 使用智能流量检测（优先后端API，降级到模拟服务）
+    const canJoin = await trafficStore.smartTrafficCheck()
     
     if (canJoin) {
       // 流量正常，尝试加入活动
@@ -69,7 +82,7 @@ const performTrafficCheck = async () => {
     }
   } catch (error) {
     console.error('流量检测失败:', error)
-    // 检测失败时显示拥挤提示
+    // 检测失败时显示拥挤提示，但提供重试机制
     showCrowdingMessage()
   } finally {
     checkingTraffic.value = false
@@ -106,6 +119,11 @@ const startLoading = async () => {
 onMounted(() => {
   startLoading()
 })
+
+// 重试流量检测
+const retryTrafficCheck = async () => {
+  await performTrafficCheck()
+}
 
 // 页面卸载时清理
 onUnmounted(() => {
@@ -168,5 +186,51 @@ onUnmounted(() => {
   .loading-animation {
     margin-bottom: 15px;
   }
+}
+
+/* 流量检测状态样式 */
+.traffic-status {
+  margin-top: 20px;
+  text-align: center;
+  color: #666;
+}
+
+.status-text {
+  font-size: 16px;
+  margin-bottom: 8px;
+  color: #409EFF;
+}
+
+.status-detail {
+  font-size: 14px;
+  color: #909399;
+}
+
+/* 错误重试样式 */
+.error-retry {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.error-message {
+  color: #F56C6C;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.retry-btn {
+  background: linear-gradient(135deg, #f35917, #f7761f);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 20px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.retry-btn:hover {
+  background: linear-gradient(135deg, #e04d0f, #e66b17);
+  transform: translateY(-1px);
 }
 </style>
