@@ -9,17 +9,14 @@
 
       <!-- 进度条组件 -->
       <ProgressBar ref="progressBarRef" @progress-complete="onProgressComplete" />
-
-      <!-- 拥挤提示 -->
-      <div v-if="showCrowdedMessage" class="crowded-message">
-        <div class="message-content">
-          <h3>🎉 活动火爆进行中！</h3>
-          <p>当前参与人数较多，请稍后再试</p>
-          <button @click="retryLoading" class="retry-btn">重新尝试</button>
-          <button @click="goHome" class="home-btn">返回首页</button>
-        </div>
-      </div>
     </div>
+
+    <!-- 拥挤提示组件 -->
+    <CrowdingTip 
+      v-if="showCrowdedMessage" 
+      @retry="retryLoading" 
+      @back="goHome" 
+    />
   </div>
 </template>
 
@@ -29,6 +26,7 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import LoadingAnim from '@/components/LoadingAnim.vue'
 import ProgressBar from '@/components/ProgressBar.vue'
+import CrowdingTip from '@/components/CrowdingTip.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -118,72 +116,7 @@ onMounted(() => {
 
 .loading-animation {
   margin-bottom: 30px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
   width: 100%;
-}
-
-.crowded-message {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.8);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.message-content {
-  background: white;
-  border-radius: 20px;
-  padding: 40px;
-  text-align: center;
-  max-width: 400px;
-  width: 90%;
-  color: #333;
-}
-
-.message-content h3 {
-  font-size: 24px;
-  margin: 0 0 20px 0;
-  color: orange;
-}
-
-.message-content p {
-  font-size: 16px;
-  margin: 0 0 30px 0;
-  color: #666;
-}
-
-.retry-btn,
-.home-btn {
-  background: orange;
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 25px;
-  font-size: 16px;
-  cursor: pointer;
-  margin: 0 10px;
-  transition: all 0.3s ease;
-}
-
-.retry-btn:hover,
-.home-btn:hover {
-  background: #ff8c00;
-  transform: translateY(-2px);
-}
-
-.home-btn {
-  background: #666;
-}
-
-.home-btn:hover {
-  background: #555;
 }
 
 /* 响应式设计 */
@@ -198,17 +131,6 @@ onMounted(() => {
 
   .loading-animation {
     margin-bottom: 20px;
-  }
-
-  .message-content {
-    padding: 30px 20px;
-  }
-
-  .retry-btn,
-  .home-btn {
-    display: block;
-    width: 100%;
-    margin: 10px 0;
   }
 }
 

@@ -1,18 +1,10 @@
 <template>
-  <div class="crowded-tip-overlay">
-    <div class="crowded-tip-modal">
-      <div class="tip-icon">🔥</div>
-      <h3>活动太火爆啦！</h3>
+  <div class="crowded-message">
+    <div class="message-content">
+      <h3>🎉 活动火爆进行中！</h3>
       <p>当前参与人数较多，请稍后再试</p>
-      
-      <div class="tip-actions">
-        <button @click="$emit('retry')" class="retry-btn">
-          重新尝试
-        </button>
-        <button @click="$emit('back')" class="back-btn">
-          返回首页
-        </button>
-      </div>
+      <button @click="$emit('retry')" class="retry-btn">重新尝试</button>
+      <button @click="$emit('back')" class="home-btn">返回首页</button>
     </div>
   </div>
 </template>
@@ -22,76 +14,79 @@ defineEmits(['retry', 'back'])
 </script>
 
 <style scoped>
-.crowded-tip-overlay {
+.crowded-message {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0, 0, 0, 0.7);
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
 }
 
-.crowded-tip-modal {
+.message-content {
   background: white;
-  border-radius: 16px;
-  padding: 40px 30px;
+  border-radius: 20px;
+  padding: 40px;
   text-align: center;
-  max-width: 320px;
-  margin: 20px;
-}
-
-.tip-icon {
-  font-size: 48px;
-  margin-bottom: 16px;
-}
-
-.crowded-tip-modal h3 {
+  max-width: 400px;
+  width: 90%;
   color: #333;
-  font-size: 20px;
-  margin-bottom: 12px;
 }
 
-.crowded-tip-modal p {
+.message-content h3 {
+  font-size: 24px;
+  margin: 0 0 20px 0;
+  color: orange;
+}
+
+.message-content p {
+  font-size: 16px;
+  margin: 0 0 30px 0;
   color: #666;
-  font-size: 14px;
-  margin-bottom: 24px;
-  line-height: 1.5;
 }
 
-.tip-actions {
-  display: flex;
-  gap: 12px;
-}
-
-.retry-btn, .back-btn {
-  flex: 1;
-  padding: 12px;
+.retry-btn,
+.home-btn {
+  background: orange;
+  color: white;
   border: none;
-  border-radius: 8px;
+  padding: 12px 24px;
+  border-radius: 25px;
   font-size: 16px;
   cursor: pointer;
-  transition: all 0.3s;
+  margin: 0 10px;
+  transition: all 0.3s ease;
 }
 
-.retry-btn {
-  background: #ff6b6b;
-  color: white;
+.retry-btn:hover,
+.home-btn:hover {
+  background: #ff8c00;
+  transform: translateY(-2px);
 }
 
-.retry-btn:hover {
-  background: #ff5252;
+.home-btn {
+  background: #666;
 }
 
-.back-btn {
-  background: #f5f5f5;
-  color: #666;
+.home-btn:hover {
+  background: #555;
 }
 
-.back-btn:hover {
-  background: #e0e0e0;
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .message-content {
+    padding: 30px 20px;
+  }
+
+  .retry-btn,
+  .home-btn {
+    display: block;
+    width: 100%;
+    margin: 10px 0;
+  }
 }
 </style>
