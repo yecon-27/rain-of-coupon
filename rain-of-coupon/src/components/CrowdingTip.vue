@@ -76,7 +76,7 @@ const uiStore = useUIStore()
 const retryCountdown = ref(0)
 const retryDisabled = computed(() => retryCountdown.value > 0)
 
-let countdownTimer: NodeJS.Timeout | null = null
+let countdownTimer: ReturnType<typeof setInterval> | null = null
 
 // 获取活动拥挤图片URL
 const getCrowdingImageUrl = () => {
