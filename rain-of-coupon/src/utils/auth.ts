@@ -4,7 +4,8 @@ const TOKEN_KEY = 'token'
 
 // 获取token
 export const getToken = (): string | null => {
-  return localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY)
+  // 优先从sessionStorage获取（与auth store保持一致）
+  return sessionStorage.getItem('auth_token') || localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY)
 }
 
 // 设置token

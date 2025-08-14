@@ -100,11 +100,19 @@ const showCrowdingMessage = () => {
 // 开始加载检查
 const startLoading = async () => {
   try {
-    // 检查登录状态
+    // 首先检查并恢复登录状态
     if (!authStore.isLoggedIn) {
-      router.push('/login?redirect=/loading')
-      return
+      const hasValidAuth = authStore.checkAuthStatus()
+      if (!hasValidAuth) {
+        console.log('用户未登录，跳转到登录页面')
+        router.push('/login?redirect=/loading')
+        return
+      }
     }
+
+    console.log('用户已登录，开始加载流程')
+    console.log('当前用户:', authStore.currentUser)
+    console.log('Token存在:', !!authStore.token)
 
     // 开始进度条
     progressBarRef.value?.startProgress()

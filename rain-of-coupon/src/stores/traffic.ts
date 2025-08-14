@@ -265,49 +265,51 @@ export const useTrafficStore = defineStore('traffic', () => {
     stopHeartbeat()
   }
 
-  // 智能流量检测（优先使用模拟服务，避免认证问题）
+  // 智能流量检测（优先使用真实后端API）
   const smartTrafficCheck = async (): Promise<boolean> => {
     loading.value = true
     error.value = null
     
     try {
-      // 优先使用模拟服务（避免后端API认证问题）
-      const { trafficService } = await import('@/services/trafficService')
+      console.log('开始调用后端流量检测API...')
       
-      // 模拟网络延迟
-      await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 400))
-      
-      // 使用模拟的流量检测逻辑
-      const result = trafficService.checkTrafficStatus()
-      
-      state.value.status = result.status
-      state.value.currentUsers = result.currentUsers
-      state.value.maxUsers = result.maxUsers
-      state.value.queuePosition = result.queuePosition || null
-      state.value.estimatedWaitTime = result.estimatedWaitTime || null
-      state.value.retryAfter = result.retryAfter || null
-      
-      console.log('流量检测结果:', result)
-      
-      return result.status === 'ok'
+      // 优先使用真实的后端API
+      const canJoin = await checkTraffic()
+      console.log('后端API调用成功，结果:', canJoin)
+      return canJoin
     } catch (err) {
-      console.warn('模拟服务失败，尝试后端API:', err)
+      console.warn('后端API调用失败，使用降级处理:', err)
+      error.value = err instanceof Error ? err.message : '网络错误'
       
-      // 降级到后端API（如果模拟服务失败）
+      // 降级到模拟服务
       try {
-        const canJoin = await checkTraffic()
-        return canJoin
-      } catch (apiErr) {
-        console.error('后端API也失败了:', apiErr)
+        const { trafficService } = await import('@/services/trafficService')
+        
+        console.log('使用模拟服务进行流量检测...')
+        
+        // 模拟网络延迟
+        await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 300))
+        
+        // 使用模拟的流量检测逻辑
+        const result = trafficService.checkTrafficStatus()
+        
+        state.value.status = result.status
+        state.value.currentUsers = result.currentUsers
+        state.value.maxUsers = result.maxUsers
+        state.value.queuePosition = result.queuePosition || null
+        state.value.estimatedWaitTime = result.estimatedWaitTime || null
+        state.value.retryAfter = result.retryAfter || null
+        
+        console.log('模拟服务检测结果:', result)
+        
+        return result.status === 'ok'
+      } catch (fallbackErr) {
+        console.error('模拟服务也失败了:', fallbackErr)
         error.value = '流量检测服务暂时不可用，请稍后重试'
         
-        // 最终降级处理 - 随机决定是否允许进入
-        const randomAllow = Math.random() > 0.3 // 70%概率允许进入
-        state.value.status = randomAllow ? 'ok' : 'crowded'
-        state.value.currentUsers = Math.floor(Math.random() * 800) + 200
-        state.value.maxUsers = 1000
-        
-        return randomAllow
+        // 最终降级处理
+        state.value.status = 'maintenance'
+        return false
       }
     } finally {
       loading.value = false
