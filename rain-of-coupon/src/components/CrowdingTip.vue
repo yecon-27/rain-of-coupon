@@ -6,48 +6,40 @@
     <div class="crowding-content">
       <!-- 拥挤图片 -->
       <img :src="getCrowdingImageUrl()" alt="活动拥挤" class="crowding-image" @error="handleImageError"
-        @load="handleImageLoad" />
-      
+        @load="handleImageLoad" @click="handleImageClick" />
+
       <!-- 流量信息卡片 -->
       <div class="traffic-info-card" v-if="trafficStore.state.status === 'crowded'">
         <div class="info-header">
           <h3>活动火爆进行中</h3>
           <div class="status-indicator crowded"></div>
         </div>
-        
+
         <div class="info-content">
           <div class="stat-item">
             <span class="label">当前参与人数</span>
             <span class="value">{{ trafficStore.state.currentUsers }}</span>
           </div>
-          
+
           <div class="stat-item">
             <span class="label">最大容量</span>
             <span class="value">{{ trafficStore.state.maxUsers }}</span>
           </div>
-          
+
           <div class="stat-item" v-if="trafficStore.state.queuePosition">
             <span class="label">您的排队位置</span>
             <span class="value highlight">第 {{ trafficStore.state.queuePosition }} 位</span>
           </div>
-          
+
           <div class="stat-item" v-if="trafficStore.state.estimatedWaitTime">
             <span class="label">预计等待时间</span>
             <span class="value">{{ formatWaitTime(trafficStore.state.estimatedWaitTime) }}</span>
           </div>
         </div>
-        
+
         <div class="action-buttons">
-          <button class="retry-btn" @click="handleRetry" :disabled="retryDisabled">
-            {{ retryDisabled ? `${retryCountdown}秒后重试` : '重新尝试' }}
-          </button>
           <button class="back-btn" @click="handleBack">返回首页</button>
         </div>
-      </div>
-      
-      <!-- 简单版本（兼容原有逻辑） -->
-      <div class="simple-actions" v-else>
-        <button class="retry-btn" @click="handleImageClick">重新尝试</button>
       </div>
     </div>
   </div>
@@ -116,7 +108,7 @@ const formatWaitTime = (seconds: number): string => {
 const startRetryCountdown = () => {
   const retryAfter = trafficStore.state.retryAfter || 60
   retryCountdown.value = retryAfter
-  
+
   countdownTimer = setInterval(() => {
     retryCountdown.value--
     if (retryCountdown.value <= 0) {
@@ -129,7 +121,7 @@ const startRetryCountdown = () => {
 // 处理重试
 const handleRetry = () => {
   if (retryDisabled.value) return
-  
+
   // 重新尝试加载
   router.push('/loading')
 }
@@ -199,14 +191,14 @@ onUnmounted(() => {
 }
 
 .crowding-image {
-  max-width: 400px;
-  max-height: 300px;
+  max-width: 800px;
+  max-height: 600px;
   width: auto;
   height: auto;
   object-fit: contain;
   animation: fadeIn 0.3s ease-out;
   border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
 }
 
 .traffic-info-card {
@@ -278,11 +270,10 @@ onUnmounted(() => {
 
 .action-buttons {
   display: flex;
-  gap: 12px;
+  justify-content: center;
 }
 
-.retry-btn, .back-btn {
-  flex: 1;
+.back-btn {
   padding: 12px 20px;
   border: none;
   border-radius: 8px;
@@ -290,25 +281,6 @@ onUnmounted(() => {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-}
-
-.retry-btn {
-  background: linear-gradient(135deg, #f35917, #f7761f);
-  color: white;
-}
-
-.retry-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, #e04d0f, #e66b17);
-  transform: translateY(-1px);
-}
-
-.retry-btn:disabled {
-  background: #ccc;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.back-btn {
   background: #f8f9fa;
   color: #666;
   border: 1px solid #e9ecef;
@@ -319,21 +291,12 @@ onUnmounted(() => {
   color: #333;
 }
 
-.simple-actions {
-  display: flex;
-  justify-content: center;
-}
-
-.simple-actions .retry-btn {
-  padding: 16px 32px;
-  font-size: 16px;
-}
-
 @keyframes fadeIn {
   from {
     opacity: 0;
     transform: scale(0.9);
   }
+
   to {
     opacity: 1;
     transform: scale(1);
@@ -345,6 +308,7 @@ onUnmounted(() => {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -352,9 +316,12 @@ onUnmounted(() => {
 }
 
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.5;
   }
@@ -365,30 +332,26 @@ onUnmounted(() => {
   .crowding-overlay {
     padding: 16px;
   }
-  
+
   .crowding-content {
     gap: 16px;
   }
-  
+
   .crowding-image {
-    max-width: 300px;
-    max-height: 200px;
+    max-width: 600px;
+    max-height: 400px;
   }
-  
+
   .traffic-info-card {
     padding: 20px;
     max-width: 100%;
   }
-  
+
   .info-header h3 {
     font-size: 16px;
   }
-  
-  .action-buttons {
-    flex-direction: column;
-  }
-  
-  .retry-btn, .back-btn {
+
+  .back-btn {
     width: 100%;
   }
 }
@@ -397,25 +360,25 @@ onUnmounted(() => {
   .crowding-overlay {
     padding: 12px;
   }
-  
+
   .crowding-image {
-    max-width: 250px;
-    max-height: 150px;
+    max-width: 500px;
+    max-height: 300px;
   }
-  
+
   .traffic-info-card {
     padding: 16px;
   }
-  
+
   .stat-item {
     padding: 8px 0;
   }
-  
+
   .stat-item .label,
   .stat-item .value {
     font-size: 13px;
   }
-  
+
   .stat-item .value.highlight {
     font-size: 14px;
   }
