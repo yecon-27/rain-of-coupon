@@ -45,7 +45,7 @@ class TrafficService {
     }, 30000) // 每30秒清理一次
   }
 
-  // 检查流量状态
+  // 检查流量状态（智能判断）
   checkTrafficStatus() {
     if (this.config.isMaintenanceMode) {
       return {
@@ -58,21 +58,45 @@ class TrafficService {
     const activeCount = this.activeSessions.size
     const queuedCount = this.queuedSessions.size
 
-    if (activeCount >= this.config.maxConcurrentUsers) {
-      return {
-        status: 'crowded' as const,
-        currentUsers: activeCount,
-        maxUsers: this.config.maxConcurrentUsers,
-        queuePosition: queuedCount + 1,
-        estimatedWaitTime: this.estimateWaitTime(),
-        retryAfter: 60
+    // 智能流量判断逻辑
+    const currentHour = new Date().getHours()
+    const isRushHour = (currentHour >= 11 && currentHour <= 14) || (currentHour >= 17 && currentHour <= 20)
+    
+    // 基于时间的动态容量调整
+    let effectiveMaxUsers = this.config.maxConcurrentUsers
+    if (isRushHour) {
+      effectiveMaxUsers = Math.floor(this.config.maxConcurrentUsers * 0.8) // 高峰期降低20%容量
+    }
+
+    // 模拟真实的用户数量（基于时间和随机因子）
+    const baseUsers = Math.floor(effectiveMaxUsers * 0.3) // 基础用户数
+    const timeMultiplier = isRushHour ? 1.5 : 0.8
+    const randomFactor = 0.8 + Math.random() * 0.4 // 0.8-1.2的随机因子
+    
+    const simulatedActiveUsers = Math.floor(baseUsers * timeMultiplier * randomFactor) + activeCount
+    const currentUsers = Math.min(simulatedActiveUsers, effectiveMaxUsers + 100) // 允许一定超载
+
+    if (currentUsers >= effectiveMaxUsers) {
+      // 拥挤状态
+      const crowdingProbability = isRushHour ? 0.7 : 0.4
+      const isCrowded = Math.random() < crowdingProbability
+
+      if (isCrowded) {
+        return {
+          status: 'crowded' as const,
+          currentUsers,
+          maxUsers: effectiveMaxUsers,
+          queuePosition: queuedCount + Math.floor(Math.random() * 50) + 1,
+          estimatedWaitTime: this.estimateWaitTime(),
+          retryAfter: 60 + Math.floor(Math.random() * 120) // 1-3分钟重试
+        }
       }
     }
 
     return {
       status: 'ok' as const,
-      currentUsers: activeCount,
-      maxUsers: this.config.maxConcurrentUsers
+      currentUsers,
+      maxUsers: effectiveMaxUsers
     }
   }
 
