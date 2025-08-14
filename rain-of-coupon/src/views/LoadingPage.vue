@@ -16,33 +16,72 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useTrafficStore } from '@/stores/traffic'
+import { useUIStore } from '@/stores/ui'
 import LoadingAnim from '@/components/LoadingAnim.vue'
 import ProgressBar from '@/components/ProgressBar.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const trafficStore = useTrafficStore()
+const uiStore = useUIStore()
 
 // 状态管理
 const progressBarRef = ref<InstanceType<typeof ProgressBar> | null>(null)
+const checkingTraffic = ref(false)
 
 // 进度条完成回调
 const onProgressComplete = async () => {
-  // 暂时总是跳转回HomePage并显示拥挤提示，用于测试
-  router.push('/?showCrowding=true')
+  await performTrafficCheck()
+}
 
-  // 原来的逻辑（已注释）：
-  // if (Math.random() > 0.3) {
-  //   // 70%概率活动正常，跳转到倒计时页面
-  //   setTimeout(() => {
-  //     router.push('/countdown')
-  //   }, 500)
-  // } else {
-  //   // 30%概率显示拥挤提示
-  //   showCrowdedMessage.value = true
-  // }
+// 执行流量检测
+const performTrafficCheck = async () => {
+  checkingTraffic.value = true
+  
+  try {
+    console.log('开始流量检测...')
+    
+    // 使用模拟流量检测（开发阶段）
+    // 生产环境应该使用: const canJoin = await trafficStore.checkTraffic()
+    const canJoin = await trafficStore.simulateTrafficCheck()
+    
+    if (canJoin) {
+      // 流量正常，尝试加入活动
+      console.log('流量正常，尝试加入活动...')
+      const joinSuccess = await trafficStore.attemptJoinActivity(authStore.currentUser?.id)
+      
+      if (joinSuccess) {
+        console.log('成功加入活动，跳转到倒计时页面')
+        setTimeout(() => {
+          router.push('/countdown')
+        }, 500)
+      } else {
+        console.log('加入活动失败，显示拥挤提示')
+        showCrowdingMessage()
+      }
+    } else {
+      console.log('流量拥挤，显示拥挤提示')
+      showCrowdingMessage()
+    }
+  } catch (error) {
+    console.error('流量检测失败:', error)
+    // 检测失败时显示拥挤提示
+    showCrowdingMessage()
+  } finally {
+    checkingTraffic.value = false
+  }
+}
+
+// 显示拥挤提示
+const showCrowdingMessage = () => {
+  // 设置UI状态显示拥挤提示
+  uiStore.setCrowdingTip(true)
+  // 跳转回首页
+  router.push('/')
 }
 
 // 开始加载检查
@@ -57,21 +96,21 @@ const startLoading = async () => {
     // 开始进度条
     progressBarRef.value?.startProgress()
 
-    // 模拟加载过程
-    await new Promise(resolve => setTimeout(resolve, 5000))
-
   } catch (error) {
     console.error('加载失败:', error)
-    // 加载失败也跳转回HomePage显示拥挤提示
-    router.push('/?showCrowding=true')
+    showCrowdingMessage()
   }
 }
-
-// 这些函数已不再需要，因为拥挤提示已移到HomePage
 
 // 页面初始化
 onMounted(() => {
   startLoading()
+})
+
+// 页面卸载时清理
+onUnmounted(() => {
+  // 如果用户离开页面，清理流量状态
+  trafficStore.leaveActivitySession()
 })
 </script>
 

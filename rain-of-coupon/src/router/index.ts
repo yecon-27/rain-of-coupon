@@ -54,6 +54,11 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/CouponPage.vue'),
     // meta: { requiresAuth: true },
     // beforeEnter: beforeEnterCoupon
+  },
+  {
+    path: '/traffic-test',
+    name: 'traffic-test',
+    component: () => import('@/views/TrafficTestPage.vue')
   }
 ]
 
