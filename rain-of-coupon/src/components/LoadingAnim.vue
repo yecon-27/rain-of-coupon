@@ -48,8 +48,10 @@ const handleImageLoad = (event: Event) => {
 }
 
 .loading-gif {
-  width: 500px; /* 从350px增加到500px */
-  height: 500px; /* 从350px增加到500px */
+  width: 500px;
+  /* 从350px增加到500px */
+  height: 500px;
+  /* 从350px增加到500px */
   object-fit: contain;
   display: block;
   margin: 0 auto;
@@ -58,15 +60,19 @@ const handleImageLoad = (event: Event) => {
 /* 响应式设计 */
 @media (max-width: 768px) {
   .loading-gif {
-    width: 400px; /* 从280px增加到400px */
-    height: 400px; /* 从280px增加到400px */
+    width: 400px;
+    /* 从280px增加到400px */
+    height: 400px;
+    /* 从280px增加到400px */
   }
 }
 
 @media (max-width: 480px) {
   .loading-gif {
-    width: 320px; /* 从220px增加到320px */
-    height: 320px; /* 从220px增加到320px */
+    width: 320px;
+    /* 从220px增加到320px */
+    height: 320px;
+    /* 从220px增加到320px */
   }
 }
 </style>

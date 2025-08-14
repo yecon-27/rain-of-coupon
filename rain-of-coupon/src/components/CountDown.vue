@@ -162,8 +162,8 @@ onUnmounted(() => {
 
 /* 准备阶段图片样式 */
 .prepare-image {
-  width: 600px;  /* 从300px放大到600px */
-  height: 400px; /* 从200px放大到400px */
+  width: 800px;  /* 与倒计时数字一样大 */
+  height: 800px; /* 与倒计时数字一样大 */
   object-fit: contain;
   transform: translateX(100vw);
   transition: transform 0.5s ease-in-out;
@@ -193,8 +193,8 @@ onUnmounted(() => {
 /* 响应式设计 */
 @media (max-width: 768px) {
   .prepare-image {
-    width: 500px;  /* 平板设备尺寸调整 */
-    height: 300px;
+    width: 600px;  /* 与倒计时数字一样大 */
+    height: 600px;
   }
   
   .countdown-image {
@@ -205,8 +205,8 @@ onUnmounted(() => {
 
 @media (max-width: 480px) {
   .prepare-image {
-    width: 400px;  /* 手机设备尺寸调整 */
-    height: 240px;
+    width: 480px;  /* 与倒计时数字一样大 */
+    height: 480px;
   }
   
   .countdown-image {
