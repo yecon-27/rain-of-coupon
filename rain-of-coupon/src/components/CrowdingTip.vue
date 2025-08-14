@@ -1,15 +1,18 @@
 <template>
   <div v-if="visible" class="crowding-overlay">
-    <div class="crowding-content">
-      <h3>🎉 活动火爆进行中！</h3>
-      <p>当前参与人数较多，请稍后再试</p>
-      <button @click="retry" class="retry-btn">重新尝试</button>
-      <button @click="close" class="close-btn">返回首页</button>
-    </div>
+    <!-- BackButton组件 -->
+    <BackButton />
+
+    <img :src="getCrowdingImageUrl()" alt="活动拥挤" class="crowding-image" @error="handleImageError"
+      @load="handleImageLoad" @click="handleImageClick" />
   </div>
 </template>
 
 <script setup lang="ts">
+import { useRouter } from 'vue-router'
+import { API_CONFIG } from '@/config/api'
+import BackButton from '@/components/BackButton.vue'
+
 // Props
 interface Props {
   visible?: boolean
@@ -17,20 +20,44 @@ interface Props {
 
 defineProps<Props>()
 
-// Emits
-const emit = defineEmits<{
-  retry: []
-  close: []
-}>()
+const router = useRouter()
 
-// 重新尝试
-const retry = () => {
-  emit('retry')
+// 获取活动拥挤图片URL
+const getCrowdingImageUrl = () => {
+  const filename = '活动拥挤.png'
+  let imageUrl = ''
+
+  // 如果数据库存储的是完整路径（以/开头）
+  if (filename.startsWith('/')) {
+    // 转换为完整URL
+    const isDev = import.meta.env.DEV
+    const baseUrl = isDev ? `http://${window.location.hostname}:8080` : 'https://your-production-domain.com'
+    imageUrl = `${baseUrl}${filename}`
+  } else {
+    // 如果只是文件名，使用配置的路径
+    imageUrl = `${API_CONFIG.couponImageURL}${filename}`
+  }
+
+  console.log('活动拥挤图片URL:', filename, '->', imageUrl)
+  return imageUrl
 }
 
-// 关闭提示
-const close = () => {
-  emit('close')
+// 点击图片处理
+const handleImageClick = () => {
+  // 点击图片后返回LoadingPage重新加载
+  router.push('/loading')
+}
+
+// 图片加载错误处理
+const handleImageError = (event: Event) => {
+  const img = event.target as HTMLImageElement
+  console.error('活动拥挤图片加载失败:', img.src)
+}
+
+// 图片加载成功处理
+const handleImageLoad = (event: Event) => {
+  const img = event.target as HTMLImageElement
+  console.log('活动拥挤图片加载成功:', img.src)
 }
 </script>
 
@@ -41,86 +68,47 @@ const close = () => {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 9999;
+  cursor: pointer;
 }
 
-.crowding-content {
-  background: white;
-  border-radius: 20px;
-  padding: 40px;
-  text-align: center;
-  max-width: 400px;
-  width: 90%;
-  color: #333;
-  animation: slideUp 0.3s ease-out;
+.crowding-image {
+  max-width: 90vw;
+  max-height: 90vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  animation: fadeIn 0.3s ease-out;
 }
 
-@keyframes slideUp {
+@keyframes fadeIn {
   from {
-    transform: translateY(50px);
     opacity: 0;
+    transform: scale(0.9);
   }
 
   to {
-    transform: translateY(0);
     opacity: 1;
+    transform: scale(1);
   }
-}
-
-.crowding-content h3 {
-  font-size: 24px;
-  margin: 0 0 20px 0;
-  color: orange;
-}
-
-.crowding-content p {
-  font-size: 16px;
-  margin: 0 0 30px 0;
-  color: #666;
-}
-
-.retry-btn,
-.close-btn {
-  background: orange;
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 25px;
-  font-size: 16px;
-  cursor: pointer;
-  margin: 0 10px;
-  transition: all 0.3s ease;
-}
-
-.retry-btn:hover,
-.close-btn:hover {
-  background: #ff8c00;
-  transform: translateY(-2px);
-}
-
-.close-btn {
-  background: #666;
-}
-
-.close-btn:hover {
-  background: #555;
 }
 
 /* 响应式设计 */
 @media (max-width: 768px) {
-  .crowding-content {
-    padding: 30px 20px;
+  .crowding-image {
+    max-width: 95vw;
+    max-height: 85vh;
   }
+}
 
-  .retry-btn,
-  .close-btn {
-    display: block;
-    width: 100%;
-    margin: 10px 0;
+@media (max-width: 480px) {
+  .crowding-image {
+    max-width: 98vw;
+    max-height: 80vh;
   }
 }
 </style>

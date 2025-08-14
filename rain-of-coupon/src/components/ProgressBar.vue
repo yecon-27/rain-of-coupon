@@ -37,7 +37,7 @@ const startProgress = () => {
     } else {
       progress.value++
     }
-  }, 50) // 每50ms更新1%，总共5秒完成
+  }, 25) // 每20ms更新1%，总共2秒完成
 }
 
 // 重置进度条
@@ -94,9 +94,11 @@ onUnmounted(() => {
 
 .progress-bar {
   flex: 1;
-  height: 28px; /* 从40px改回30px，与原版一致 */
+  height: 28px;
+  /* 从40px改回30px，与原版一致 */
   border: 3px solid orange;
-  border-radius: 20px; /* 从25px改为20px */
+  border-radius: 20px;
+  /* 从25px改为20px */
   overflow: hidden;
   background: rgba(255, 255, 255, 0.8);
 }
@@ -104,15 +106,14 @@ onUnmounted(() => {
 .progress {
   height: 100%;
   width: 0;
-  background: repeating-linear-gradient(
-    -45deg,
-    orange,
-    orange 6px,
-    #ffcc66 6px,
-    #ffcc66 12px
-  );
+  background: repeating-linear-gradient(-45deg,
+      orange,
+      orange 6px,
+      #ffcc66 6px,
+      #ffcc66 12px);
   transition: width 0.3s ease;
-  border-radius: 17px; /* 保持原版的17px */
+  border-radius: 17px;
+  /* 保持原版的17px */
 }
 
 /* 进度数字 */
@@ -130,11 +131,11 @@ onUnmounted(() => {
   .progress-section {
     margin-left: 20px;
   }
-  
+
   .loading-text {
     margin-right: 20px;
   }
-  
+
   .progress-bar {
     width: 275px;
   }
@@ -144,16 +145,16 @@ onUnmounted(() => {
   .progress-section {
     margin-left: 10px;
   }
-  
+
   .loading-text {
     margin-right: 10px;
     font-size: 20px;
   }
-  
+
   .progress-bar {
     width: 220px;
   }
-  
+
   .progress-container {
     gap: 10px;
   }
