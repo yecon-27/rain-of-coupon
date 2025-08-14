@@ -12,11 +12,7 @@
     </div>
 
     <!-- 拥挤提示组件 -->
-    <CrowdingTip 
-      v-if="showCrowdedMessage" 
-      @retry="retryLoading" 
-      @back="goHome" 
-    />
+    <CrowdingTip v-if="showCrowdedMessage" @retry="retryLoading" @back="goHome" />
   </div>
 </template>
 
@@ -37,16 +33,19 @@ const progressBarRef = ref<InstanceType<typeof ProgressBar> | null>(null)
 
 // 进度条完成回调
 const onProgressComplete = async () => {
-  // 模拟检查活动状态的逻辑
-  if (Math.random() > 0.3) {
-    // 70%概率活动正常，跳转到倒计时页面
-    setTimeout(() => {
-      router.push('/countdown')
-    }, 500)
-  } else {
-    // 30%概率显示拥挤提示
-    showCrowdedMessage.value = true
-  }
+  // 暂时总是显示拥挤提示，用于测试
+  showCrowdedMessage.value = true
+
+  // 原来的逻辑（已注释）：
+  // if (Math.random() > 0.3) {
+  //   // 70%概率活动正常，跳转到倒计时页面
+  //   setTimeout(() => {
+  //     router.push('/countdown')
+  //   }, 500)
+  // } else {
+  //   // 30%概率显示拥挤提示
+  //   showCrowdedMessage.value = true
+  // }
 }
 
 // 开始加载检查
