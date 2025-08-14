@@ -11,8 +11,7 @@
       <ProgressBar ref="progressBarRef" @progress-complete="onProgressComplete" />
     </div>
 
-    <!-- 拥挤提示组件 -->
-    <CrowdingTip v-if="showCrowdedMessage" @retry="retryLoading" @back="goHome" />
+
   </div>
 </template>
 
@@ -22,19 +21,17 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import LoadingAnim from '@/components/LoadingAnim.vue'
 import ProgressBar from '@/components/ProgressBar.vue'
-import CrowdingTip from '@/components/CrowdingTip.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
 
 // 状态管理
-const showCrowdedMessage = ref(false)
 const progressBarRef = ref<InstanceType<typeof ProgressBar> | null>(null)
 
 // 进度条完成回调
 const onProgressComplete = async () => {
-  // 暂时总是显示拥挤提示，用于测试
-  showCrowdedMessage.value = true
+  // 暂时总是跳转回HomePage并显示拥挤提示，用于测试
+  router.push('/?showCrowding=true')
 
   // 原来的逻辑（已注释）：
   // if (Math.random() > 0.3) {
@@ -65,21 +62,12 @@ const startLoading = async () => {
 
   } catch (error) {
     console.error('加载失败:', error)
-    showCrowdedMessage.value = true
+    // 加载失败也跳转回HomePage显示拥挤提示
+    router.push('/?showCrowding=true')
   }
 }
 
-// 重新尝试
-const retryLoading = () => {
-  showCrowdedMessage.value = false
-  progressBarRef.value?.resetProgress()
-  startLoading()
-}
-
-// 返回首页
-const goHome = () => {
-  router.push('/')
-}
+// 这些函数已不再需要，因为拥挤提示已移到HomePage
 
 // 页面初始化
 onMounted(() => {

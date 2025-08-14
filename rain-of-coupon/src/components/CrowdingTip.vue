@@ -1,33 +1,54 @@
 <template>
-  <div class="crowded-message">
-    <div class="message-content">
+  <div v-if="visible" class="crowding-overlay">
+    <div class="crowding-content">
       <h3>🎉 活动火爆进行中！</h3>
       <p>当前参与人数较多，请稍后再试</p>
-      <button @click="$emit('retry')" class="retry-btn">重新尝试</button>
-      <button @click="$emit('back')" class="home-btn">返回首页</button>
+      <button @click="retry" class="retry-btn">重新尝试</button>
+      <button @click="close" class="close-btn">返回首页</button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-defineEmits(['retry', 'back'])
+// Props
+interface Props {
+  visible?: boolean
+}
+
+defineProps<Props>()
+
+// Emits
+const emit = defineEmits<{
+  retry: []
+  close: []
+}>()
+
+// 重新尝试
+const retry = () => {
+  emit('retry')
+}
+
+// 关闭提示
+const close = () => {
+  emit('close')
+}
 </script>
 
 <style scoped>
-.crowded-message {
+.crowding-overlay {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
   background: rgba(0, 0, 0, 0.8);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 9999;
 }
 
-.message-content {
+.crowding-content {
   background: white;
   border-radius: 20px;
   padding: 40px;
@@ -35,22 +56,35 @@ defineEmits(['retry', 'back'])
   max-width: 400px;
   width: 90%;
   color: #333;
+  animation: slideUp 0.3s ease-out;
 }
 
-.message-content h3 {
+@keyframes slideUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.crowding-content h3 {
   font-size: 24px;
   margin: 0 0 20px 0;
   color: orange;
 }
 
-.message-content p {
+.crowding-content p {
   font-size: 16px;
   margin: 0 0 30px 0;
   color: #666;
 }
 
 .retry-btn,
-.home-btn {
+.close-btn {
   background: orange;
   color: white;
   border: none;
@@ -63,27 +97,27 @@ defineEmits(['retry', 'back'])
 }
 
 .retry-btn:hover,
-.home-btn:hover {
+.close-btn:hover {
   background: #ff8c00;
   transform: translateY(-2px);
 }
 
-.home-btn {
+.close-btn {
   background: #666;
 }
 
-.home-btn:hover {
+.close-btn:hover {
   background: #555;
 }
 
 /* 响应式设计 */
 @media (max-width: 768px) {
-  .message-content {
+  .crowding-content {
     padding: 30px 20px;
   }
 
   .retry-btn,
-  .home-btn {
+  .close-btn {
     display: block;
     width: 100%;
     margin: 10px 0;
