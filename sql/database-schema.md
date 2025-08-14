@@ -1,10 +1,10 @@
 
-## 1. 活动参与者表 (activity_participants)
+## 1. 红包活动参与者表 (redpacket_activity_participants)
 
 用于记录用户参与活动的历史记录和当前状态。
 
 ```sql
-CREATE TABLE activity_participants (
+CREATE TABLE redpacket_activity_participants (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id VARCHAR(50) NULL COMMENT '用户ID（可选，支持匿名用户）',
     session_id VARCHAR(100) NOT NULL UNIQUE COMMENT '会话ID',
@@ -21,15 +21,15 @@ CREATE TABLE activity_participants (
     INDEX idx_user_id (user_id),
     INDEX idx_status_join_time (status, join_time),
     INDEX idx_last_heartbeat (last_heartbeat)
-) COMMENT='活动参与者记录表';
+) COMMENT='红包活动参与者记录表';
 ```
 
-## 2. 流量控制配置表 (traffic_config)
+## 2. 红包流量控制配置表 (redpacket_traffic_config)
 
 用于存储流量控制的配置参数。
 
 ```sql
-CREATE TABLE traffic_config (
+CREATE TABLE redpacket_traffic_config (
     id INT PRIMARY KEY AUTO_INCREMENT,
     config_key VARCHAR(50) NOT NULL UNIQUE COMMENT '配置键',
     config_value VARCHAR(200) NOT NULL COMMENT '配置值',
@@ -37,10 +37,10 @@ CREATE TABLE traffic_config (
     is_active BOOLEAN DEFAULT TRUE COMMENT '是否启用',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) COMMENT='流量控制配置表';
+) COMMENT='红包流量控制配置表';
 
 -- 插入默认配置
-INSERT INTO traffic_config (config_key, config_value, description) VALUES
+INSERT INTO redpacket_traffic_config (config_key, config_value, description) VALUES
 ('max_concurrent_users', '1000', '最大并发用户数'),
 ('queue_timeout_seconds', '300', '队列超时时间（秒）'),
 ('heartbeat_timeout_seconds', '60', '心跳超时时间（秒）'),
@@ -50,12 +50,12 @@ INSERT INTO traffic_config (config_key, config_value, description) VALUES
 ('rush_hour_max_users', '800', '高峰期最大用户数');
 ```
 
-## 3. 流量统计表 (traffic_stats)
+## 3. 红包流量统计表 (redpacket_traffic_stats)
 
 用于记录流量统计数据，便于分析和监控。
 
 ```sql
-CREATE TABLE traffic_stats (
+CREATE TABLE redpacket_traffic_stats (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     stat_time DATETIME NOT NULL COMMENT '统计时间',
     active_users INT NOT NULL DEFAULT 0 COMMENT '活跃用户数',
@@ -66,7 +66,7 @@ CREATE TABLE traffic_stats (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     
     INDEX idx_stat_time (stat_time)
-) COMMENT='流量统计表';
+) COMMENT='红包流量统计表';
 ```
 
 ## 后端API实现建议
