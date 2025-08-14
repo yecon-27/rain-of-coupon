@@ -191,8 +191,8 @@ onUnmounted(() => {
 }
 
 .crowding-image {
-  max-width: 800px;
-  max-height: 600px;
+  max-width: 900px;
+  max-height: 700px;
   width: auto;
   height: auto;
   object-fit: contain;
@@ -338,8 +338,8 @@ onUnmounted(() => {
   }
 
   .crowding-image {
-    max-width: 600px;
-    max-height: 400px;
+    max-width: 700px;
+    max-height: 450px;
   }
 
   .traffic-info-card {
@@ -362,8 +362,8 @@ onUnmounted(() => {
   }
 
   .crowding-image {
-    max-width: 500px;
-    max-height: 300px;
+    max-width: 550px;
+    max-height: 350px;
   }
 
   .traffic-info-card {
