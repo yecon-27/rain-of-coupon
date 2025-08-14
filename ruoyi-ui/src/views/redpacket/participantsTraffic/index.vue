@@ -60,12 +60,10 @@
       </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-select v-model="queryParams.status" placeholder="请选择状态" clearable>
-          <el-option
-            v-for="dict in dict.type.sys_job_status"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
+          <el-option label="活跃" value="active" />
+          <el-option label="排队中" value="queued" />
+          <el-option label="已过期" value="expired" />
+          <el-option label="已离开" value="left" />
         </el-select>
       </el-form-item>
       <el-form-item label="队列位置" prop="queuePosition">
@@ -76,7 +74,7 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="${comment}">
+      <el-form-item label="创建时间">
         <el-date-picker
           v-model="daterangeCreatedAt"
           style="width: 240px"
@@ -96,16 +94,6 @@
     <el-row :gutter="10" class="mb8">
       <el-col :span="1.5">
         <el-button
-          type="primary"
-          plain
-          icon="el-icon-plus"
-          size="mini"
-          @click="handleAdd"
-          v-hasPermi="['redpacket:participantsTraffic:add']"
-        >新增</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
           type="success"
           plain
           icon="el-icon-edit"
@@ -113,18 +101,7 @@
           :disabled="single"
           @click="handleUpdate"
           v-hasPermi="['redpacket:participantsTraffic:edit']"
-        >修改</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="danger"
-          plain
-          icon="el-icon-delete"
-          size="mini"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['redpacket:participantsTraffic:remove']"
-        >删除</el-button>
+        >修改状态</el-button>
       </el-col>
       <el-col :span="1.5">
         <el-button
@@ -141,39 +118,54 @@
 
     <el-table v-loading="loading" :data="participantsTrafficList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="${comment}" align="center" prop="id" />
-      <el-table-column label="用户ID" align="center" prop="userId" />
+      <el-table-column label="主键ID" align="center" prop="id" />
+      <el-table-column label="用户ID" align="center" prop="userId">
+        <template slot-scope="scope">
+          <span v-if="scope.row.userId">{{ scope.row.userId }}</span>
+          <el-tag v-else type="info" size="mini">匿名</el-tag>
+        </template>
+      </el-table-column>
       <el-table-column label="会话ID" align="center" prop="sessionId" />
       <el-table-column label="IP地址" align="center" prop="ipAddress" />
       <el-table-column label="加入时间" align="center" prop="joinTime" width="180">
         <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.joinTime, '{y}-{m}-{d}') }}</span>
+          <span>{{ parseTime(scope.row.joinTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
         </template>
       </el-table-column>
       <el-table-column label="离开时间" align="center" prop="leaveTime" width="180">
         <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.leaveTime, '{y}-{m}-{d}') }}</span>
+          <span v-if="scope.row.leaveTime">{{ parseTime(scope.row.leaveTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
+          <el-tag v-else type="success" size="mini">在线</el-tag>
         </template>
       </el-table-column>
       <el-table-column label="最后心跳时间" align="center" prop="lastHeartbeat" width="180">
         <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.lastHeartbeat, '{y}-{m}-{d}') }}</span>
+          <span>{{ parseTime(scope.row.lastHeartbeat, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
         </template>
       </el-table-column>
       <el-table-column label="状态" align="center" prop="status">
         <template slot-scope="scope">
-          <dict-tag :options="dict.type.sys_job_status" :value="scope.row.status"/>
+          <el-tag v-if="scope.row.status === 'active'" type="success">活跃</el-tag>
+          <el-tag v-else-if="scope.row.status === 'queued'" type="warning">排队中</el-tag>
+          <el-tag v-else-if="scope.row.status === 'expired'" type="danger">已过期</el-tag>
+          <el-tag v-else-if="scope.row.status === 'left'" type="info">已离开</el-tag>
+          <el-tag v-else type="default">{{ scope.row.status }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="队列位置" align="center" prop="queuePosition" />
-      <el-table-column label="${comment}" align="center" prop="createdAt" width="180">
+      <el-table-column label="队列位置" align="center" prop="queuePosition">
         <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.createdAt, '{y}-{m}-{d}') }}</span>
+          <span v-if="scope.row.queuePosition">第{{ scope.row.queuePosition }}位</span>
+          <span v-else>-</span>
         </template>
       </el-table-column>
-      <el-table-column label="${comment}" align="center" prop="updatedAt" width="180">
+      <el-table-column label="创建时间" align="center" prop="createdAt" width="180">
         <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.updatedAt, '{y}-{m}-{d}') }}</span>
+          <span>{{ parseTime(scope.row.createdAt, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="更新时间" align="center" prop="updatedAt" width="180">
+        <template slot-scope="scope">
+          <span>{{ parseTime(scope.row.updatedAt, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
@@ -184,14 +176,7 @@
             icon="el-icon-edit"
             @click="handleUpdate(scope.row)"
             v-hasPermi="['redpacket:participantsTraffic:edit']"
-          >修改</el-button>
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-delete"
-            @click="handleDelete(scope.row)"
-            v-hasPermi="['redpacket:participantsTraffic:remove']"
-          >删除</el-button>
+          >修改状态</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -204,9 +189,35 @@
       @pagination="getList"
     />
 
-    <!-- 添加或修改红包活动参与者记录对话框 -->
+    <!-- 修改参与者状态对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
-      <el-form ref="form" :model="form" :rules="rules" label-width="80px">
+      <el-form ref="form" :model="form" :rules="rules" label-width="100px">
+        <el-form-item label="用户ID" prop="userId">
+          <el-input v-model="form.userId" disabled />
+        </el-form-item>
+        <el-form-item label="会话ID" prop="sessionId">
+          <el-input v-model="form.sessionId" disabled />
+        </el-form-item>
+        <el-form-item label="IP地址" prop="ipAddress">
+          <el-input v-model="form.ipAddress" disabled />
+        </el-form-item>
+        <el-form-item label="当前状态" prop="currentStatus">
+          <el-tag v-if="form.status === 'active'" type="success">活跃</el-tag>
+          <el-tag v-else-if="form.status === 'queued'" type="warning">排队中</el-tag>
+          <el-tag v-else-if="form.status === 'expired'" type="danger">已过期</el-tag>
+          <el-tag v-else-if="form.status === 'left'" type="info">已离开</el-tag>
+        </el-form-item>
+        <el-form-item label="修改为" prop="status">
+          <el-radio-group v-model="form.status">
+            <el-radio label="active">活跃</el-radio>
+            <el-radio label="queued">排队中</el-radio>
+            <el-radio label="expired">已过期</el-radio>
+            <el-radio label="left">已离开</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="队列位置" prop="queuePosition" v-if="form.status === 'queued'">
+          <el-input-number v-model="form.queuePosition" :min="1" :max="999" />
+        </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitForm">确 定</el-button>
@@ -221,7 +232,6 @@ import { listParticipantsTraffic, getParticipantsTraffic, delParticipantsTraffic
 
 export default {
   name: "ParticipantsTraffic",
-  dicts: ['sys_job_status'],
   data() {
     return {
       // 遮罩层
@@ -242,13 +252,13 @@ export default {
       title: "",
       // 是否显示弹出层
       open: false,
-      // $comment时间范围
+      // 加入时间范围
       daterangeJoinTime: [],
-      // $comment时间范围
+      // 离开时间范围
       daterangeLeaveTime: [],
-      // $comment时间范围
+      // 最后心跳时间范围
       daterangeLastHeartbeat: [],
-      // $comment时间范围
+      // 创建时间范围
       daterangeCreatedAt: [],
       // 查询参数
       queryParams: {
@@ -355,12 +365,6 @@ export default {
       this.single = selection.length!==1
       this.multiple = !selection.length
     },
-    /** 新增按钮操作 */
-    handleAdd() {
-      this.reset()
-      this.open = true
-      this.title = "添加红包活动参与者记录"
-    },
     /** 修改按钮操作 */
     handleUpdate(row) {
       this.reset()
@@ -368,39 +372,22 @@ export default {
       getParticipantsTraffic(id).then(response => {
         this.form = response.data
         this.open = true
-        this.title = "修改红包活动参与者记录"
+        this.title = "修改参与者状态"
       })
     },
     /** 提交按钮 */
     submitForm() {
       this.$refs["form"].validate(valid => {
         if (valid) {
-          if (this.form.id != null) {
-            updateParticipantsTraffic(this.form).then(response => {
-              this.$modal.msgSuccess("修改成功")
-              this.open = false
-              this.getList()
-            })
-          } else {
-            addParticipantsTraffic(this.form).then(response => {
-              this.$modal.msgSuccess("新增成功")
-              this.open = false
-              this.getList()
-            })
-          }
+          updateParticipantsTraffic(this.form).then(response => {
+            this.$modal.msgSuccess("状态修改成功")
+            this.open = false
+            this.getList()
+          })
         }
       })
     },
-    /** 删除按钮操作 */
-    handleDelete(row) {
-      const ids = row.id || this.ids
-      this.$modal.confirm('是否确认删除红包活动参与者记录编号为"' + ids + '"的数据项？').then(function() {
-        return delParticipantsTraffic(ids)
-      }).then(() => {
-        this.getList()
-        this.$modal.msgSuccess("删除成功")
-      }).catch(() => {})
-    },
+
     /** 导出按钮操作 */
     handleExport() {
       this.download('redpacket/participantsTraffic/export', {

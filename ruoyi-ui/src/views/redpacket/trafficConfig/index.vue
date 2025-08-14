@@ -9,34 +9,19 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
+      <el-form-item label="配置描述" prop="description">
+        <el-input
+          v-model="queryParams.description"
+          placeholder="请输入配置描述"
+          clearable
+          @keyup.enter.native="handleQuery"
+        />
+      </el-form-item>
       <el-form-item label="是否启用" prop="isActive">
         <el-select v-model="queryParams.isActive" placeholder="请选择是否启用" clearable>
-          <el-option
-            v-for="dict in dict.type.sys_yes_no"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
+          <el-option label="启用" :value="true" />
+          <el-option label="禁用" :value="false" />
         </el-select>
-      </el-form-item>
-      <el-form-item label="${comment}">
-        <el-date-picker
-          v-model="daterangeCreatedAt"
-          style="width: 240px"
-          value-format="yyyy-MM-dd"
-          type="daterange"
-          range-separator="-"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-        ></el-date-picker>
-      </el-form-item>
-      <el-form-item label="${comment}" prop="updatedAt">
-        <el-date-picker clearable
-          v-model="queryParams.updatedAt"
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="请选择${comment}">
-        </el-date-picker>
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
@@ -92,23 +77,23 @@
 
     <el-table v-loading="loading" :data="trafficConfigList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="${comment}" align="center" prop="id" />
-      <el-table-column label="配置键" align="center" prop="configKey" />
+      <el-table-column label="配置ID" align="center" prop="id" />
+      <el-table-column label="配置键" align="center" prop="configKey" :show-overflow-tooltip="true" />
       <el-table-column label="配置值" align="center" prop="configValue" />
-      <el-table-column label="配置描述" align="center" prop="description" />
+      <el-table-column label="配置描述" align="center" prop="description" :show-overflow-tooltip="true" />
       <el-table-column label="是否启用" align="center" prop="isActive">
         <template slot-scope="scope">
-          <dict-tag :options="dict.type.sys_yes_no" :value="scope.row.isActive"/>
+          <el-switch
+            v-model="scope.row.isActive"
+            :active-value="true"
+            :inactive-value="false"
+            @change="handleStatusChange(scope.row)"
+          ></el-switch>
         </template>
       </el-table-column>
-      <el-table-column label="${comment}" align="center" prop="createdAt" width="180">
+      <el-table-column label="创建时间" align="center" prop="createdAt" width="180">
         <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.createdAt, '{y}-{m}-{d}') }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="${comment}" align="center" prop="updatedAt" width="180">
-        <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.updatedAt, '{y}-{m}-{d}') }}</span>
+          <span>{{ parseTime(scope.row.createdAt, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
@@ -139,25 +124,22 @@
       @pagination="getList"
     />
 
-    <!-- 添加或修改红包流量控制配置对话框 -->
+    <!-- 添加或修改流量控制配置对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="配置键" prop="configKey">
-          <el-input v-model="form.configKey" placeholder="请输入配置键" />
+          <el-input v-model="form.configKey" placeholder="请输入配置键" :disabled="form.id != null" />
         </el-form-item>
         <el-form-item label="配置值" prop="configValue">
           <el-input v-model="form.configValue" placeholder="请输入配置值" />
         </el-form-item>
         <el-form-item label="配置描述" prop="description">
-          <el-input v-model="form.description" type="textarea" placeholder="请输入内容" />
+          <el-input v-model="form.description" type="textarea" placeholder="请输入配置描述" />
         </el-form-item>
         <el-form-item label="是否启用" prop="isActive">
           <el-radio-group v-model="form.isActive">
-            <el-radio
-              v-for="dict in dict.type.sys_yes_no"
-              :key="dict.value"
-              :label="parseInt(dict.value)"
-            >{{dict.label}}</el-radio>
+            <el-radio :label="true">启用</el-radio>
+            <el-radio :label="false">禁用</el-radio>
           </el-radio-group>
         </el-form-item>
       </el-form>
@@ -170,11 +152,10 @@
 </template>
 
 <script>
-import { listTrafficConfig, getTrafficConfig, delTrafficConfig, addTrafficConfig, updateTrafficConfig } from "@/api/redpacket/trafficConfig"
+import { listTrafficConfig, getTrafficConfig, delTrafficConfig, addTrafficConfig, updateTrafficConfig } from "@/api/redpacket/trafficConfig";
 
 export default {
   name: "TrafficConfig",
-  dicts: ['sys_yes_no'],
   data() {
     return {
       // 遮罩层
@@ -189,14 +170,12 @@ export default {
       showSearch: true,
       // 总条数
       total: 0,
-      // 红包流量控制配置表格数据
+      // 流量控制配置表格数据
       trafficConfigList: [],
       // 弹出层标题
       title: "",
       // 是否显示弹出层
       open: false,
-      // 是否启用时间范围
-      daterangeCreatedAt: [],
       // 查询参数
       queryParams: {
         pageNum: 1,
@@ -204,8 +183,6 @@ export default {
         configKey: null,
         description: null,
         isActive: null,
-        createdAt: null,
-        updatedAt: null
       },
       // 表单参数
       form: {},
@@ -218,30 +195,25 @@ export default {
           { required: true, message: "配置值不能为空", trigger: "blur" }
         ],
       }
-    }
+    };
   },
   created() {
-    this.getList()
+    this.getList();
   },
   methods: {
-    /** 查询红包流量控制配置列表 */
+    /** 查询流量控制配置列表 */
     getList() {
-      this.loading = true
-      this.queryParams.params = {}
-      if (null != this.daterangeCreatedAt && '' != this.daterangeCreatedAt) {
-        this.queryParams.params["beginCreatedAt"] = this.daterangeCreatedAt[0]
-        this.queryParams.params["endCreatedAt"] = this.daterangeCreatedAt[1]
-      }
+      this.loading = true;
       listTrafficConfig(this.queryParams).then(response => {
-        this.trafficConfigList = response.rows
-        this.total = response.total
-        this.loading = false
-      })
+        this.trafficConfigList = response.rows;
+        this.total = response.total;
+        this.loading = false;
+      });
     },
     // 取消按钮
     cancel() {
-      this.open = false
-      this.reset()
+      this.open = false;
+      this.reset();
     },
     // 表单重置
     reset() {
@@ -250,22 +222,19 @@ export default {
         configKey: null,
         configValue: null,
         description: null,
-        isActive: null,
-        createdAt: null,
-        updatedAt: null
-      }
-      this.resetForm("form")
+        isActive: true
+      };
+      this.resetForm("form");
     },
     /** 搜索按钮操作 */
     handleQuery() {
-      this.queryParams.pageNum = 1
-      this.getList()
+      this.queryParams.pageNum = 1;
+      this.getList();
     },
     /** 重置按钮操作 */
     resetQuery() {
-      this.daterangeCreatedAt = []
-      this.resetForm("queryForm")
-      this.handleQuery()
+      this.resetForm("queryForm");
+      this.handleQuery();
     },
     // 多选框选中数据
     handleSelectionChange(selection) {
@@ -275,19 +244,19 @@ export default {
     },
     /** 新增按钮操作 */
     handleAdd() {
-      this.reset()
-      this.open = true
-      this.title = "添加红包流量控制配置"
+      this.reset();
+      this.open = true;
+      this.title = "添加流量控制配置";
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
-      this.reset()
+      this.reset();
       const id = row.id || this.ids
       getTrafficConfig(id).then(response => {
-        this.form = response.data
-        this.open = true
-        this.title = "修改红包流量控制配置"
-      })
+        this.form = response.data;
+        this.open = true;
+        this.title = "修改流量控制配置";
+      });
     },
     /** 提交按钮 */
     submitForm() {
@@ -295,29 +264,40 @@ export default {
         if (valid) {
           if (this.form.id != null) {
             updateTrafficConfig(this.form).then(response => {
-              this.$modal.msgSuccess("修改成功")
-              this.open = false
-              this.getList()
-            })
+              this.$modal.msgSuccess("修改成功");
+              this.open = false;
+              this.getList();
+            });
           } else {
             addTrafficConfig(this.form).then(response => {
-              this.$modal.msgSuccess("新增成功")
-              this.open = false
-              this.getList()
-            })
+              this.$modal.msgSuccess("新增成功");
+              this.open = false;
+              this.getList();
+            });
           }
         }
-      })
+      });
     },
     /** 删除按钮操作 */
     handleDelete(row) {
-      const ids = row.id || this.ids
-      this.$modal.confirm('是否确认删除红包流量控制配置编号为"' + ids + '"的数据项？').then(function() {
-        return delTrafficConfig(ids)
+      const ids = row.id || this.ids;
+      this.$modal.confirm('是否确认删除流量控制配置编号为"' + ids + '"的数据项？').then(function() {
+        return delTrafficConfig(ids);
       }).then(() => {
-        this.getList()
-        this.$modal.msgSuccess("删除成功")
-      }).catch(() => {})
+        this.getList();
+        this.$modal.msgSuccess("删除成功");
+      }).catch(() => {});
+    },
+    /** 状态修改 */
+    handleStatusChange(row) {
+      let text = row.isActive === true ? "启用" : "停用";
+      this.$modal.confirm('确认要"' + text + '""' + row.configKey + '"配置吗？').then(function() {
+        return updateTrafficConfig(row);
+      }).then(() => {
+        this.$modal.msgSuccess(text + "成功");
+      }).catch(function() {
+        row.isActive = row.isActive === false ? true : false;
+      });
     },
     /** 导出按钮操作 */
     handleExport() {
@@ -326,5 +306,5 @@ export default {
       }, `trafficConfig_${new Date().getTime()}.xlsx`)
     }
   }
-}
+};
 </script>

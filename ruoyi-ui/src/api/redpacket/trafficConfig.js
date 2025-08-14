@@ -1,6 +1,6 @@
 import request from '@/utils/request'
 
-// 查询红包流量控制配置列表
+// 查询流量控制配置列表
 export function listTrafficConfig(query) {
   return request({
     url: '/redpacket/trafficConfig/list',
@@ -9,7 +9,7 @@ export function listTrafficConfig(query) {
   })
 }
 
-// 查询红包流量控制配置详细
+// 查询流量控制配置详细
 export function getTrafficConfig(id) {
   return request({
     url: '/redpacket/trafficConfig/' + id,
@@ -17,7 +17,7 @@ export function getTrafficConfig(id) {
   })
 }
 
-// 新增红包流量控制配置
+// 新增流量控制配置
 export function addTrafficConfig(data) {
   return request({
     url: '/redpacket/trafficConfig',
@@ -26,7 +26,7 @@ export function addTrafficConfig(data) {
   })
 }
 
-// 修改红包流量控制配置
+// 修改流量控制配置
 export function updateTrafficConfig(data) {
   return request({
     url: '/redpacket/trafficConfig',
@@ -35,10 +35,19 @@ export function updateTrafficConfig(data) {
   })
 }
 
-// 删除红包流量控制配置
+// 删除流量控制配置
 export function delTrafficConfig(id) {
   return request({
     url: '/redpacket/trafficConfig/' + id,
     method: 'delete'
+  })
+}
+
+// 导出流量控制配置
+export function exportTrafficConfig(query) {
+  return request({
+    url: '/redpacket/trafficConfig/export',
+    method: 'get',
+    params: query
   })
 }

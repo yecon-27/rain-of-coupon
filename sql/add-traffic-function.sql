@@ -1,14 +1,14 @@
 
 CREATE TABLE redpacket_activity_participants (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    user_id VARCHAR(50) NULL COMMENT '用户ID（可选，支持匿名用户）',
+    user_id VARCHAR(50) NULL COMMENT '用户ID',
     session_id VARCHAR(100) NOT NULL UNIQUE COMMENT '会话ID',
     ip_address VARCHAR(45) NULL COMMENT 'IP地址',
     join_time DATETIME NOT NULL COMMENT '加入时间',
     leave_time DATETIME NULL COMMENT '离开时间',
     last_heartbeat DATETIME NOT NULL COMMENT '最后心跳时间',
     status ENUM('active', 'queued', 'expired', 'left') NOT NULL DEFAULT 'active' COMMENT '状态',
-    queue_position INT NULL COMMENT '队列位置（仅排队时有效）',
+    queue_position INT NULL COMMENT '队列位置',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     
@@ -30,12 +30,12 @@ CREATE TABLE redpacket_traffic_config (
 
 -- 修改流量控制配置的插入语句，使用不同的默认值
 INSERT INTO redpacket_traffic_config (config_key, config_value, description) VALUES
-('max_concurrent_users', '800', '流量控制最大并发用户数（技术层面限制）'),
-('queue_timeout_seconds', '300', '队列超时时间（秒）'),
-('heartbeat_timeout_seconds', '60', '心跳超时时间（秒）'),
+('max_concurrent_users', '800', '流量控制最大并发用户数'),
+('queue_timeout_seconds', '300', '队列超时时间秒'),
+('heartbeat_timeout_seconds', '60', '心跳超时时间秒'),
 ('maintenance_mode', 'false', '维护模式开关'),
-('rush_hour_start', '11', '高峰期开始时间（小时）'),
-('rush_hour_end', '20', '高峰期结束时间（小时）'),
+('rush_hour_start', '11', '高峰期开始时间小时'),
+('rush_hour_end', '20', '高峰期结束时间小时'),
 ('rush_hour_max_users', '600', '高峰期最大用户数');
 
 CREATE TABLE redpacket_traffic_stats (
@@ -44,8 +44,8 @@ CREATE TABLE redpacket_traffic_stats (
     active_users INT NOT NULL DEFAULT 0 COMMENT '活跃用户数',
     queued_users INT NOT NULL DEFAULT 0 COMMENT '排队用户数',
     total_requests INT NOT NULL DEFAULT 0 COMMENT '总请求数',
-    rejected_requests INT NOT NULL DEFAULT 0 COMMENT '被拒绝的请求数',
-    average_session_time INT NULL COMMENT '平均会话时间（秒）',
+    rejected_requests INT NOT NULL DEFAULT 0 COMMENT '被拒绝请求数',
+    average_session_time INT NULL COMMENT '平均会话时间',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     
     INDEX idx_stat_time (stat_time)
