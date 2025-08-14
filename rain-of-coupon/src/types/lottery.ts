@@ -8,6 +8,7 @@ export interface Prize {
   probability: number
 }
 
+// 用户参与记录（redpacket_user_participation_log）
 export interface ParticipationRecord {
   id: number
   userId: number

@@ -110,6 +110,7 @@ const request = async (url: string, options: RequestInit = {}) => {
 }
 
 // 参与红包雨（领取优惠券）
+// 后端写入 redpacket_user_participation_log 表
 export const drawLottery = async (data: DrawLotteryRequest = {}): Promise<DrawLotteryResponse> => {
   return request('/redpacket/lottery/draw', {
     method: 'POST',
@@ -169,8 +170,8 @@ export const getWinningAnnouncements = async (query: UserRecordsQuery = {}) => {
 }
 
 // 使用优惠券
-export const claimPrize = async (logId: number) => {
-  return request(`/redpacket/lottery/claim/${logId}`, {
+export const claimPrize = async (participationId: number) => {
+  return request(`/redpacket/lottery/claim/${participationId}`, {
     method: 'POST',
     headers: {
       'repeatSubmit': 'false'
@@ -198,6 +199,7 @@ export const login = async (username: string, password: string) => {
     })
   })
 }
+
 
 // 用户登出
 export const logout = async () => {
