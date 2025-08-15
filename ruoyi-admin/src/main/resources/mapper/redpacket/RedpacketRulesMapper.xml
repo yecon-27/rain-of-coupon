@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.redpacket.mapper.RedpacketRulesMapper">
+    
+    <resultMap type="RedpacketRules" id="RedpacketRulesResult">
+        <result property="id"    column="id"    />
+        <result property="ruleType"    column="rule_type"    />
+        <result property="ruleTitle"    column="rule_title"    />
+        <result property="ruleContent"    column="rule_content"    />
+        <result property="ruleOrder"    column="rule_order"    />
+        <result property="status"    column="status"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectRedpacketRulesVo">
+        select id, rule_type, rule_title, rule_content, rule_order, status, create_by, create_time, update_by, update_time, remark from redpacket_rules
+    </sql>
+
+    <select id="selectRedpacketRulesList" parameterType="RedpacketRules" resultMap="RedpacketRulesResult">
+        <include refid="selectRedpacketRulesVo"/>
+        <where>  
+            <if test="ruleTitle != null  and ruleTitle != ''"> and rule_title like concat('%', #{ruleTitle}, '%')</if>
+        </where>
+    </select>
+    
+    <select id="selectRedpacketRulesById" parameterType="Long" resultMap="RedpacketRulesResult">
+        <include refid="selectRedpacketRulesVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertRedpacketRules" parameterType="RedpacketRules" useGeneratedKeys="true" keyProperty="id">
+        insert into redpacket_rules
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ruleType != null and ruleType != ''">rule_type,</if>
+            <if test="ruleTitle != null and ruleTitle != ''">rule_title,</if>
+            <if test="ruleContent != null and ruleContent != ''">rule_content,</if>
+            <if test="ruleOrder != null">rule_order,</if>
+            <if test="status != null">status,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="ruleType != null and ruleType != ''">#{ruleType},</if>
+            <if test="ruleTitle != null and ruleTitle != ''">#{ruleTitle},</if>
+            <if test="ruleContent != null and ruleContent != ''">#{ruleContent},</if>
+            <if test="ruleOrder != null">#{ruleOrder},</if>
+            <if test="status != null">#{status},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateRedpacketRules" parameterType="RedpacketRules">
+        update redpacket_rules
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="ruleType != null and ruleType != ''">rule_type = #{ruleType},</if>
+            <if test="ruleTitle != null and ruleTitle != ''">rule_title = #{ruleTitle},</if>
+            <if test="ruleContent != null and ruleContent != ''">rule_content = #{ruleContent},</if>
+            <if test="ruleOrder != null">rule_order = #{ruleOrder},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteRedpacketRulesById" parameterType="Long">
+        delete from redpacket_rules where id = #{id}
+    </delete>
+
+    <delete id="deleteRedpacketRulesByIds" parameterType="String">
+        delete from redpacket_rules where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>
