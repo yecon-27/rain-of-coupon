@@ -18,6 +18,9 @@
           <div class="section-content" v-html="distributionRules"></div>
         </div>
 
+        <!-- 虚线分隔 -->
+        <div class="rule-divider"></div>
+
         <!-- 使用规则 -->
         <div class="rule-section">
           <div class="section-header">
@@ -26,12 +29,7 @@
           <div class="section-content" v-html="usageRules"></div>
         </div>
 
-        <!-- 底部按钮 -->
-        <div class="rule-footer">
-          <button class="confirm-btn" @click="handleConfirm">
-            我已阅读并同意
-          </button>
-        </div>
+        <!-- 移除底部按钮 -->
       </div>
     </div>
 
@@ -140,10 +138,10 @@ const handleClose = () => {
   emit('close')
 }
 
-// 确认按钮
-const handleConfirm = () => {
-  emit('confirm')
-}
+// 确认按钮 (已移除，保留函数避免编译错误)
+// const handleConfirm = () => {
+//   emit('confirm')
+// }
 
 // 监听visible变化，当弹窗显示时加载规则
 watch(() => props.visible, (newVisible) => {
@@ -175,15 +173,16 @@ onMounted(() => {
 }
 
 .rule-modal {
-  width: 90%;
-  max-width: 500px;
-  max-height: 80vh;
+  width: 70%;
+  max-width: 350px;
+  max-height: 75vh;
   background: white;
   border-radius: 12px;
   padding: 20px;
   position: relative;
   overflow-y: auto;
   animation: slideUp 0.3s ease-out;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
 @keyframes slideUp {
@@ -204,19 +203,20 @@ onMounted(() => {
 
 /* 底部关闭按钮 */
 .bottom-close-btn {
-  position: absolute;
-  bottom: -60px;
+  position: fixed;
+  bottom: 10vh;
   left: 50%;
   transform: translateX(-50%);
-  width: 40px;
-  height: 40px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.7);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: background 0.2s;
+  z-index: 10000;
 }
 
 .bottom-close-btn:hover {
@@ -224,9 +224,17 @@ onMounted(() => {
 }
 
 .close-icon {
-  font-size: 24px;
+  font-size: 32px;
   color: white;
   font-weight: bold;
+  line-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-family: Arial, sans-serif;
+  transform: translate(-1px, 1px);
 }
 
 .rule-header {
@@ -236,9 +244,12 @@ onMounted(() => {
 
 .rule-title {
   color: #f35917;
-  font-size: 20px;
+  font-size: 28px;
   font-weight: bold;
+  font-style: italic;
   margin: 0;
+  text-decoration: underline;
+  text-decoration-style: double;
 }
 
 .rule-section {
@@ -253,7 +264,7 @@ onMounted(() => {
   background: #f35917;
   color: white;
   padding: 6px 12px;
-  border-radius: 15px;
+  border-radius: 6px;
   font-size: 14px;
   font-weight: bold;
 }
@@ -283,42 +294,40 @@ onMounted(() => {
   margin-right: 5px;
 }
 
-.rule-footer {
-  text-align: center;
-  margin-top: 30px;
-  padding-top: 20px;
-  border-top: 1px solid #eee;
+/* 虚线分隔线 */
+.rule-divider {
+  border-top: 2px dashed #f35917;
+  margin: 25px 0;
 }
 
-.confirm-btn {
-  background: #f35917;
-  color: white;
-  border: none;
-  border-radius: 25px;
-  padding: 12px 30px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background 0.3s;
-}
-
-.confirm-btn:hover {
-  background: #e04d0f;
-}
+/* 移除原来的底部按钮样式 */
 
 /* 响应式设计 */
 @media (max-width: 768px) {
   .rule-modal {
-    width: 95%;
+    width: 85%;
+    max-width: 320px;
     padding: 15px;
-    max-height: 85vh;
+    max-height: 80vh;
   }
-
+  
   .rule-title {
-    font-size: 18px;
+    font-size: 22px;
   }
-
+  
   .section-content {
     font-size: 13px;
+  }
+  
+  .bottom-close-btn {
+    width: 50px;
+    height: 50px;
+    bottom: 8vh;
+  }
+  
+  .close-icon {
+    font-size: 28px;
+    transform: translate(-1px, 1px);
   }
 }
 </style>
