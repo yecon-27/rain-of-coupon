@@ -2,6 +2,7 @@ package com.ruoyi.redpacket.controller;
 
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
+import com.ruoyi.common.annotation.Anonymous;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -62,6 +63,7 @@ public class RedpacketRulesController extends BaseController
     /**
      * 获取红包活动规则用于前端显示
      */
+    @Anonymous
     @GetMapping("/display")
     public AjaxResult getRulesForDisplay()
     {

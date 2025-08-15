@@ -3,10 +3,7 @@
     <!-- 规则弹窗 -->
     <div class="rule-modal">
       <div class="rule-content">
-        <!-- 关闭按钮 -->
-        <div class="close-btn" @click="handleClose">
-          <i class="close-icon">×</i>
-        </div>
+        <!-- 关闭按钮移到底部 -->
 
         <!-- 活动规则标题 -->
         <div class="rule-header">
@@ -36,6 +33,11 @@
           </button>
         </div>
       </div>
+    </div>
+
+    <!-- 底部关闭按钮 -->
+    <div class="bottom-close-btn" @click="handleClose">
+      <i class="close-icon">×</i>
     </div>
   </div>
 </template>
@@ -72,62 +74,66 @@ const loadRules = async () => {
   try {
     const response = await getRulesForDisplay()
     console.log('✅ 成功从API加载规则数据:', response.data)
-    
+
     // 处理API返回的规则数据
     if (response.data && Array.isArray(response.data)) {
       const rules = response.data
-      
+
       // 按规则类型分类
       const distributionRule = rules.find(rule => rule.ruleType === 'distribution_rule')
       const usageRule = rules.find(rule => rule.ruleType === 'usage_rule')
-      
-      distributionRules.value = distributionRule?.ruleContent || getDefaultDistributionRules()
-      usageRules.value = usageRule?.ruleContent || getDefaultUsageRules()
+
+      distributionRules.value = distributionRule?.ruleContent || ''
+      usageRules.value = usageRule?.ruleContent || ''
     } else {
-      console.warn('⚠️ API返回数据格式异常，使用默认规则')
-      setDefaultRules()
+      console.warn('⚠️ API返回数据格式异常')
+      distributionRules.value = ''
+      usageRules.value = ''
+      // setDefaultRules() // 注释掉默认规则
     }
   } catch (error) {
     console.error('❌ 加载规则失败:', error)
-    console.log('📋 降级到默认规则内容')
-    setDefaultRules()
+    console.log('📋 API调用失败，不使用默认规则')
+    distributionRules.value = ''
+    usageRules.value = ''
+    // setDefaultRules() // 注释掉默认规则
   } finally {
     loading.value = false
   }
 }
 
-// 获取默认发放规则
-const getDefaultDistributionRules = () => {
-  return `
-    <div class="rule-intro">消费券发放分两个阶段。</div>
-    <div class="rule-stage">
-      <span class="stage-title">第一阶段</span>发放时间为2025年1月22日早上10:00至25日早上10:00，按计划数发放，发完为止。
-    </div>
-    <div class="rule-stage">
-      <span class="stage-title">第二阶段</span>发放时间为2025年2月6日10:00至18:00，按第一份段未使用的消费券回收数量发放，发完为止。
-    </div>
-  `
-}
+// 获取默认发放规则 (已注释，测试纯API调用)
+// const getDefaultDistributionRules = () => {
+//   return `
+//     <div class="rule-intro">消费券发放分两个阶段。</div>
+//     <div class="rule-stage">
+//       <span class="stage-title">第一阶段</span>发放时间为2025年1月22日早上10:00至25日早上10:00，按计划数发放，发完为止。
+//     </div>
+//     <div class="rule-stage">
+//       <span class="stage-title">第二阶段</span>发放时间为2025年2月6日10:00至18:00，按第一份段未使用的消费券回收数量发放，发完为止。
+//     </div>
+//   `
+// }
 
-// 获取默认使用规则
-const getDefaultUsageRules = () => {
-  return `
-    <div class="usage-intro">消费者在符合条件的实体餐饮商家进行消费时，须满足所持消费券对应的使用要求方可核销，每桌限使用一张。</div>
-    <div class="usage-detail">消费券使用分两个阶段。</div>
-    <div class="rule-stage">
-      <span class="stage-title">第一阶段</span>使用时间为2025年1月22日早上10:00至2月4日午夜12:00，期间未使用，消费券失效且被系统回收。
-    </div>
-    <div class="rule-stage">
-      <span class="stage-title">第二阶段</span>使用时间为2025年2月6日早上10:00至2月12日午夜12:00，期间未使用，消费券失效。
-    </div>
-  `
-}
+// 获取默认使用规则 (已注释，测试纯API调用)
+// const getDefaultUsageRules = () => {
+//   return `
+//     <div class="usage-intro">消费者在符合条件的实体餐饮商家进行消费时，须满足所持消费券对应的使用要求方可核销，每桌限使用一张。</div>
+//     <div class="usage-detail">消费券使用分两个阶段。</div>
+//     <div class="rule-stage">
+//       <span class="stage-title">第一阶段</span>使用时间为2025年1月22日早上10:00至2月4日午夜12:00，期间未使用，消费券失效且被系统回收。
+//     </div>
+//     <div class="rule-stage">
+//       <span class="stage-title">第二阶段</span>使用时间为2025年2月6日早上10:00至2月12日午夜12:00，期间未使用，消费券失效。
+//     </div>
+//   `
+// }
 
-// 设置默认规则内容（后端不可用时的降级处理）
-const setDefaultRules = () => {
-  distributionRules.value = getDefaultDistributionRules()
-  usageRules.value = getDefaultUsageRules()
-}
+// 设置默认规则内容（已注释，测试纯API调用）
+// const setDefaultRules = () => {
+//   distributionRules.value = getDefaultDistributionRules()
+//   usageRules.value = getDefaultUsageRules()
+// }
 
 // 关闭弹窗
 const handleClose = () => {
@@ -196,14 +202,16 @@ onMounted(() => {
   width: 100%;
 }
 
-.close-btn {
+/* 底部关闭按钮 */
+.bottom-close-btn {
   position: absolute;
-  top: 15px;
-  right: 15px;
-  width: 30px;
-  height: 30px;
+  bottom: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  background: #f0f0f0;
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -211,13 +219,13 @@ onMounted(() => {
   transition: background 0.2s;
 }
 
-.close-btn:hover {
-  background: #e0e0e0;
+.bottom-close-btn:hover {
+  background: rgba(0, 0, 0, 0.8);
 }
 
 .close-icon {
-  font-size: 20px;
-  color: #666;
+  font-size: 24px;
+  color: white;
   font-weight: bold;
 }
 
