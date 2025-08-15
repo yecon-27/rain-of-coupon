@@ -19,26 +19,14 @@
       <form @submit.prevent="handleLogin" class="login-form">
         <div class="form-group">
           <label for="username">用户名</label>
-          <input
-            id="username"
-            v-model="loginForm.username"
-            type="text"
-            placeholder="请输入用户名"
-            required
-            class="form-input"
-          />
+          <input id="username" v-model="loginForm.username" type="text" placeholder="请输入用户名" required
+            class="form-input" />
         </div>
-        
+
         <div class="form-group">
           <label for="password">密码</label>
-          <input
-            id="password"
-            v-model="loginForm.password"
-            type="password"
-            placeholder="请输入密码"
-            required
-            class="form-input"
-          />
+          <input id="password" v-model="loginForm.password" type="password" placeholder="请输入密码" required
+            class="form-input" />
         </div>
 
         <!-- 登录按钮 -->
@@ -51,13 +39,17 @@
 
       <!-- 其他操作 -->
       <div class="other-actions">
-        <button
-          type="button"
-          @click="showRegisterDialog = true"
-          class="register-btn"
-        >
+        <button type="button" @click="showRegisterDialog = true" class="register-btn">
           还没有账号？立即注册
         </button>
+      </div>
+    </div>
+
+    <!-- 气泡提示 -->
+    <div v-if="toast.show" class="toast" :class="toast.type">
+      <div class="toast-content">
+        <span class="toast-icon">{{ toast.type === 'success' ? '✓' : '⚠' }}</span>
+        <span class="toast-message">{{ toast.message }}</span>
       </div>
     </div>
 
@@ -68,55 +60,32 @@
           <h3>用户注册</h3>
           <button @click="closeRegisterDialog" class="close-btn">×</button>
         </div>
-        
+
         <form @submit.prevent="handleRegister" class="register-form">
           <div class="form-group">
             <label for="reg-username">用户名</label>
-            <input
-              id="reg-username"
-              v-model="registerForm.username"
-              type="text"
-              placeholder="请输入用户名"
-              required
-              class="form-input"
-            />
+            <input id="reg-username" v-model="registerForm.username" type="text" placeholder="请输入用户名" required
+              class="form-input" />
           </div>
-          
+
           <div class="form-group">
             <label for="reg-password">密码</label>
-            <input
-              id="reg-password"
-              v-model="registerForm.password"
-              type="password"
-              placeholder="请输入密码"
-              required
-              class="form-input"
-            />
+            <input id="reg-password" v-model="registerForm.password" type="password" placeholder="请输入密码" required
+              class="form-input" />
           </div>
-          
+
           <div class="form-group">
             <label for="reg-confirm">确认密码</label>
-            <input
-              id="reg-confirm"
-              v-model="registerForm.confirmPassword"
-              type="password"
-              placeholder="请再次输入密码"
-              required
-              class="form-input"
-            />
+            <input id="reg-confirm" v-model="registerForm.confirmPassword" type="password" placeholder="请再次输入密码"
+              required class="form-input" />
           </div>
-          
+
           <div class="form-group">
             <label for="reg-nickname">昵称</label>
-            <input
-              id="reg-nickname"
-              v-model="registerForm.nickname"
-              type="text"
-              placeholder="请输入昵称（可选）"
-              class="form-input"
-            />
+            <input id="reg-nickname" v-model="registerForm.nickname" type="text" placeholder="请输入昵称（可选）"
+              class="form-input" />
           </div>
-          
+
           <div class="dialog-actions">
             <button type="button" @click="closeRegisterDialog" class="cancel-btn">取消</button>
             <button type="submit" :disabled="authStore.loading" class="confirm-btn">
@@ -154,40 +123,61 @@ const registerForm = reactive({
 // 状态
 const showRegisterDialog = ref(false)
 
+// 气泡提示状态
+const toast = reactive({
+  show: false,
+  type: 'success' as 'success' | 'error',
+  message: ''
+})
+
+// 显示气泡提示
+const showToast = (type: 'success' | 'error', message: string) => {
+  toast.show = true
+  toast.type = type
+  toast.message = message
+
+  // 3秒后自动隐藏
+  setTimeout(() => {
+    toast.show = false
+  }, 3000)
+}
+
 // 处理登录
 const handleLogin = async () => {
   if (!loginForm.username || !loginForm.password) {
-    alert('请填写完整信息')
+    showToast('error', '请填写完整信息')
     return
   }
 
   try {
     await authStore.login(loginForm.username, loginForm.password)
-    
-    alert('登录成功！')
 
-    // 登录成功后跳转
-    const redirect = route.query.redirect as string
-    if (redirect) {
-      router.push(redirect)
-    } else {
-      router.push('/')
-    }
+    showToast('success', '登录成功！')
+
+    // 延迟跳转，让用户看到成功提示
+    setTimeout(() => {
+      const redirect = route.query.redirect as string
+      if (redirect) {
+        router.push(redirect)
+      } else {
+        router.push('/')
+      }
+    }, 1500)
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : '登录失败'
-    alert(errorMessage)
+    showToast('error', errorMessage)
   }
 }
 
 // 处理注册
 const handleRegister = async () => {
   if (!registerForm.username || !registerForm.password) {
-    alert('请填写完整信息')
+    showToast('error', '请填写完整信息')
     return
   }
 
   if (registerForm.password !== registerForm.confirmPassword) {
-    alert('两次输入的密码不一致')
+    showToast('error', '两次输入的密码不一致')
     return
   }
 
@@ -197,15 +187,15 @@ const handleRegister = async () => {
       password: registerForm.password,
       nickname: registerForm.nickname || registerForm.username
     })
-    
-    alert('注册成功！')
-    
+
+    showToast('success', '注册成功！')
+
     // 关闭注册对话框
     showRegisterDialog.value = false
-    
+
     // 自动填入登录表单
     loginForm.username = registerForm.username
-    
+
     // 清空注册表单
     Object.assign(registerForm, {
       username: '',
@@ -213,10 +203,10 @@ const handleRegister = async () => {
       confirmPassword: '',
       nickname: ''
     })
-    
+
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : '注册失败'
-    alert(errorMessage)
+    showToast('error', errorMessage)
   }
 }
 
@@ -238,7 +228,7 @@ const goBack = () => {
 onMounted(() => {
   // 检查是否已经登录
   authStore.checkAuthStatus()
-  
+
   if (authStore.isLoggedIn) {
     const redirect = route.query.redirect as string
     router.push(redirect || '/')
@@ -262,9 +252,11 @@ onMounted(() => {
 .login-header {
   display: flex;
   align-items: center;
+  justify-content: center;
   padding: 15px 20px;
   background: rgba(0, 0, 0, 0.1);
   color: white;
+  position: relative;
 }
 
 .back-btn {
@@ -276,6 +268,8 @@ onMounted(() => {
   padding: 5px 10px;
   border-radius: 5px;
   transition: background-color 0.3s;
+  position: absolute;
+  left: 20px;
 }
 
 .back-btn:hover {
@@ -283,7 +277,7 @@ onMounted(() => {
 }
 
 .login-header h2 {
-  margin: 0 0 0 20px;
+  margin: 0;
   font-size: 18px;
   font-weight: bold;
 }
@@ -492,7 +486,8 @@ onMounted(() => {
   margin-top: 30px;
 }
 
-.cancel-btn, .confirm-btn {
+.cancel-btn,
+.confirm-btn {
   flex: 1;
   padding: 12px;
   border: none;
@@ -525,22 +520,80 @@ onMounted(() => {
   cursor: not-allowed;
 }
 
+/* 气泡提示样式 */
+.toast {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2000;
+  padding: 12px 20px;
+  border-radius: 25px;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  animation: slideDown 0.3s ease-out;
+  max-width: 80%;
+  text-align: center;
+}
+
+.toast.success {
+  background: linear-gradient(135deg, #4CAF50, #45a049);
+}
+
+.toast.error {
+  background: linear-gradient(135deg, #FF9800, #F57C00);
+}
+
+.toast-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.toast-icon {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.toast-message {
+  font-size: 14px;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
 /* 响应式设计 */
 @media (max-width: 375px) {
   .login-container {
     padding: 16px;
   }
-  
+
   .logo {
     font-size: 50px;
   }
-  
+
   .app-title {
     font-size: 20px;
   }
-  
+
   .dialog-content {
     width: 95%;
+  }
+
+  .toast {
+    max-width: 90%;
+    font-size: 13px;
   }
 }
 </style>
