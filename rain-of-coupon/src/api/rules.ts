@@ -1,4 +1,5 @@
 // 规则管理API接口
+import { getToken } from '@/utils/auth'
 
 // 规则数据类型定义
 export interface Rule {
@@ -33,12 +34,31 @@ export interface RulesQuery {
 // API基础URL配置
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
 
+// 获取若依系统的token
+const getRuoyiToken = (): string | null => {
+  // 从Cookie中获取Admin-Token
+  const cookies = document.cookie.split(';')
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=')
+    if (name === 'Admin-Token') {
+      return value
+    }
+  }
+  return null
+}
+
 // 通用请求函数
 const apiRequest = async (url: string, options: RequestInit = {}) => {
+  // 优先使用若依系统的token
+  const ruoyiToken = getRuoyiToken()
+  const authToken = getToken()
+  const token = ruoyiToken || authToken
+
   const config: RequestInit = {
     ...options,
     headers: {
       'Content-Type': 'application/json',
+      ...(token && { Authorization: `Bearer ${token}` }),
       ...options.headers,
     },
   }

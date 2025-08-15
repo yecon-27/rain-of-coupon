@@ -17,6 +17,13 @@
 
     <!-- 拥挤提示组件 -->
     <CrowdingTip :visible="uiStore.showCrowdingTip" />
+
+    <!-- 规则弹窗组件 -->
+    <RulePopup 
+      :visible="showRulePopup" 
+      @close="showRulePopup = false"
+      @confirm="showRulePopup = false"
+    />
   </div>
 </template>
 
@@ -31,6 +38,7 @@ import FoodDisplaySection from '@/components/FoodDisplaySection.vue'
 import Top10FoodSection from '@/components/Top10FoodSection.vue'
 import SpecialityFoodSection from '@/components/SpecialityFoodSection.vue'
 import CrowdingTip from '@/components/CrowdingTip.vue'
+import RulePopup from '@/components/RulePopup.vue'
 
 // 路由和认证
 const router = useRouter()
@@ -39,6 +47,7 @@ const uiStore = useUIStore()
 const top10Foods = ref<FoodItem[]>([])
 const specialityFoods = ref<FoodItem[]>([])
 const loading = ref(false)
+const showRulePopup = ref(false)
 
 // 获取美食列表数据
 const fetchFoodData = async () => {
@@ -78,8 +87,8 @@ const joinActivity = () => {
 }
 
 const showRules = () => {
-  // 显示规则
-  console.log('显示规则')
+  // 显示规则弹窗
+  showRulePopup.value = true
 }
 
 // 登出功能（暂时未使用，保留备用）

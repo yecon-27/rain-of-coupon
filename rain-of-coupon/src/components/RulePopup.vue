@@ -67,28 +67,12 @@ const loading = ref(false)
 // 获取规则数据
 const loadRules = async () => {
   loading.value = true
-  try {
-    const response = await getRulesForDisplay()
-    if (response.code === 200) {
-      const rulesData = response.data
-      
-      // 设置发放规则
-      if (rulesData.distribution_rule && rulesData.distribution_rule.length > 0) {
-        distributionRules.value = rulesData.distribution_rule[0].ruleContent
-      }
-      
-      // 设置使用规则
-      if (rulesData.usage_rule && rulesData.usage_rule.length > 0) {
-        usageRules.value = rulesData.usage_rule[0].ruleContent
-      }
-    }
-  } catch (error) {
-    console.error('加载规则失败:', error)
-    // 设置默认规则内容
-    setDefaultRules()
-  } finally {
-    loading.value = false
-  }
+  console.log('🔍 开始加载规则数据...')
+
+  // 暂时直接使用默认规则，等后端接口修复后再启用API调用
+  console.log('📋 使用默认规则内容（后端接口待修复）')
+  setDefaultRules()
+  loading.value = false
 }
 
 // 设置默认规则内容（后端不可用时的降级处理）
@@ -102,7 +86,7 @@ const setDefaultRules = () => {
       <span class="stage-title">第二阶段</span>发放时间为2025年2月6日10:00至18:00，按第一份段未使用的消费券回收数量发放，发完为止。
     </div>
   `
-  
+
   usageRules.value = `
     <div class="usage-intro">消费者在符合条件的实体餐饮商家进行消费时，须满足所持消费券对应的使用要求方可核销，每桌限使用一张。</div>
     <div class="usage-detail">消费券使用分两个阶段。</div>
@@ -171,6 +155,7 @@ onMounted(() => {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -289,11 +274,11 @@ onMounted(() => {
     padding: 15px;
     max-height: 85vh;
   }
-  
+
   .rule-title {
     font-size: 18px;
   }
-  
+
   .section-content {
     font-size: 13px;
   }
