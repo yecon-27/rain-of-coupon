@@ -42,3 +42,11 @@ export function delRules(id) {
     method: 'delete'
   })
 }
+
+// 获取规则用于前端显示（无需权限）
+export function getRulesForDisplay() {
+  return request({
+    url: '/redpacket/rules/display',
+    method: 'get'
+  })
+}

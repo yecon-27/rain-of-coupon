@@ -69,15 +69,36 @@ const loadRules = async () => {
   loading.value = true
   console.log('🔍 开始加载规则数据...')
 
-  // 暂时直接使用默认规则，等后端接口修复后再启用API调用
-  console.log('📋 使用默认规则内容（后端接口待修复）')
-  setDefaultRules()
-  loading.value = false
+  try {
+    const response = await getRulesForDisplay()
+    console.log('✅ 成功从API加载规则数据:', response.data)
+    
+    // 处理API返回的规则数据
+    if (response.data && Array.isArray(response.data)) {
+      const rules = response.data
+      
+      // 按规则类型分类
+      const distributionRule = rules.find(rule => rule.ruleType === 'distribution_rule')
+      const usageRule = rules.find(rule => rule.ruleType === 'usage_rule')
+      
+      distributionRules.value = distributionRule?.ruleContent || getDefaultDistributionRules()
+      usageRules.value = usageRule?.ruleContent || getDefaultUsageRules()
+    } else {
+      console.warn('⚠️ API返回数据格式异常，使用默认规则')
+      setDefaultRules()
+    }
+  } catch (error) {
+    console.error('❌ 加载规则失败:', error)
+    console.log('📋 降级到默认规则内容')
+    setDefaultRules()
+  } finally {
+    loading.value = false
+  }
 }
 
-// 设置默认规则内容（后端不可用时的降级处理）
-const setDefaultRules = () => {
-  distributionRules.value = `
+// 获取默认发放规则
+const getDefaultDistributionRules = () => {
+  return `
     <div class="rule-intro">消费券发放分两个阶段。</div>
     <div class="rule-stage">
       <span class="stage-title">第一阶段</span>发放时间为2025年1月22日早上10:00至25日早上10:00，按计划数发放，发完为止。
@@ -86,8 +107,11 @@ const setDefaultRules = () => {
       <span class="stage-title">第二阶段</span>发放时间为2025年2月6日10:00至18:00，按第一份段未使用的消费券回收数量发放，发完为止。
     </div>
   `
+}
 
-  usageRules.value = `
+// 获取默认使用规则
+const getDefaultUsageRules = () => {
+  return `
     <div class="usage-intro">消费者在符合条件的实体餐饮商家进行消费时，须满足所持消费券对应的使用要求方可核销，每桌限使用一张。</div>
     <div class="usage-detail">消费券使用分两个阶段。</div>
     <div class="rule-stage">
@@ -97,6 +121,12 @@ const setDefaultRules = () => {
       <span class="stage-title">第二阶段</span>使用时间为2025年2月6日早上10:00至2月12日午夜12:00，期间未使用，消费券失效。
     </div>
   `
+}
+
+// 设置默认规则内容（后端不可用时的降级处理）
+const setDefaultRules = () => {
+  distributionRules.value = getDefaultDistributionRules()
+  usageRules.value = getDefaultUsageRules()
 }
 
 // 关闭弹窗

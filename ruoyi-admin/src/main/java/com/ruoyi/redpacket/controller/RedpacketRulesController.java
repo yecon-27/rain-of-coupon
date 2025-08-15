@@ -60,6 +60,17 @@ public class RedpacketRulesController extends BaseController
     }
 
     /**
+     * 获取红包活动规则用于前端显示
+     */
+    @GetMapping("/display")
+    public AjaxResult getRulesForDisplay()
+    {
+        List<RedpacketRules> list = redpacketRulesService.selectRedpacketRulesList(new RedpacketRules());
+        // 按规则类型和显示顺序排序
+        return success(list);
+    }
+
+    /**
      * 获取红包活动规则详细信息
      */
     @PreAuthorize("@ss.hasPermi('redpacket:rules:query')")
