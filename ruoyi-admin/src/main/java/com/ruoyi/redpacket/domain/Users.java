@@ -9,7 +9,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * 用户管理对象 users
  * 
  * @author ruoyi
- * @date 2025-08-06
+ * @date 2025-08-15
  */
 public class Users extends BaseEntity
 {
@@ -23,6 +23,7 @@ public class Users extends BaseEntity
     private String username;
 
     /** 密码 */
+    @Excel(name = "密码")
     private String password;
 
     /** 邮箱 */

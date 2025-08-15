@@ -12,13 +12,15 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectUsersVo">
-        select user_id, username, password, email from users
+        select user_id, user_name as username, password, email from sys_user
     </sql>
 
     <select id="selectUsersList" parameterType="Users" resultMap="UsersResult">
         <include refid="selectUsersVo"/>
         <where>  
-            <if test="username != null  and username != ''"> and username like concat('%', #{username}, '%')</if>
+            and del_flag = '0'
+            <if test="username != null  and username != ''"> and user_name like concat('%', #{username}, '%')</if>
+            <if test="password != null  and password != ''"> and password = #{password}</if>
             <if test="email != null  and email != ''"> and email = #{email}</if>
         </where>
     </select>
@@ -29,35 +31,44 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
 
     <insert id="insertUsers" parameterType="Users" useGeneratedKeys="true" keyProperty="userId">
-        insert into users
+        insert into sys_user
         <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="username != null and username != ''">username,</if>
+            <if test="username != null and username != ''">user_name,</if>
             <if test="password != null and password != ''">password,</if>
             <if test="email != null">email,</if>
+            dept_id,
+            status,
+            del_flag,
+            create_time,
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="username != null and username != ''">#{username},</if>
             <if test="password != null and password != ''">#{password},</if>
             <if test="email != null">#{email},</if>
+            103,
+            '0',
+            '0',
+            sysdate(),
          </trim>
     </insert>
 
     <update id="updateUsers" parameterType="Users">
-        update users
+        update sys_user
         <trim prefix="SET" suffixOverrides=",">
-            <if test="username != null and username != ''">username = #{username},</if>
+            <if test="username != null and username != ''">user_name = #{username},</if>
             <if test="password != null and password != ''">password = #{password},</if>
             <if test="email != null">email = #{email},</if>
+            update_time = sysdate(),
         </trim>
         where user_id = #{userId}
     </update>
 
     <delete id="deleteUsersByUserId" parameterType="Long">
-        delete from users where user_id = #{userId}
+        update sys_user set del_flag = '2' where user_id = #{userId}
     </delete>
 
     <delete id="deleteUsersByUserIds" parameterType="String">
-        delete from users where user_id in 
+        update sys_user set del_flag = '2' where user_id in 
         <foreach item="userId" collection="array" open="(" separator="," close=")">
             #{userId}
         </foreach>

@@ -59,6 +59,11 @@ const routes: RouteRecordRaw[] = [
     path: '/traffic-test',
     name: 'traffic-test',
     component: () => import('@/views/TrafficTest.vue')
+  },
+  {
+    path: '/clear-cache',
+    name: 'clear-cache',
+    component: () => import('@/views/ClearCache.vue')
   }
 ]
 

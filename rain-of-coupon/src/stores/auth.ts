@@ -130,54 +130,89 @@ interface RegisterResponse {
   success: boolean
   message?: string
 }
-
-// 模拟登录API
+// 真实登录API调用
 async function mockLoginAPI(username: string, password: string): Promise<LoginResponse> {
-  await new Promise(resolve => setTimeout(resolve, 1000))
-  
-  // 模拟用户数据库
-  const users = [
-    { id: 'user_001', username: 'admin', password: 'Admin@2024', nickname: '管理员' },
-    { id: 'user_002', username: 'test', password: 'Test@2024', nickname: '测试用户' }
-  ]
-  
-  const user = users.find(u => u.username === username && u.password === password)
-  
-  if (user) {
-    return {
-      success: true,
-      user: {
-        id: user.id,
-        username: user.username,
-        nickname: user.nickname
-        // 不返回密码！
+  try {
+    // 调用若依系统的登录接口
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
+    
+    const response = await fetch(`${API_BASE_URL}/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
       },
-      token: `jwt_token_${Date.now()}_${Math.random()}` // 模拟JWT token
+      body: JSON.stringify({
+        username,
+        password,
+        code: '', // 验证码已禁用，留空
+        uuid: ''
+      })
+    })
+
+    const data = await response.json()
+    
+    if (data.code === 200) {
+      return {
+        success: true,
+        user: {
+          id: data.user?.userId?.toString() || username,
+          username: data.user?.userName || username,
+          nickname: data.user?.nickName || username
+        },
+        token: data.token
+      }
+    } else {
+      return {
+        success: false,
+        message: data.msg || '登录失败'
+      }
     }
-  } else {
+  } catch (error) {
+    console.error('登录API调用失败:', error)
     return {
       success: false,
-      message: '用户名或密码错误'
+      message: '网络错误，请检查后端服务是否启动'
     }
   }
 }
 
-// 模拟注册API
+// 真实注册API调用
 async function mockRegisterAPI(userData: {username: string, password: string, nickname: string}): Promise<RegisterResponse> {
-  await new Promise(resolve => setTimeout(resolve, 1000))
-  
-  // 模拟检查用户名是否存在
-  const existingUsers = ['admin', 'test'] // 模拟已存在的用户名
-  
-  if (existingUsers.includes(userData.username)) {
+  try {
+    // 调用若依系统的注册接口
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
+    
+    const response = await fetch(`${API_BASE_URL}/register`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        username: userData.username,
+        password: userData.password,
+        code: '', // 验证码已禁用，留空
+        uuid: ''
+      })
+    })
+
+    const data = await response.json()
+    
+    if (data.code === 200) {
+      return {
+        success: true,
+        message: '注册成功'
+      }
+    } else {
+      return {
+        success: false,
+        message: data.msg || '注册失败'
+      }
+    }
+  } catch (error) {
+    console.error('注册API调用失败:', error)
     return {
       success: false,
-      message: '用户名已存在'
+      message: '网络错误，请检查后端服务是否启动'
     }
-  }
-  
-  return {
-    success: true,
-    message: '注册成功'
   }
 }

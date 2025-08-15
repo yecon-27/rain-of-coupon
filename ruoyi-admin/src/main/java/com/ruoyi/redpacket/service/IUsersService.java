@@ -7,7 +7,7 @@ import com.ruoyi.redpacket.domain.Users;
  * 用户管理Service接口
  * 
  * @author ruoyi
- * @date 2025-08-06
+ * @date 2025-08-15
  */
 public interface IUsersService 
 {

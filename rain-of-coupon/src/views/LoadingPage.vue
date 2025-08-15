@@ -147,7 +147,7 @@ onUnmounted(() => {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: radial-gradient(ellipse 80% 60% at center, #ffcc99, #ffe4cc, #fff4e8);
+  background: radial-gradient(ellipse 90% 80% at center, #ffcc99, #ffe4cc, #fff4e8);
   display: flex;
   align-items: flex-start;
   justify-content: center;
