@@ -185,47 +185,49 @@ Phase 1 and Phase 2 may progress in parallel, with priority given to completing 
 **Database Design** `8/5 - 8/6``8/7 Supplemented the participation log table`
 
 **Code Generation** `8/6`
-- ✅ Entity classes generated
-- ✅ Mapper interfaces generated  
-- ✅ Basic CRUD Service and Controller layers generated
-- ✅ Menu configuration SQL files generated
+- Entity classes generated
+- Mapper interfaces generated  
+- Basic CRUD Service and Controller layers generated
+- Menu configuration SQL files generated
 
 **Core Business Logic for Red Envelope Rain Controller and Service Layer**`8/6`
-- ✅ Daily Limit of 3 Games
-- ✅ Participation Stops After Winning (One Win Per Person)
-- ✅ IP Frequency Limit (10 Times per Hour)
-- ✅ Event Duration Control
-- ✅ Click-Based Probability Algorithm (More Clicks = Higher Win Rate)
-- ✅ Red Envelope Rain Interactive Mode (100 Red Envelopes Fall in 50 Seconds)
-- ✅ Automatic Inventory Deductions
-- ✅ Automatic Exclusion of Zero Inventory
-- ✅ Transactions Ensure Data Consistency
+- Daily Limit of 3 Games
+- Participation Stops After Winning (One Win Per Person)
+- IP Frequency Limit (10 Times per Hour)
+- Event Duration Control
+- Click-Based Probability Algorithm (More Clicks = Higher Win Rate)
+- Red Envelope Rain Interactive Mode (100 Red Envelopes Fall in 50 Seconds)
+- Automatic Inventory Deductions
+- Automatic Exclusion of Zero Inventory
+- Transactions Ensure Data Consistency
 
 ***API Interface Specification** `8/6`
-1. POST /api/lottery/draw ✅
+1. POST /api/lottery/draw 
 - Executes red envelope rain logic
 - Calculates win probability based on click count
 - Checks user eligibility
 - Saves participation record
 - Returns red envelope grab results
-2. GET /api/lottery/records ✅
+2. GET /api/lottery/records 
 - Gets the user's historical participation records
 - Requires user login
-3. GET /api/lottery/drawCount ✅
+3. GET /api/lottery/drawCount 
 - Gets the remaining number of games
 - Checks if a prize has been won
 - Returns whether user can participate in red envelope rain
-4. GET /api/lottery/prizes ✅
+4. GET /api/lottery/prizes 
 - Gets a list of all available prizes
 - Automatically filters prizes with zero inventory
-5. GET /api/lottery/status ✅
+5. GET /api/lottery/status 
 - Checks user eligibility for red envelope rain
 - Returns detailed status information
 - Including the reason for not being able to participate
-6. GET /api/activity/config ✅
+6. GET /api/activity/config 
 - Gets activity configuration information
 - Activity duration, restrictions, etc.
 - Determines activity status
+
+**Authentication & Data Security**`8.17`
 
 ### Phase 2: Frontend Page Structure & API Integration (In Progress: 3 days)
 
