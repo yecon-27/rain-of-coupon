@@ -145,7 +145,7 @@ onMounted(() => {
   /* 100px * 1.25 */
   cursor: pointer;
   display: block;
-  animation: breathe 2s ease-in-out infinite;
+  animation: breathe 1.2s ease-in-out infinite;
 }
 
 @keyframes breathe {
