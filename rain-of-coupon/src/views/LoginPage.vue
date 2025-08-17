@@ -16,17 +16,21 @@
       </div>
 
       <!-- 登录表单 -->
-      <form @submit.prevent="handleLogin" class="login-form">
+      <form @submit.prevent="handleLogin" class="login-form" autocomplete="off">
+        <!-- 隐藏的蜜罐字段 -->
+        <input type="text" name="fake_username" style="display:none" autocomplete="username" />
+        <input type="password" name="fake_password" style="display:none" autocomplete="current-password" />
+
         <div class="form-group">
           <label for="username">用户名</label>
-          <input id="username" v-model="loginForm.username" type="text" placeholder="请输入用户名" required
-            class="form-input" />
+          <input id="username" v-model="loginForm.username" type="text" placeholder="请输入用户名" required class="form-input"
+            autocomplete="off" name="user_login_field" data-lpignore="true" data-form-type="other" />
         </div>
 
         <div class="form-group">
           <label for="password">密码</label>
           <input id="password" v-model="loginForm.password" type="password" placeholder="请输入密码" required
-            class="form-input" />
+            class="form-input" autocomplete="off" name="security_field" data-lpignore="true" data-form-type="search" />
         </div>
 
         <!-- 登录按钮 -->
@@ -61,23 +65,29 @@
           <button @click="closeRegisterDialog" class="close-btn">×</button>
         </div>
 
-        <form @submit.prevent="handleRegister" class="register-form">
+        <form @submit.prevent="handleRegister" class="register-form" autocomplete="off">
+          <!-- 隐藏的蜜罐字段 -->
+          <input type="text" name="reg_fake_username" style="display:none" autocomplete="username" />
+          <input type="password" name="reg_fake_password" style="display:none" autocomplete="new-password" />
+
           <div class="form-group">
             <label for="reg-username">用户名</label>
             <input id="reg-username" v-model="registerForm.username" type="text" placeholder="请输入用户名" required
-              class="form-input" />
+              class="form-input" autocomplete="off" name="reg_user_field" data-lpignore="true" data-form-type="other" />
           </div>
 
           <div class="form-group">
             <label for="reg-password">密码</label>
             <input id="reg-password" v-model="registerForm.password" type="password" placeholder="请输入密码" required
-              class="form-input" />
+              class="form-input" autocomplete="off" name="reg_security_field" data-lpignore="true"
+              data-form-type="search" />
           </div>
 
           <div class="form-group">
             <label for="reg-confirm">确认密码</label>
             <input id="reg-confirm" v-model="registerForm.confirmPassword" type="password" placeholder="请再次输入密码"
-              required class="form-input" />
+              required class="form-input" autocomplete="off" name="reg_confirm_security" data-lpignore="true"
+              data-form-type="search" />
           </div>
 
           <div class="form-group">
@@ -141,6 +151,8 @@ const showToast = (type: 'success' | 'error', message: string) => {
     toast.show = false
   }, 3000)
 }
+
+
 
 // 处理登录
 const handleLogin = async () => {

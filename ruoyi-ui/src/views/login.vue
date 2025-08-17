@@ -1,6 +1,10 @@
 <template>
   <div class="login">
-    <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form">
+    <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" autocomplete="off">
+      <!-- 隐藏的蜜罐字段 -->
+      <input type="text" name="fake_user" style="display:none" autocomplete="username" />
+      <input type="password" name="fake_pass" style="display:none" autocomplete="current-password" />
+      
       <h3 class="title">{{title}}</h3>
       <el-form-item prop="username">
         <el-input
@@ -8,6 +12,7 @@
           type="text"
           auto-complete="off"
           placeholder="账号"
+          name="admin_user_field"
         >
           <svg-icon slot="prefix" icon-class="user" class="el-input__icon input-icon" />
         </el-input>
@@ -18,6 +23,7 @@
           type="password"
           auto-complete="off"
           placeholder="密码"
+          name="admin_pass_field"
           @keyup.enter.native="handleLogin"
         >
           <svg-icon slot="prefix" icon-class="password" class="el-input__icon input-icon" />
