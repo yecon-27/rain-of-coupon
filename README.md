@@ -1,6 +1,7 @@
-🌐 Language Switch | 语言切换:  [English](./README.md) | [中文](./README.cn.md)
+🌐 Language Switch | 语言切换: [English](./README.md) | [中文](./README.cn.md)
 
 ## Red Envelope Rain Mini Program
+
 Developed a mini program using Vue 3 and the Ruoyi Framework. Key features include:
 
 - **Red Envelope Rain System**: Up to 3 games per user per day; ends automatically upon winning. The more red envelopes clicked, the higher the winning probability.
@@ -10,9 +11,10 @@ Developed a mini program using Vue 3 and the Ruoyi Framework. Key features inclu
 - Interactive animations: Falling red envelopes and clickable reward triggers.
 
 - Coupon package page: Designed a responsive layout with return navigation.
-<img width="1199" height="756" alt="642b289e022901a99b5f68f1a5e94f4" src="https://github.com/user-attachments/assets/ee03551b-73a5-4565-862b-7016bc432df9" />
+  <img width="1199" height="756" alt="642b289e022901a99b5f68f1a5e94f4" src="https://github.com/user-attachments/assets/ee03551b-73a5-4565-862b-7016bc432df9" />
 
 ### Tech Stack
+
 - Frontend: Vue 3, Vuex, Vite
 - Backend: Ruoyi Framework (Spring Boot)
 - Database: MySQL
@@ -22,6 +24,7 @@ Developed a mini program using Vue 3 and the Ruoyi Framework. Key features inclu
 ## Database Schema
 
 ### Core Business Tables
+
 1. **redpacket_prize** (Prize Configuration Table)
    - Prize name, total quantity, remaining quantity, win probability
 2. **redpacket_user_participation_log** (User Participation Log Table)
@@ -32,6 +35,7 @@ Developed a mini program using Vue 3 and the Ruoyi Framework. Key features inclu
    - Static image resource management for red envelope rain
 
 ### Business Features
+
 - **Anti-Fraud Mechanism**: IP frequency limits, daily attempt limits, stop after winning
 - **Probability Algorithm**: Dynamic probability calculation based on click count
 - **Concurrency Control**: Redis cache + database transactions ensure data consistency
@@ -123,10 +127,13 @@ Developed a mini program using Vue 3 and the Ruoyi Framework. Key features inclu
 │   │   │   ├── ...
 │   └── pom.xml                   # Maven config specific to this module
 ├── ruoyi-common/                # Shared Java utility module
-├── ruoyi-framework/             # Core backend framework module            
+├── ruoyi-framework/             # Core backend framework module
 ```
+
 ## Userflow & Page-Level Route Structure
-1. 
+
+1.
+
 ```
 Home (/)
 ├─ Click "Join Activity" → Login Page (/login)
@@ -142,7 +149,9 @@ Home (/)
 ├─ Click "Activity Rules" → Rules Page (/rule)
 └─ After lottery ends or user logs in → Coupon Page (/coupon)
 ```
-2. 
+
+2.
+
 ```
 /
 ├── HomePage (/)
@@ -174,23 +183,26 @@ Home (/)
 ├── CouponPage (/coupon)
 │   └── Display received coupons + BackButton
 ```
+
 ## Dev Progress
 
 Phase 1 and Phase 2 may progress in parallel, with priority given to completing the MVP.
 
 ### Phase 1: Database Design & API Development (In Progress: 3 days)
 
-#### ✅ **Completed Tasks:**
+#### **Completed Tasks:**
 
-**Database Design** `8/5 - 8/6``8/7 Supplemented the participation log table`
+**Database Design** ` 8/5 - 8/6``8/7 Supplemented the participation log table `
 
 **Code Generation** `8/6`
+
 - Entity classes generated
-- Mapper interfaces generated  
+- Mapper interfaces generated
 - Basic CRUD Service and Controller layers generated
 - Menu configuration SQL files generated
 
 **Core Business Logic for Red Envelope Rain Controller and Service Layer**`8/6`
+
 - Daily Limit of 3 Games
 - Participation Stops After Winning (One Win Per Person)
 - IP Frequency Limit (10 Times per Hour)
@@ -201,33 +213,35 @@ Phase 1 and Phase 2 may progress in parallel, with priority given to completing 
 - Automatic Exclusion of Zero Inventory
 - Transactions Ensure Data Consistency
 
-***API Interface Specification** `8/6`
-1. POST /api/lottery/draw 
-- Executes red envelope rain logic
-- Calculates win probability based on click count
-- Checks user eligibility
-- Saves participation record
-- Returns red envelope grab results
-2. GET /api/lottery/records 
-- Gets the user's historical participation records
-- Requires user login
-3. GET /api/lottery/drawCount 
-- Gets the remaining number of games
-- Checks if a prize has been won
-- Returns whether user can participate in red envelope rain
-4. GET /api/lottery/prizes 
-- Gets a list of all available prizes
-- Automatically filters prizes with zero inventory
-5. GET /api/lottery/status 
-- Checks user eligibility for red envelope rain
-- Returns detailed status information
-- Including the reason for not being able to participate
-6. GET /api/activity/config 
-- Gets activity configuration information
-- Activity duration, restrictions, etc.
-- Determines activity status
+## API Interface Specification `8/17`
+
+### Core Business APIs
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/redpacket/lottery/draw` | Execute red envelope rain logic with click count |
+| GET | `/redpacket/lottery/records` | Get user participation history with pagination |
+| GET | `/redpacket/lottery/count` | Get remaining draws and daily statistics |
+| GET | `/redpacket/lottery/status` | Check user eligibility and participation status |
+| GET | `/redpacket/lottery/prizes` | Get available prize list (auto-filter zero inventory) |
+| POST | `/redpacket/lottery/claim/{logId}` | Claim/use coupon from winning record |
+| GET | `/redpacket/lottery/config` | Get activity configuration and time settings |
+
+*Additional admin management APIs available for prize configuration, user management, and analytics.*
 
 **Authentication & Data Security**`8.17`
+
+#### Password Protection Measures
+
+To prevent browser password leak warnings and enhance security, the following measures have been implemented:
+
+1. **Honeypot Fields**: Hidden fake username and password fields with standard autocomplete attributes to divert browser attention
+2. **Custom Field Names**: Real input fields use non-standard names (e.g., `security_field`, `user_login_field`) instead of common password field names
+3. **Password Manager Exclusion**: Added `data-lpignore="true"` attribute to prevent LastPass and other password managers from detecting these fields
+4. **Form Type Masking**: Used `data-form-type="search"` to disguise login forms as search forms
+5. **Autocomplete Disabled**: Set `autocomplete="off"` on all sensitive fields to prevent browser auto-fill
+6. **Field Type Obfuscation**: Strategic use of field types and attributes to avoid browser password detection algorithms
+
+These measures work together to prevent browsers from identifying the fields as login credentials, thus avoiding password leak warnings while maintaining full functionality.
 
 ### Phase 2: Frontend Page Structure & API Integration (In Progress: 3 days)
 
@@ -239,8 +253,8 @@ Phase 1 and Phase 2 may progress in parallel, with priority given to completing 
 
 2. Axios setup with request interceptors
 
-- **Red Envelope Rain Logic**: *100 red envelopes fall in 50 seconds*, *Click to accumulate count*, *Calculate win probability based on click count after game ends*, *Popup to show win or no-win*
-  
+- **Red Envelope Rain Logic**: _100 red envelopes fall in 50 seconds_, _Click to accumulate count_, _Calculate win probability based on click count after game ends_, _Popup to show win or no-win_
+
 ```
 let totalRedPackets = 100;
 let interval = setInterval(() => {
@@ -250,8 +264,8 @@ let interval = setInterval(() => {
 }, 200);
 ```
 
-- **Detects high user traffic**： "Current Limitation" Problem -> Backend current limiting + status response + 
-Front-end loading judgment, return `{ "status": "crowded" } // or "ok"`
+- **Detects high user traffic**： "Current Limitation" Problem -> Backend current limiting + status response +
+  Front-end loading judgment, return `{ "status": "crowded" } // or "ok"`
 
 - **Determine win based on click count**:
 
@@ -276,6 +290,7 @@ if (isWin) {
     saveUserPrize(userId, prize);
 }
 ```
+
 - **Configurable prize distribution algorithm**:
 
 1. Use Redis for inventory deductions (to prevent concurrent over-issuance)
@@ -289,4 +304,5 @@ if (isWin) {
 - Validate draw limits and winning logic
 
 ## License
+
 This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for details.
