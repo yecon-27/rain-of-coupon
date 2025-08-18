@@ -137,4 +137,63 @@ public class RedpacketActivityParticipantsServiceImpl implements IRedpacketActiv
             return false;
         }
     }
+
+    /**
+     * 更新用户心跳时间
+     */
+    @Override
+    public boolean updateUserHeartbeat(String userId, String sessionId) {
+        try {
+            // 查找现有的参与者记录
+            RedpacketActivityParticipants query = new RedpacketActivityParticipants();
+            query.setUserId(userId);
+            query.setSessionId(sessionId);
+            query.setStatus("active");
+            
+            List<RedpacketActivityParticipants> participants = 
+                redpacketActivityParticipantsMapper.selectRedpacketActivityParticipantsList(query);
+            
+            if (!participants.isEmpty()) {
+                RedpacketActivityParticipants participant = participants.get(0);
+                participant.setLastHeartbeat(new java.util.Date());
+                participant.setUpdatedAt(new java.util.Date());
+                
+                int result = redpacketActivityParticipantsMapper.updateRedpacketActivityParticipants(participant);
+                return result > 0;
+            }
+            return false;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * 用户离开活动
+     */
+    @Override
+    public boolean leaveActivity(String userId, String sessionId) {
+        try {
+            // 查找现有的参与者记录
+            RedpacketActivityParticipants query = new RedpacketActivityParticipants();
+            query.setUserId(userId);
+            query.setSessionId(sessionId);
+            query.setStatus("active");
+            
+            List<RedpacketActivityParticipants> participants = 
+                redpacketActivityParticipantsMapper.selectRedpacketActivityParticipantsList(query);
+            
+            if (!participants.isEmpty()) {
+                RedpacketActivityParticipants participant = participants.get(0);
+                participant.setStatus("left");
+                participant.setLeaveTime(new java.util.Date());
+                participant.setUpdatedAt(new java.util.Date());
+                
+                int result = redpacketActivityParticipantsMapper.updateRedpacketActivityParticipants(participant);
+                return result > 0;
+            }
+            return false;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }

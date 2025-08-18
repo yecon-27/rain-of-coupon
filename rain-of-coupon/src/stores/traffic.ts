@@ -41,7 +41,7 @@ export const useTrafficStore = defineStore('traffic', () => {
   const error = ref<string | null>(null)
   
   // 心跳定时器
-  let heartbeatTimer: NodeJS.Timeout | null = null
+  let heartbeatTimer: ReturnType<typeof setInterval> | null = null
   
   // Computed
   const canJoinActivity = computed(() => {
@@ -116,7 +116,6 @@ export const useTrafficStore = defineStore('traffic', () => {
         state.value.isInActivity = response.data.userStatus === 'active'
         
         if (response.data.userStatus === 'queued') {
-          state.value.queuePosition = (response.data as any).queuePosition || null
         }
         
         // 如果成功加入，开始心跳
@@ -131,7 +130,7 @@ export const useTrafficStore = defineStore('traffic', () => {
       }
     } catch (err) {
       console.error('后端API调用失败:', error)
-      error.value = error instanceof Error ? error.message : '网络错误'
+      error.value = err instanceof Error ? err.message : '网络错误'
       
       // 如果确实需要降级到模拟服务，可以在这里添加
       // 但根据您的要求，我们优先使用后端接口

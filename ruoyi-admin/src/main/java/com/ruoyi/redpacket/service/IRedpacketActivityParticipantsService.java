@@ -81,4 +81,22 @@ public interface IRedpacketActivityParticipantsService
      * @return 是否成功
      */
     public boolean joinActivity(String userId, String sessionId);
+
+    /**
+     * 更新用户心跳时间
+     * 
+     * @param userId 用户ID
+     * @param sessionId 会话ID
+     * @return 是否成功
+     */
+    public boolean updateUserHeartbeat(String userId, String sessionId);
+
+    /**
+     * 用户离开活动
+     * 
+     * @param userId 用户ID
+     * @param sessionId 会话ID
+     * @return 是否成功
+     */
+    public boolean leaveActivity(String userId, String sessionId);
 }

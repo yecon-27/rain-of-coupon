@@ -13,9 +13,12 @@ import java.util.Date;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.Map;
 import java.util.HashMap;
+// 添加以下导入
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * 流量检测Controller
+ * 流量控制Controller
  * 
  * @author ruoyi
  */
@@ -23,6 +26,9 @@ import java.util.HashMap;
 @RestController
 @RequestMapping("/api/traffic")
 public class TrafficController extends BaseController {
+    
+    // 添加 Logger 声明
+    private static final Logger logger = LoggerFactory.getLogger(TrafficController.class);
     
     @Autowired
     private IRedpacketTrafficConfigService trafficConfigService;
@@ -39,53 +45,38 @@ public class TrafficController extends BaseController {
     @GetMapping("/check")
     public AjaxResult checkTraffic() {
         try {
-            // 1. 获取活跃用户数并记录日志
-            int activeUsers = participantsService.getActiveUserCount();
-            logger.info("当前活跃用户数: {}", activeUsers);
+            // 获取配置
+            String maxUsersStr = trafficConfigService.getConfigValueByKey("max_users", "1000");
+            String maintenanceModeStr = trafficConfigService.getConfigValueByKey("maintenance_mode", "false");
             
-            // 2. 获取配置的最大用户数
-            int maxUsers = 1000;
-            try {
-                String maxUsersStr = trafficConfigService.getConfigValueByKey("max_concurrent_users", "1000");
-                maxUsers = Integer.parseInt(maxUsersStr);
-                logger.info("配置的最大用户数: {}", maxUsers);
-            } catch (NumberFormatException e) {
-                logger.warn("解析max_concurrent_users配置失败，使用默认值1000", e);
-            }
-            
-            // 3. 判断是否维护模式（从数据库配置表中读取）
-            boolean isMaintenanceMode = false;
-            try {
-                String maintenanceModeStr = trafficConfigService.getConfigValueByKey("maintenance_mode", "false");
-                isMaintenanceMode = "true".equals(maintenanceModeStr) || "1".equals(maintenanceModeStr);
-            } catch (Exception e) {
-                logger.warn("读取maintenance_mode配置失败，使用默认值false", e);
-            }
-            
-            // 记录流量统计数据
-            recordTrafficStats("check_traffic", activeUsers, maxUsers, isMaintenanceMode);
+            int maxUsers = Integer.parseInt(maxUsersStr);
+            boolean isMaintenanceMode = Boolean.parseBoolean(maintenanceModeStr);
             
             if (isMaintenanceMode) {
-                return AjaxResult.success(createResponse("maintenance", 0, maxUsers, null, null, null));
+                // 维护模式
+                recordTrafficStats("check_traffic", 0, maxUsers, true);
+                return AjaxResult.success(createResponse("maintenance", 0, maxUsers, null, null, 300));
             }
             
-            // 4. 判断是否拥挤并记录日志
-            if (activeUsers >= maxUsers) {
-                // 简化队列逻辑，暂时使用固定值
-                int queueCount = Math.max(0, activeUsers - maxUsers);
-                int estimatedWaitTime = calculateEstimatedWaitTime(queueCount, activeUsers);
+            // 获取当前用户数
+            int currentUsers = participantsService.getActiveUserCount();
+            
+            if (currentUsers >= maxUsers) {
+                // 需要排队
+                int queuedUsers = participantsService.getQueuedUserCount();
+                int estimatedWaitTime = calculateEstimatedWaitTime(queuedUsers, currentUsers);
                 
-                return AjaxResult.success(createResponse("crowded", activeUsers, maxUsers, 
-                    queueCount + 1, estimatedWaitTime, 60));
+                recordTrafficStats("check_traffic", currentUsers, maxUsers, false);
+                return AjaxResult.success(createResponse("queue", currentUsers, maxUsers, queuedUsers + 1, estimatedWaitTime, 30));
             } else {
-                logger.info("系统状态正常: activeUsers={}, maxUsers={}", activeUsers, maxUsers);
+                // 可以直接进入
+                recordTrafficStats("check_traffic", currentUsers, maxUsers, false);
+                return AjaxResult.success(createResponse("allow", currentUsers, maxUsers, null, null, null));
             }
-            
-            return AjaxResult.success(createResponse("ok", activeUsers, maxUsers, null, null, null));
             
         } catch (Exception e) {
             logger.error("流量检测失败", e);
-            // 记录错误统计
+            
             recordErrorStats("check_traffic", e.getMessage());
             return AjaxResult.error("流量检测服务暂时不可用");
         }
@@ -94,20 +85,23 @@ public class TrafficController extends BaseController {
     @PostMapping("/join")
     public AjaxResult joinActivity(@RequestBody JoinActivityRequest request) {
         try {
-            // 实现加入活动的逻辑
-            boolean success = participantsService.joinActivity(request.getUserId(), request.getSessionId());
+            String userId = request.getUserId();
+            String sessionId = request.getSessionId();
+            
+            // 用户加入活动逻辑
+            boolean success = participantsService.joinActivity(userId, sessionId);
             
             int currentUsers = participantsService.getActiveUserCount();
-            String userStatus = success ? "active" : "queued";
+            String userStatus = success ? "active" : "failed";
             
-            // 记录加入统计数据
-            recordJoinStats(request.getUserId(), success, currentUsers);
+            // 记录加入统计
+            recordJoinStats(userId, success, currentUsers);
             
             return AjaxResult.success(createJoinResponse(success, currentUsers, userStatus));
             
         } catch (Exception e) {
             logger.error("加入活动失败", e);
-            // 记录错误统计
+            
             recordErrorStats("join_activity", e.getMessage());
             return AjaxResult.error("加入活动失败");
         }
@@ -204,6 +198,72 @@ public class TrafficController extends BaseController {
             logger.debug("错误统计数据记录成功: operation={}, error={}", operation, errorMessage);
         } catch (Exception e) {
             logger.error("记录错误统计数据失败", e);
+        }
+    }
+    
+    /**
+     * 心跳检测接口
+     */
+    @PostMapping("/heartbeat")
+    public AjaxResult heartbeat(@RequestBody Map<String, Object> request) {
+        try {
+            String userId = (String) request.get("userId");
+            String sessionId = (String) request.get("sessionId");
+            
+            // 更新用户心跳时间
+            boolean success = participantsService.updateUserHeartbeat(userId, sessionId);
+            
+            if (success) {
+                int currentUsers = participantsService.getActiveUserCount();
+                
+                // 记录心跳统计
+                recordTrafficStats("heartbeat", currentUsers, 1000, false);
+                
+                Map<String, Object> data = new HashMap<>();
+                data.put("success", true);
+                data.put("currentUsers", currentUsers);
+                data.put("timestamp", System.currentTimeMillis());
+                
+                return AjaxResult.success(data);
+            } else {
+                return AjaxResult.error("心跳更新失败");
+            }
+            
+        } catch (Exception e) {
+            logger.error("心跳检测失败", e);
+            recordErrorStats("heartbeat", e.getMessage());
+            return AjaxResult.error("心跳检测服务暂时不可用");
+        }
+    }
+    
+    /**
+     * 离开活动接口
+     */
+    @PostMapping("/leave")
+    public AjaxResult leaveActivity(@RequestBody Map<String, Object> request) {
+        try {
+            String userId = (String) request.get("userId");
+            String sessionId = (String) request.get("sessionId");
+            
+            // 用户离开活动
+            boolean success = participantsService.leaveActivity(userId, sessionId);
+            
+            int currentUsers = participantsService.getActiveUserCount();
+            
+            // 记录离开统计
+            recordTrafficStats("leave_activity", currentUsers, 1000, false);
+            
+            Map<String, Object> data = new HashMap<>();
+            data.put("success", success);
+            data.put("currentUsers", currentUsers);
+            data.put("message", success ? "成功离开活动" : "离开活动失败");
+            
+            return AjaxResult.success(data);
+            
+        } catch (Exception e) {
+            logger.error("离开活动失败", e);
+            recordErrorStats("leave_activity", e.getMessage());
+            return AjaxResult.error("离开活动服务暂时不可用");
         }
     }
 }
