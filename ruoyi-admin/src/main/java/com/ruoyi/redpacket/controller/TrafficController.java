@@ -32,16 +32,16 @@ public class TrafficController extends BaseController {
     @GetMapping("/check")
     public AjaxResult checkTraffic() {
         try {
-            // 1. 获取当前活跃用户数（使用现有方法）
-            com.ruoyi.redpacket.domain.RedpacketActivityParticipants query = new com.ruoyi.redpacket.domain.RedpacketActivityParticipants();
-            // 可以根据需要设置查询条件，比如只查询活跃状态的参与者
-            int activeUsers = participantsService.selectRedpacketActivityParticipantsList(query).size();
+            // 1. 获取活跃用户数并记录日志
+            int activeUsers = participantsService.getActiveUserCount();
+            logger.info("当前活跃用户数: {}", activeUsers);
             
-            // 2. 获取配置的最大用户数（从数据库配置表中读取）
-            int maxUsers = 1000; // 默认值
+            // 2. 获取配置的最大用户数
+            int maxUsers = 1000;
             try {
                 String maxUsersStr = trafficConfigService.getConfigValueByKey("max_concurrent_users", "1000");
                 maxUsers = Integer.parseInt(maxUsersStr);
+                logger.info("配置的最大用户数: {}", maxUsers);
             } catch (NumberFormatException e) {
                 logger.warn("解析max_concurrent_users配置失败，使用默认值1000", e);
             }
@@ -49,8 +49,8 @@ public class TrafficController extends BaseController {
             // 3. 判断是否维护模式（从数据库配置表中读取）
             boolean isMaintenanceMode = false;
             try {
-                String maintenanceModeStr = trafficConfigService.getConfigValueByKey("maintenance_mode", "0");
-                isMaintenanceMode = "1".equals(maintenanceModeStr);
+                String maintenanceModeStr = trafficConfigService.getConfigValueByKey("maintenance_mode", "false");
+                isMaintenanceMode = "true".equals(maintenanceModeStr) || "1".equals(maintenanceModeStr);
             } catch (Exception e) {
                 logger.warn("读取maintenance_mode配置失败，使用默认值false", e);
             }
@@ -59,7 +59,7 @@ public class TrafficController extends BaseController {
                 return AjaxResult.success(createResponse("maintenance", 0, maxUsers, null, null, null));
             }
             
-            // 4. 判断是否拥挤
+            // 4. 判断是否拥挤并记录日志
             if (activeUsers >= maxUsers) {
                 // 简化队列逻辑，暂时使用固定值
                 int queueCount = Math.max(0, activeUsers - maxUsers);
@@ -67,6 +67,8 @@ public class TrafficController extends BaseController {
                 
                 return AjaxResult.success(createResponse("crowded", activeUsers, maxUsers, 
                     queueCount + 1, estimatedWaitTime, 60));
+            } else {
+                logger.info("系统状态正常: activeUsers={}, maxUsers={}", activeUsers, maxUsers);
             }
             
             return AjaxResult.success(createResponse("ok", activeUsers, maxUsers, null, null, null));

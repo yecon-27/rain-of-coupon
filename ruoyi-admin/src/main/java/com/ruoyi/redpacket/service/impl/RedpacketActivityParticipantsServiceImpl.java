@@ -98,9 +98,8 @@ public class RedpacketActivityParticipantsServiceImpl implements IRedpacketActiv
      */
     @Override
     public int getActiveUserCount() {
-        // 实现获取活跃用户数的逻辑
         RedpacketActivityParticipants query = new RedpacketActivityParticipants();
-        // 可以根据状态字段查询活跃用户
+        query.setStatus("active"); // 只查询活跃状态的用户
         List<RedpacketActivityParticipants> activeUsers = redpacketActivityParticipantsMapper.selectRedpacketActivityParticipantsList(query);
         return activeUsers.size();
     }
@@ -129,6 +128,8 @@ public class RedpacketActivityParticipantsServiceImpl implements IRedpacketActiv
             participant.setUserId(userId);
             participant.setSessionId(sessionId);
             participant.setJoinTime(new java.util.Date());
+            participant.setStatus("active");  // 设置状态为活跃
+            participant.setLastHeartbeat(new java.util.Date());  // 设置心跳时间
             
             int result = redpacketActivityParticipantsMapper.insertRedpacketActivityParticipants(participant);
             return result > 0;

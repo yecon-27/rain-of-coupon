@@ -320,7 +320,20 @@
 </template>
 
 <script>
-import { listTrafficStats } from "@/api/redpacket/trafficStats";
+import { 
+  listTrafficStats, 
+  getTrafficStats, 
+  exportTrafficStats,
+  getRealTimeStats,
+  getPeakAnalysis,
+  getBehaviorAnalysis,
+  getSystemConfig,
+  updateSystemConfig,
+  getUserSessions,
+  clearQueue,
+  resetStats,
+  removeUserSession
+} from "@/api/redpacket/trafficStats";
 import * as echarts from 'echarts';
 
 export default {
@@ -740,12 +753,46 @@ export default {
     /** 生成热力图数据 */
     generateHeatmapData() {
       const data = [];
-      for (let day = 0; day < 7; day++) {
-        for (let hour = 0; hour < 24; hour++) {
-          const value = Math.floor(Math.random() * 1000);
-          data.push([day, hour, value]);
+      // 基于真实的流量统计数据生成热力图
+      if (this.trafficStatsList && this.trafficStatsList.length > 0) {
+        // 按小时和星期分组统计
+        const hourlyStats = {};
+        
+        this.trafficStatsList.forEach(item => {
+          const date = new Date(item.statTime);
+          const hour = date.getHours();
+          const day = date.getDay(); // 0=周日, 1=周一, ..., 6=周六
+          const key = `${day}-${hour}`;
+          
+          if (!hourlyStats[key]) {
+            hourlyStats[key] = [];
+          }
+          hourlyStats[key].push(item.activeUsers || 0);
+        });
+        
+        // 生成热力图数据
+        for (let day = 0; day < 7; day++) {
+          for (let hour = 0; hour < 24; hour++) {
+            const key = `${day}-${hour}`;
+            let value = 0;
+            
+            if (hourlyStats[key] && hourlyStats[key].length > 0) {
+              // 计算平均值
+              value = Math.round(hourlyStats[key].reduce((a, b) => a + b, 0) / hourlyStats[key].length);
+            }
+            
+            data.push([day, hour, value]);
+          }
+        }
+      } else {
+        // 如果没有数据，返回空数据
+        for (let day = 0; day < 7; day++) {
+          for (let hour = 0; hour < 24; hour++) {
+            data.push([day, hour, 0]);
+          }
         }
       }
+      
       return data;
     },
 
@@ -799,7 +846,6 @@ export default {
     /** 加载实时统计数据 */
     async loadRealTimeStats() {
       try {
-        // 模拟API调用
         const response = await this.fetchRealTimeStats();
         const oldStats = { ...this.realTimeStats };
         this.realTimeStats = response.data;
@@ -808,24 +854,32 @@ export default {
         this.calculateTrends(oldStats, this.realTimeStats);
       } catch (error) {
         console.error('加载实时统计失败:', error);
+        // 发生错误时，停止实时模式
+        if (this.realTimeMode) {
+          this.toggleRealTimeMode();
+        }
       }
     },
 
-    /** 模拟获取实时统计数据 */
+    /** 获取实时统计数据 */
     async fetchRealTimeStats() {
-      // 模拟API延迟
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      return {
-        data: {
-          activeUsers: Math.floor(Math.random() * 1000) + 500,
-          queuedUsers: Math.floor(Math.random() * 200),
-          systemLoad: Math.floor(Math.random() * 100),
-          successRate: Math.floor(Math.random() * 20) + 80,
-          avgWaitTime: Math.floor(Math.random() * 10) + 2,
-          todayJoins: Math.floor(Math.random() * 5000) + 1000
-        }
-      };
+      try {
+        const response = await getRealTimeStats();
+        return response;
+      } catch (error) {
+        console.error('获取实时统计数据失败:', error);
+        // 如果API调用失败，返回默认值
+        return {
+          data: {
+            activeUsers: 0,
+            queuedUsers: 0,
+            systemLoad: 0,
+            successRate: 0,
+            avgWaitTime: 0,
+            todayJoins: 0
+          }
+        };
+      }
     },
 
     /** 计算趋势 */
@@ -851,19 +905,24 @@ export default {
       }
     },
 
-    /** 模拟获取系统配置 */
+    /** 获取系统配置 */
     async fetchSystemConfig() {
-      await new Promise(resolve => setTimeout(resolve, 100));
-      return {
-        data: {
-          maxConcurrentUsers: 1000,
-          queueTimeoutSeconds: 300,
-          heartbeatTimeoutSeconds: 60,
-          maintenanceMode: false,
-          autoScaling: true,
-          scaleUpThreshold: 80
-        }
-      };
+      try {
+        const response = await getSystemConfig();
+        return response;
+      } catch (error) {
+        console.error('获取系统配置失败:', error);
+        return {
+          data: {
+            maxConcurrentUsers: 1000,
+            queueTimeoutSeconds: 300,
+            heartbeatTimeoutSeconds: 60,
+            maintenanceMode: false,
+            autoScaling: false,
+            scaleUpThreshold: 80
+          }
+        };
+      }
     },
 
     /** 保存系统配置 */
@@ -878,10 +937,14 @@ export default {
       }
     },
 
-    /** 模拟更新系统配置 */
+    /** 更新系统配置 */
     async updateSystemConfig(config) {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      console.log('更新配置:', config);
+      try {
+        await updateSystemConfig(config);
+      } catch (error) {
+        console.error('更新系统配置失败:', error);
+        throw error;
+      }
     },
 
     /** 加载分析数据 */
@@ -899,32 +962,42 @@ export default {
       }
     },
 
-    /** 模拟获取峰值分析 */
+    /** 获取峰值分析数据 */
     async fetchPeakAnalysis() {
-      await new Promise(resolve => setTimeout(resolve, 100));
-      return {
-        data: {
-          todayPeak: 1250,
-          todayPeakTime: '14:30',
-          historyPeak: 1580,
-          historyPeakTime: '2024-01-15 15:45',
-          predictedPeak: 1350,
-          predictedTime: '今日 19:30'
-        }
-      };
+      try {
+        const response = await getPeakAnalysis();
+        return response;
+      } catch (error) {
+        console.error('获取峰值分析数据失败:', error);
+        return {
+          data: {
+            todayPeak: 0,
+            todayPeakTime: '',
+            historyPeak: 0,
+            historyPeakTime: '',
+            predictedPeak: 0,
+            predictedTime: ''
+          }
+        };
+      }
     },
 
-    /** 模拟获取用户行为分析 */
+    /** 获取用户行为分析数据 */
     async fetchBehaviorAnalysis() {
-      await new Promise(resolve => setTimeout(resolve, 100));
-      return {
-        data: {
-          avgSessionDuration: 8.5,
-          bounceRate: 15.2,
-          retryRate: 23.8,
-          conversionRate: 76.3
-        }
-      };
+      try {
+        const response = await getBehaviorAnalysis();
+        return response;
+      } catch (error) {
+        console.error('获取用户行为分析数据失败:', error);
+        return {
+          data: {
+            avgSessionDuration: 0,
+            bounceRate: 0,
+            retryRate: 0,
+            conversionRate: 0
+          }
+        };
+      }
     },
 
     /** 清空队列 */
@@ -947,9 +1020,14 @@ export default {
       }
     },
 
-    /** 模拟清空队列 */
+    /** 清空队列 */
     async clearQueue() {
-      await new Promise(resolve => setTimeout(resolve, 500));
+      try {
+        await clearQueue();
+      } catch (error) {
+        console.error('清空队列失败:', error);
+        throw error;
+      }
     },
 
     /** 重置统计 */
@@ -972,9 +1050,14 @@ export default {
       }
     },
 
-    /** 模拟重置统计 */
+    /** 重置统计 */
     async resetStats() {
-      await new Promise(resolve => setTimeout(resolve, 500));
+      try {
+        await resetStats();
+      } catch (error) {
+        console.error('重置统计失败:', error);
+        throw error;
+      }
     },
 
     /** 获取状态类型 */
@@ -1019,10 +1102,14 @@ export default {
       }
     },
 
-    /** 模拟移除用户会话 */
+    /** 移除用户会话 */
     async removeUserSession(sessionId) {
-      await new Promise(resolve => setTimeout(resolve, 300));
-      console.log('踢出用户:', sessionId);
+      try {
+        await removeUserSession(sessionId);
+      } catch (error) {
+        console.error('移除用户会话失败:', error);
+        throw error;
+      }
     },
 
     /** 加载用户会话 */
@@ -1038,29 +1125,15 @@ export default {
       }
     },
 
-    /** 模拟获取用户会话 */
+    /** 获取用户会话 */
     async fetchUserSessions() {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      return {
-        data: [
-          {
-            sessionId: 'sess_001',
-            userId: 'user_123',
-            ipAddress: '192.168.1.100',
-            status: 'active',
-            joinTime: new Date(Date.now() - 300000),
-            lastHeartbeat: new Date()
-          },
-          {
-            sessionId: 'sess_002',
-            userId: 'user_456',
-            ipAddress: '192.168.1.101',
-            status: 'queued',
-            joinTime: new Date(Date.now() - 600000),
-            lastHeartbeat: new Date(Date.now() - 30000)
-          }
-        ]
-      };
+      try {
+        const response = await getUserSessions();
+        return response;
+      } catch (error) {
+        console.error('获取用户会话失败:', error);
+        return { data: [] };
+      }
     }
   },
   watch: {
