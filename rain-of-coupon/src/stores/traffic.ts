@@ -99,77 +99,43 @@ export const useTrafficStore = defineStore('traffic', () => {
         state.value.sessionId = `session_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`
       }
       
-      // 优先使用模拟服务
-      try {
-        const { trafficService } = await import('@/services/trafficService')
+      // 优先使用后端API
+      const request: UserActivityRequest = {
+        action: 'join',
+        userId: userId || `anonymous_${Date.now()}`,
+        sessionId: state.value.sessionId
+      }
+      
+      console.log('调用后端API，请求参数:', request)
+      
+      const response = await joinActivity(request)
+      
+      if (response.code === 200) {
+        state.value.currentUsers = response.data.currentUsers
+        state.value.userStatus = response.data.userStatus
+        state.value.isInActivity = response.data.userStatus === 'active'
         
-        // 模拟网络延迟
-        await new Promise(resolve => setTimeout(resolve, 300 + Math.random() * 200))
-        
-        const result = trafficService.joinActivity(state.value.sessionId, userId)
-        
-        state.value.currentUsers = result.currentUsers
-        state.value.userStatus = result.userStatus
-        state.value.isInActivity = result.userStatus === 'active'
-        
-        if (result.userStatus === 'queued') {
-          state.value.queuePosition = (result as any).queuePosition || null
+        if (response.data.userStatus === 'queued') {
+          state.value.queuePosition = (response.data as any).queuePosition || null
         }
         
         // 如果成功加入，开始心跳
-        if (result.userStatus === 'active') {
+        if (response.data.userStatus === 'active') {
           startHeartbeat()
           return true
         }
         
         return false
-      } catch (simulationErr) {
-        console.warn('模拟服务失败，尝试后端API:', simulationErr)
-        
-        // 降级到后端API
-        const request: UserActivityRequest = {
-          action: 'join',
-          userId,
-          sessionId: state.value.sessionId
-        }
-        
-        const response = await joinActivity(request)
-        
-        if (response.code === 200) {
-          state.value.currentUsers = response.data.currentUsers
-          state.value.userStatus = response.data.userStatus
-          state.value.isInActivity = response.data.userStatus === 'active'
-          
-          if (response.data.userStatus === 'queued') {
-            state.value.queuePosition = (response.data as any).queuePosition || null
-          }
-          
-          // 如果成功加入，开始心跳
-          if (response.data.userStatus === 'active') {
-            startHeartbeat()
-            return true
-          }
-          
-          return false
-        } else {
-          throw new Error(response.msg || '加入活动失败')
-        }
+      } else {
+        throw new Error(response.msg || '加入活动失败')
       }
     } catch (err) {
-      error.value = err instanceof Error ? err.message : '网络错误'
+      console.error('后端API调用失败:', error)
+      error.value = error instanceof Error ? error.message : '网络错误'
       
-      // 最终降级处理
-      const randomSuccess = Math.random() > 0.5 // 50%概率成功
-      if (randomSuccess) {
-        state.value.userStatus = 'active'
-        state.value.isInActivity = true
-        startHeartbeat()
-        return true
-      } else {
-        state.value.userStatus = 'queued'
-        state.value.queuePosition = Math.floor(Math.random() * 100) + 1
-        return false
-      }
+      // 如果确实需要降级到模拟服务，可以在这里添加
+      // 但根据您的要求，我们优先使用后端接口
+      throw error
     } finally {
       loading.value = false
     }
@@ -273,44 +239,16 @@ export const useTrafficStore = defineStore('traffic', () => {
     try {
       console.log('开始调用后端流量检测API...')
       
-      // 优先使用真实的后端API
+      // 直接使用后端API，不降级到模拟服务
       const canJoin = await checkTraffic()
       console.log('后端API调用成功，结果:', canJoin)
       return canJoin
     } catch (err) {
-      console.warn('后端API调用失败，使用降级处理:', err)
+      console.error('后端API调用失败:', err)
       error.value = err instanceof Error ? err.message : '网络错误'
       
-      // 降级到模拟服务
-      try {
-        const { trafficService } = await import('@/services/trafficService')
-        
-        console.log('使用模拟服务进行流量检测...')
-        
-        // 模拟网络延迟
-        await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 300))
-        
-        // 使用模拟的流量检测逻辑
-        const result = trafficService.checkTrafficStatus()
-        
-        state.value.status = result.status
-        state.value.currentUsers = result.currentUsers
-        state.value.maxUsers = result.maxUsers
-        state.value.queuePosition = result.queuePosition || null
-        state.value.estimatedWaitTime = result.estimatedWaitTime || null
-        state.value.retryAfter = result.retryAfter || null
-        
-        console.log('模拟服务检测结果:', result)
-        
-        return result.status === 'ok'
-      } catch (fallbackErr) {
-        console.error('模拟服务也失败了:', fallbackErr)
-        error.value = '流量检测服务暂时不可用，请稍后重试'
-        
-        // 最终降级处理
-        state.value.status = 'maintenance'
-        return false
-      }
+      // 不使用模拟服务降级，直接抛出错误
+      throw err
     } finally {
       loading.value = false
     }

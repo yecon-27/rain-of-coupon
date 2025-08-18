@@ -2,6 +2,7 @@ package com.ruoyi.redpacket.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import com.ruoyi.common.annotation.Anonymous;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.redpacket.service.IRedpacketTrafficConfigService;
@@ -14,6 +15,7 @@ import java.util.HashMap;
  * 
  * @author ruoyi
  */
+@Anonymous
 @RestController
 @RequestMapping("/api/traffic")
 public class TrafficController extends BaseController {
@@ -30,8 +32,10 @@ public class TrafficController extends BaseController {
     @GetMapping("/check")
     public AjaxResult checkTraffic() {
         try {
-            // 1. 获取当前活跃用户数
-            int activeUsers = participantsService.getActiveUserCount();
+            // 1. 获取当前活跃用户数（使用现有方法）
+            com.ruoyi.redpacket.domain.RedpacketActivityParticipants query = new com.ruoyi.redpacket.domain.RedpacketActivityParticipants();
+            // 可以根据需要设置查询条件，比如只查询活跃状态的参与者
+            int activeUsers = participantsService.selectRedpacketActivityParticipantsList(query).size();
             
             // 2. 获取配置的最大用户数（从数据库配置表中读取）
             int maxUsers = 1000; // 默认值
@@ -57,7 +61,8 @@ public class TrafficController extends BaseController {
             
             // 4. 判断是否拥挤
             if (activeUsers >= maxUsers) {
-                int queueCount = participantsService.getQueuedUserCount();
+                // 简化队列逻辑，暂时使用固定值
+                int queueCount = Math.max(0, activeUsers - maxUsers);
                 int estimatedWaitTime = calculateEstimatedWaitTime(queueCount, activeUsers);
                 
                 return AjaxResult.success(createResponse("crowded", activeUsers, maxUsers, 

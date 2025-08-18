@@ -72,6 +72,8 @@ export const checkTrafficStatus = async (): Promise<TrafficCheckResponse> => {
 
 // 用户加入活动队列
 export const joinActivity = async (data: UserActivityRequest): Promise<UserActivityResponse> => {
+  console.log('发送到后端的请求参数:', data)
+  
   return request('/api/traffic/join', {
     method: 'POST',
     body: JSON.stringify(data)
