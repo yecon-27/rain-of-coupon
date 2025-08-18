@@ -1,10 +1,9 @@
 <template>
-  <!-- 红包雨页 - 红包雨动画效果，点击抽奖逻辑，中奖/未中奖弹窗 -->
+    <div>
+      <RedPacketRain/>
+    </div>
 </template>
 
 <script setup lang="ts">
-// 红包雨页逻辑
+import RedPacketRain from '@/components/RedPacketRain.vue'
 </script>
-
-<style scoped>
-</style>

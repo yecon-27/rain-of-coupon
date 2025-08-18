@@ -37,8 +37,8 @@ const routes: RouteRecordRaw[] = [
     // beforeEnter: beforeEnterCountdown
   },
   {
-    path: '/redpacket',
-    name: 'redpacket',
+    path: '/red-packet',
+    name: 'red-packet',
     component: () => import('@/views/RedPacketPage.vue'),
     // meta: { requiresAuth: true, requiresActivity: true },
     // beforeEnter: beforeEnterRedPacket
