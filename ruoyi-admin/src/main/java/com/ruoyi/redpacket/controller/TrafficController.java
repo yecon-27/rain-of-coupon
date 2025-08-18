@@ -67,11 +67,13 @@ public class TrafficController extends BaseController {
                 int estimatedWaitTime = calculateEstimatedWaitTime(queuedUsers, currentUsers);
                 
                 recordTrafficStats("check_traffic", currentUsers, maxUsers, false);
-                return AjaxResult.success(createResponse("queue", currentUsers, maxUsers, queuedUsers + 1, estimatedWaitTime, 30));
+                // 修改status为'crowded'以匹配前端
+                return AjaxResult.success(createResponse("crowded", currentUsers, maxUsers, queuedUsers + 1, estimatedWaitTime, 30));
             } else {
                 // 可以直接进入
                 recordTrafficStats("check_traffic", currentUsers, maxUsers, false);
-                return AjaxResult.success(createResponse("allow", currentUsers, maxUsers, null, null, null));
+                // 修改status为'ok'以匹配前端
+                return AjaxResult.success(createResponse("ok", currentUsers, maxUsers, null, null, null));
             }
             
         } catch (Exception e) {
