@@ -97,7 +97,13 @@ public class TrafficController extends BaseController {
             // 记录加入统计
             recordJoinStats(userId, success, currentUsers);
             
-            return AjaxResult.success(createJoinResponse(success, currentUsers, userStatus));
+            // 修复响应格式，确保与前端期望一致
+            Map<String, Object> data = new HashMap<>();
+            data.put("success", success);
+            data.put("currentUsers", currentUsers);
+            data.put("userStatus", userStatus);
+            
+            return AjaxResult.success(data);
             
         } catch (Exception e) {
             logger.error("加入活动失败", e);

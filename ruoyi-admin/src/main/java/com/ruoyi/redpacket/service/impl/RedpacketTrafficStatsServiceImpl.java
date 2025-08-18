@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.ruoyi.redpacket.mapper.RedpacketTrafficStatsMapper;
 import com.ruoyi.redpacket.domain.RedpacketTrafficStats;
 import com.ruoyi.redpacket.service.IRedpacketTrafficStatsService;
+import com.ruoyi.redpacket.service.IRedpacketActivityParticipantsService;
 
 /**
  * 红包流量统计Service业务层处理
@@ -23,6 +24,10 @@ public class RedpacketTrafficStatsServiceImpl implements IRedpacketTrafficStatsS
     
     @Autowired
     private RedpacketTrafficStatsMapper redpacketTrafficStatsMapper;
+    
+    // 添加参与者服务注入
+    @Autowired
+    private IRedpacketActivityParticipantsService participantsService;
 
     /**
      * 查询红包流量统计
@@ -131,17 +136,36 @@ public class RedpacketTrafficStatsServiceImpl implements IRedpacketTrafficStatsS
     public void autoRecordCurrentTrafficStats()
     {
         try {
-            // 这里需要注入其他服务来获取实时数据
-            // 由于循环依赖问题，建议在定时任务中调用
+            // 获取真实的系统数据
+            int activeUsers = participantsService.getActiveUserCount();
+            int queuedUsers = participantsService.getQueuedUserCount();
+            
+            // 获取最近的统计记录来计算请求数
+            Date now = new Date();
+            Date oneHourAgo = new Date(now.getTime() - 3600000); // 一小时前
+            List<RedpacketTrafficStats> recentStats = selectStatsByTimeRange(oneHourAgo, now);
+            
+            // 计算总请求数（基于最近的活动）
+            long totalRequests = recentStats.isEmpty() ? activeUsers + queuedUsers : 
+                recentStats.get(recentStats.size() - 1).getTotalRequests() + activeUsers;
+            
+            // 计算被拒绝的请求数（排队用户可视为暂时被拒绝）
+            long rejectedRequests = queuedUsers;
+            
+            // 计算平均会话时间（基于活跃用户的估算）
+            long averageSessionTime = activeUsers > 0 ? 300L : 180L; // 活跃时300秒，否则180秒
+            
             RedpacketTrafficStats stats = new RedpacketTrafficStats();
-            stats.setStatTime(new Date());
-            stats.setActiveUsers(0L); // 需要从其他服务获取
-            stats.setQueuedUsers(0L);
-            stats.setTotalRequests(1L);
-            stats.setRejectedRequests(0L);
-            stats.setAverageSessionTime(300L);
+            stats.setStatTime(now);
+            stats.setActiveUsers((long) activeUsers);
+            stats.setQueuedUsers((long) queuedUsers);
+            stats.setTotalRequests(totalRequests);
+            stats.setRejectedRequests(rejectedRequests);
+            stats.setAverageSessionTime(averageSessionTime);
             
             insertRedpacketTrafficStats(stats);
+            logger.info("自动记录流量统计成功: 活跃用户={}, 排队用户={}, 总请求={}", 
+                activeUsers, queuedUsers, totalRequests);
         } catch (Exception e) {
             logger.error("自动记录流量统计失败", e);
         }

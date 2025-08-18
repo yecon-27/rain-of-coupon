@@ -111,9 +111,10 @@ public class RedpacketActivityParticipantsServiceImpl implements IRedpacketActiv
      */
     @Override
     public int getQueuedUserCount() {
-        // 实现获取排队用户数的逻辑
-        // 这里需要根据实际的业务逻辑来实现
-        return 0; // 临时返回0
+        RedpacketActivityParticipants query = new RedpacketActivityParticipants();
+        query.setStatus("queued"); // 查询排队状态的用户
+        List<RedpacketActivityParticipants> queuedUsers = redpacketActivityParticipantsMapper.selectRedpacketActivityParticipantsList(query);
+        return queuedUsers.size();
     }
 
     /**
