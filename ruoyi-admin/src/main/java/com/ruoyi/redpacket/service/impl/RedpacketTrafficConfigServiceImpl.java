@@ -90,4 +90,38 @@ public class RedpacketTrafficConfigServiceImpl implements IRedpacketTrafficConfi
     {
         return redpacketTrafficConfigMapper.deleteRedpacketTrafficConfigById(id);
     }
+
+    /**
+     * 根据配置键获取配置值
+     * 
+     * @param configKey 配置键
+     * @return 配置值
+     */
+    @Override
+    public String getConfigValueByKey(String configKey)
+    {
+        RedpacketTrafficConfig config = new RedpacketTrafficConfig();
+        config.setConfigKey(configKey);
+        config.setIsActive(1); // 只查询启用的配置
+        
+        List<RedpacketTrafficConfig> list = redpacketTrafficConfigMapper.selectRedpacketTrafficConfigList(config);
+        if (list != null && !list.isEmpty()) {
+            return list.get(0).getConfigValue();
+        }
+        return null;
+    }
+
+    /**
+     * 根据配置键获取配置值，如果不存在则返回默认值
+     * 
+     * @param configKey 配置键
+     * @param defaultValue 默认值
+     * @return 配置值
+     */
+    @Override
+    public String getConfigValueByKey(String configKey, String defaultValue)
+    {
+        String value = getConfigValueByKey(configKey);
+        return value != null ? value : defaultValue;
+    }
 }

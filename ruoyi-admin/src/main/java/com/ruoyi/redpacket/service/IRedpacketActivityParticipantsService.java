@@ -58,4 +58,27 @@ public interface IRedpacketActivityParticipantsService
      * @return 结果
      */
     public int deleteRedpacketActivityParticipantsById(Long id);
+
+    /**
+     * 获取当前活跃用户数
+     * 
+     * @return 活跃用户数
+     */
+    public int getActiveUserCount();
+
+    /**
+     * 获取排队用户数
+     * 
+     * @return 排队用户数
+     */
+    public int getQueuedUserCount();
+
+    /**
+     * 用户加入活动
+     * 
+     * @param userId 用户ID
+     * @param sessionId 会话ID
+     * @return 是否成功
+     */
+    public boolean joinActivity(String userId, String sessionId);
 }

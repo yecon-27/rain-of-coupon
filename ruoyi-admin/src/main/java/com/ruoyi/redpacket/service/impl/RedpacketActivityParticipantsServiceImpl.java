@@ -90,4 +90,50 @@ public class RedpacketActivityParticipantsServiceImpl implements IRedpacketActiv
     {
         return redpacketActivityParticipantsMapper.deleteRedpacketActivityParticipantsById(id);
     }
+
+    /**
+     * 实现获取活跃用户数的逻辑
+     * 
+     * @return 活跃用户数
+     */
+    @Override
+    public int getActiveUserCount() {
+        // 实现获取活跃用户数的逻辑
+        RedpacketActivityParticipants query = new RedpacketActivityParticipants();
+        // 可以根据状态字段查询活跃用户
+        List<RedpacketActivityParticipants> activeUsers = redpacketActivityParticipantsMapper.selectRedpacketActivityParticipantsList(query);
+        return activeUsers.size();
+    }
+
+    /**
+     * 实现获取排队用户数的逻辑
+     * 
+     * @return 排队用户数
+     */
+    @Override
+    public int getQueuedUserCount() {
+        // 实现获取排队用户数的逻辑
+        // 这里需要根据实际的业务逻辑来实现
+        return 0; // 临时返回0
+    }
+
+    /**
+     * 加入红包活动逻辑
+     * 
+     * @return 结果
+     */
+    @Override
+    public boolean joinActivity(String userId, String sessionId) {
+        try {
+            RedpacketActivityParticipants participant = new RedpacketActivityParticipants();
+            participant.setUserId(userId);
+            participant.setSessionId(sessionId);
+            participant.setJoinTime(new java.util.Date());
+            
+            int result = redpacketActivityParticipantsMapper.insertRedpacketActivityParticipants(participant);
+            return result > 0;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }
