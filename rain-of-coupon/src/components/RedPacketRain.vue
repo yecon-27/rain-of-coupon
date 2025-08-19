@@ -35,7 +35,6 @@ const columnPositions = ['15%', '50%', '85%'];
 let currentColumn = 0;
 
 const calculateRainInterval = () => {
-  // 确保50秒内掉落99个红包
   return Math.max(100, (50 * 1000) / 99);
 };
 
@@ -47,23 +46,12 @@ function startRain() {
       }
       return;
     }
-    
+
     if (!rainContainer.value) return;
 
     const packet = document.createElement('img');
     packet.src = getImageUrl('luckyBag.png');
     packet.className = 'red-packet';
-    
-    // 调整红包尺寸为100x100px
-    packet.width = 120;
-    packet.height = 120;
-    packet.style.width = '120px';
-    packet.style.height = '120px';
-    packet.style.maxWidth = '120px';
-    packet.style.maxHeight = '120px';
-    packet.style.objectFit = 'contain';
-
-    // 调整红包位置（20%, 50%, 80%）
     packet.style.left = columnPositions[currentColumn];
     currentColumn = (currentColumn + 1) % columnPositions.length;
     packet.style.animationDuration = `${Math.random() * 2 + 3}s`;
@@ -82,8 +70,17 @@ function startRain() {
     });
 
     rainContainer.value.appendChild(packet);
-    // 强制重绘
-    packet.offsetHeight;
+    void packet.offsetHeight; // 强制重绘
+
+    // 调试：打印红包尺寸
+    setTimeout(() => {
+      const computedStyle = window.getComputedStyle(packet);
+      console.log('Red Packet Size:', {
+        width: computedStyle.width,
+        height: computedStyle.height,
+        viewportWidth: window.innerWidth,
+      });
+    }, 100);
 
     if (packetCount.value > 0) {
       const nextInterval = calculateRainInterval();
@@ -132,8 +129,12 @@ function endGame(isWin: boolean, prize?: { amount: number }) {
 }
 
 onMounted(() => {
-  startTimer();
-  startRain();
+  const img = new Image();
+  img.src = getImageUrl('luckyBag.png');
+  img.onload = () => {
+    startTimer();
+    startRain();
+  };
 });
 
 onUnmounted(() => {
@@ -214,7 +215,6 @@ onUnmounted(() => {
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
 }
 
-/* 红包雨容器 */
 .rain-container {
   position: absolute;
   top: 0;
@@ -225,16 +225,21 @@ onUnmounted(() => {
   touch-action: manipulation;
 }
 
-/* 红包样式（缩小范围） */
 .red-packet {
   position: absolute;
-  animation: fall linear infinite;
+  width: clamp(80px, 15vw, 120px) !important; /* 强制覆盖内在尺寸 */
+  height: auto !important; /* 按比例调整高度 */
+  max-width: 120px !important;
+  max-height: 120px !important;
+  object-fit: contain !important; /* 确保图片按比例填充 */
+  animation: fall linear forwards;
   cursor: pointer;
   transition: transform 0.1s ease;
   padding: 3px;
   margin: -3px;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
+  border: 1px solid red; /* 调试用边框 */
 }
 
 .red-packet:hover,
@@ -243,7 +248,31 @@ onUnmounted(() => {
 }
 
 @keyframes fall {
-  0% { transform: translateY(-100px) rotate(0deg); }
-  100% { transform: translateY(100vh) rotate(360deg); }
+  0% {
+    transform: translateY(-100px) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .red-packet {
+    width: clamp(60px, 12vw, 90px) !important;
+    height: auto !important;
+    max-width: 90px !important;
+    max-height: 90px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .red-packet {
+    width: clamp(50px, 10vw, 70px) !important;
+    height: auto !important;
+    max-width: 70px !important;
+    max-height: 70px !important;
+  }
 }
 </style>
