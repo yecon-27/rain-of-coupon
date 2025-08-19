@@ -65,7 +65,7 @@ onMounted(() => {
   background: rgba(255, 255, 255, 0.9);
   padding: 8px 15px;
   border-radius: 20px;
-  z-index: 1001;
+  z-index: 5; /* 降低z-index，确保被蒙版覆盖 */
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
@@ -109,13 +109,11 @@ onMounted(() => {
   top: calc(50vh - 40px);
   right: -2px;
   width: 96px;
-  /* 96px * 1.5 */
   height: 96px;
-  /* 96px * 1.5 */
   cursor: pointer;
   display: block;
   object-fit: contain;
-  z-index: 1000;
+  z-index: 5; /* 降低z-index，确保被蒙版覆盖 */
 }
 
 .coupon-btn {
@@ -127,7 +125,7 @@ onMounted(() => {
   cursor: pointer;
   display: block;
   object-fit: contain;
-  z-index: 1000;
+  z-index: 5; /* 降低z-index，确保被蒙版覆盖 */
 }
 
 .center-button {
