@@ -23,6 +23,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+// 修改导入语句 - 使用正确的 game store
 import { useGameStore } from '@/stores/game'
 import CouponCard from '@/components/CouponCard.vue'
 
@@ -35,58 +36,28 @@ const loading = ref(true)
 
 // 计算属性：获取优惠券奖励
 const couponRewards = computed(() => {
+  // 直接使用 game store 中的 userRewards，只显示优惠券类型
   return gameStore.userRewards.filter(reward => reward.type === 'coupon')
 })
 
-// 检查用户登录状态和获取奖励数据
+// 修改检查用户状态方法
 const checkUserStatus = async () => {
   try {
-    // 检查登录状态
     if (!authStore.isLoggedIn) {
-      router.push('/login?redirect=/coupon')
-      return
+      router.push('/login?redirect=/coupon');
+      return;
     }
 
-    // 初始化游戏数据
+    // 初始化数据并获取用户奖励
     gameStore.initializeData()
-
-    // 从游戏store获取用户奖励数据
-    const userId = authStore.currentUser?.id || ''
-    await gameStore.getUserRewards(userId)
-
-    // 临时mock中奖数据用于测试视图 - 已注释
-    // const mockRewards = [
-    //   {
-    //     id: 'mock_coupon_001',
-    //     type: 'coupon' as const,
-    //     name: '满500元优惠券',
-    //     description: '满500元且消费一道特色菜可使用',
-    //     image: '/image/coupon/满500元且消费一道特色菜可使用.png',
-    //     value: 500,
-    //     expireDate: '2024-12-31',
-    //     isUsed: false
-    //   },
-    //   {
-    //     id: 'mock_coupon_002',
-    //     type: 'coupon' as const,
-    //     name: '满1500元优惠券',
-    //     description: '满1500元且消费一道特色菜可使用',
-    //     image: '/image/coupon/满1500元且消费一道特色菜可使用.png',
-    //     value: 1500,
-    //     expireDate: '2024-11-30',
-    //     isUsed: true
-    //   }
-    // ]
-
-    // 添加mock数据到gameStore - 已注释
-    // gameStore.userRewards.push(...mockRewards)
-
+    await gameStore.getUserRewards(authStore.currentUser?.id || '')
+    
   } catch (error: unknown) {
-    console.error('获取用户奖励失败:', error)
+    console.error('获取用户奖励失败:', error);
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 // 返回主页
 const goBack = () => {

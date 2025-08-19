@@ -62,10 +62,11 @@ const handleJoinActivity = () => {
 }
 
 // 组件挂载时检查登录状态和加载中奖记录
-onMounted(() => {
-  authStore.checkAuthStatus()
-  gameStore.loadPrizeRecord()
-})
+onMounted(async () => {
+  authStore.checkAuthStatus();
+  // 从数据库加载真实的中奖记录
+  await gameStore.loadPrizeRecord();
+});
 </script>
 
 <style scoped>
