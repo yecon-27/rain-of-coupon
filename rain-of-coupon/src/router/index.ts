@@ -44,6 +44,11 @@ const routes: RouteRecordRaw[] = [
     // beforeEnter: beforeEnterRedPacket
   },
   {
+    path: '/prize',
+    name: 'prize',
+    component: () => import('@/views/PrizePage.vue')
+  },
+  {
     path: '/rule',
     name: 'rule',
     component: () => import('@/views/RulePage.vue')

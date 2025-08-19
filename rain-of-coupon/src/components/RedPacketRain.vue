@@ -105,7 +105,7 @@ const getImageUrl = (filename: string): string => {
 function startTimer() {
   gameStore.resetClickedPacketCount();
 
-  timerInterval = setInterval(() => {
+  timerInterval = setInterval(async () => {
     if (remainingTime.value > 0) {
       remainingTime.value--;
     } else {
@@ -117,8 +117,12 @@ function startTimer() {
       const isWin = Math.random() > finalProbOfNotWinning;
 
       if (isWin) {
-        // 设置中奖记录
-        gameStore.setPrizeRecord(gameStore.clickedPacketCount);
+        try {
+          // 异步设置中奖记录并调用API
+          await gameStore.setPrizeRecord(gameStore.clickedPacketCount);
+        } catch (error) {
+          console.error('设置中奖记录失败:', error);
+        }
       }
       
       endGame(isWin);
