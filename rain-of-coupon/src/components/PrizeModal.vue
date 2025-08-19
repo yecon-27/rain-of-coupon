@@ -1,24 +1,32 @@
 <template>
   <div class="prize-modal">
     <div class="modal-content">
-      <h2>🎉 恭喜中奖！</h2>
-      <div class="prize-info">
-        <p>您获得了：{{ prize?.prizeName || '神秘奖品' }}</p>
-        <p class="prize-amount">{{ prize?.amount || '价值不菲' }}</p>
-      </div>
+      <h2>恭喜！</h2>
+      <p>您点击了 {{ clickedCount }} 个红包！</p>
+      <p>获得奖励：{{ prizeTier }}</p>
       <button class="close-btn" @click="$emit('close')">确定</button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-defineProps<{
-  prize?: any
-}>()
+import { useGameStore } from '@/stores/gameStore';
 
-defineEmits<{
-  close: []
-}>()
+const gameStore = useGameStore();
+
+const clickedCount = gameStore.clickedPacketCount;
+
+function getPrizeTier(count: number) {
+  if (count >= 20) {
+    return '一等奖';
+  } else if (count >= 10) {
+    return '二等奖';
+  } else {
+    return '三等奖';
+  }
+}
+
+const prizeTier = getPrizeTier(clickedCount);
 </script>
 
 <style scoped>
