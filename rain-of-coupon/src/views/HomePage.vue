@@ -1,7 +1,7 @@
 <template>
   <div class="home-page">
     <!-- 第一部分：参与活动区域 -->
-    <ActivitySection @show-rules="showRules" @my-coupons="myCoupons" @join-activity="joinActivity" />
+    <ActivitySection @show-rules="showRules" @my-coupons="myCoupons" />
 
     <!-- 第二部分：展示菜品 -->
     <FoodDisplaySection />
@@ -74,17 +74,18 @@ const fetchFoodData = async () => {
 }
 
 // 按钮点击事件
-const joinActivity = () => {
-  // 检查是否已登录
-  if (authStore.isLoggedIn) {
-    // 已登录，跳转到加载页面
-    console.log('用户已登录，跳转到加载页面')
-    router.push('/loading')
-  } else {
-    // 未登录，跳转到登录页面
-    router.push('/login?redirect=/')
-  }
-}
+// 移除 joinActivity 函数，因为现在由 ActivitySection 直接处理
+// const joinActivity = () => {
+//   // 检查是否已登录
+//   if (authStore.isLoggedIn) {
+//     // 已登录，跳转到加载页面
+//     console.log('用户已登录，跳转到加载页面')
+//     router.push('/loading')
+//   } else {
+//     // 未登录，跳转到登录页面
+//     router.push('/login?redirect=/')
+//   }
+// }
 
 const showRules = () => {
   // 显示规则弹窗

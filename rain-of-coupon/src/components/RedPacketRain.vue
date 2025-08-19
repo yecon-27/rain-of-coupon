@@ -27,12 +27,12 @@ const emit = defineEmits<{
 }>();
 
 const rainContainer = ref<HTMLDivElement | null>(null);
-const remainingTime = ref(40);
+const remainingTime = ref(15);
 const packetCount = ref(99);
 // const clickedPacketCount = ref(0); // 不再需要本地的 ref
 const PROB_OF_NOT_WINNING_PER_PACKET = 0.95;
 let timerInterval: number | null = null;
-let rainInterval: number | null = null;
+const rainInterval: number | null = null;
 let activePackets = 0;
 const maxActivePackets = 99;
 const columnPositions = ['15%', '60%', '85%'];
@@ -86,8 +86,8 @@ function startRain() {
     });
 
     rainContainer.value.appendChild(packet);
-    // 强制重绘
-    packet.offsetHeight;
+
+    void packet.offsetHeight;
 
     if (packetCount.value > 0) {
       const nextInterval = calculateRainInterval();
@@ -103,7 +103,6 @@ const getImageUrl = (filename: string): string => {
 };
 
 function startTimer() {
-  // 游戏开始时重置点击数
   gameStore.resetClickedPacketCount();
 
   timerInterval = setInterval(() => {
@@ -113,15 +112,16 @@ function startTimer() {
       clearInterval(timerInterval as number);
       if (rainInterval) clearInterval(rainInterval);
       
-      // 游戏结束时，从 store 中获取点击数
+      // 游戏结束时，根据点击数动态计算中奖概率
       const finalProbOfNotWinning = Math.pow(PROB_OF_NOT_WINNING_PER_PACKET, gameStore.clickedPacketCount);
       const isWin = Math.random() > finalProbOfNotWinning;
 
-      let prize;
       if (isWin) {
-        prize = { amount: Math.floor(Math.random() * 1000) + 100 };
+        // 设置中奖记录
+        gameStore.setPrizeRecord(gameStore.clickedPacketCount);
       }
-      endGame(isWin, prize);
+      
+      endGame(isWin);
     }
   }, 1000);
 }

@@ -1,37 +1,38 @@
 <template>
   <div class="prize-modal">
-    <div class="modal-content">
-      <h2>恭喜！</h2>
-      <p>您点击了 {{ clickedCount }} 个红包！</p>
-      <p>获得奖励：{{ prizeTier }}</p>
-      <button class="close-btn" @click="$emit('close')">确定</button>
+    <div v-if="gameStore.hasPrize" class="prize-content">
+      <img 
+        :src="gameStore.getPrizeImageUrl || ''"
+        @click="navigateToHome"
+        class="prize-image"
+        alt="奖品"
+      />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { useGameStore } from '@/stores/gameStore';
+import { useRouter } from 'vue-router';
+import { onMounted } from 'vue';
 
 const gameStore = useGameStore();
+const router = useRouter();
 
-const clickedCount = gameStore.clickedPacketCount;
+// 在组件挂载时检查是否已经中奖
 
-function getPrizeTier(count: number) {
-  if (count >= 20) {
-    return '一等奖';
-  } else if (count >= 10) {
-    return '二等奖';
-  } else {
-    return '三等奖';
-  }
-}
+onMounted(() => {
+  gameStore.loadPrizeRecord();
+});
 
-const prizeTier = getPrizeTier(clickedCount);
+const navigateToHome = () => {
+  router.push('/');
+};
 </script>
 
 <style scoped>
 .prize-modal {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
@@ -39,36 +40,21 @@ const prizeTier = getPrizeTier(clickedCount);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 10;
+  z-index: 1000;
 }
 
-.modal-content {
-  background: white;
-  padding: 30px;
-  border-radius: 15px;
+.prize-content {
   text-align: center;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-  max-width: 300px;
-  width: 90%;
 }
 
-.prize-info {
-  margin: 20px 0;
-}
-
-.prize-amount {
-  font-size: 18px;
-  font-weight: bold;
-  color: #ff6b6b;
-}
-
-.close-btn {
-  background: #ff6b6b;
-  color: white;
-  border: none;
-  padding: 10px 30px;
-  border-radius: 25px;
+.prize-image {
+  max-width: 80%;
+  max-height: 80vh;
   cursor: pointer;
-  font-size: 16px;
+  transition: transform 0.2s;
+}
+
+.prize-image:hover {
+  transform: scale(1.05);
 }
 </style>

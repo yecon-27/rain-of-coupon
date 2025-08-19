@@ -14,34 +14,57 @@
 
     <!-- 底部居中按钮 -->
     <div class="center-button">
-      <img :src="getImageUrl('button.png')" alt="立即挑战" class="challenge-btn" @click="$emit('joinActivity')" />
+      <img :src="getImageUrl('button.png')" alt="立即挑战" class="challenge-btn" @click="handleJoinActivity" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useGameStore } from '@/stores/gameStore'
 import { API_CONFIG } from '@/config/api'
 
 // 定义事件
 defineEmits<{
   showRules: []
   myCoupons: []
-  joinActivity: []
 }>()
 
-// 认证store
+// 路由和store
+const router = useRouter()
 const authStore = useAuthStore()
+const gameStore = useGameStore()
 
 // 获取图片URL
 const getImageUrl = (filename: string) => {
   return `${API_CONFIG.imageURL}${filename}`
 }
 
-// 组件挂载时检查登录状态
+// 处理立即挑战按钮点击
+const handleJoinActivity = () => {
+  // 检查是否已登录
+  if (!authStore.isLoggedIn) {
+    // 未登录，跳转到登录页面
+    router.push('/login?redirect=/')
+    return
+  }
+
+  // 已登录，检查是否已中奖
+  if (gameStore.hasPrize) {
+    // 已中奖，跳转到PrizeModal页面显示中奖情况
+    router.push('/prize')
+  } else {
+    // 未中奖，跳转到LoadingPage开始新游戏
+    router.push('/loading')
+  }
+}
+
+// 组件挂载时检查登录状态和加载中奖记录
 onMounted(() => {
   authStore.checkAuthStatus()
+  gameStore.loadPrizeRecord()
 })
 </script>
 
