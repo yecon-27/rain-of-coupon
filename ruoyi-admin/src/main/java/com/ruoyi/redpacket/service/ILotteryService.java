@@ -27,7 +27,7 @@ public interface ILotteryService {
      * @param userId 用户ID
      * @return 抽奖结果
      */
-    DrawResult executeDraw(Long userId);
+    DrawResult executeDraw(Long userId, int clickedCount);
     
     /**
      * 保存抽奖记录到数据库
@@ -36,7 +36,7 @@ public interface ILotteryService {
      * @param result 抽奖结果
      * @param ipAddress IP地址
      */
-    void saveDrawRecord(Long userId, DrawResult result, String ipAddress);
+    void saveDrawRecord(Long userId, DrawResult result, String ipAddress, int clickedCount);
     
     /**
      * 获取用户今日剩余抽奖次数

@@ -18,7 +18,8 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
 import { API_CONFIG } from '@/config/api';
-import { useGameStore } from '@/stores/gameStore'; // 引入 game store
+import { useGameStore } from '@/stores/gameStore';
+import { drawLottery } from '@/api/lottery';  // 添加此导入
 
 const gameStore = useGameStore(); // 初始化 store
 
@@ -30,7 +31,7 @@ const rainContainer = ref<HTMLDivElement | null>(null);
 const remainingTime = ref(15);
 const packetCount = ref(99);
 // const clickedPacketCount = ref(0); // 不再需要本地的 ref
-const PROB_OF_NOT_WINNING_PER_PACKET = 0.95;
+// const PROB_OF_NOT_WINNING_PER_PACKET = 0.95;
 let timerInterval: number | null = null;
 const rainInterval: number | null = null;
 let activePackets = 0;
@@ -112,20 +113,7 @@ function startTimer() {
       clearInterval(timerInterval as number);
       if (rainInterval) clearInterval(rainInterval);
       
-      // 游戏结束时，根据点击数动态计算中奖概率
-      const finalProbOfNotWinning = Math.pow(PROB_OF_NOT_WINNING_PER_PACKET, gameStore.clickedPacketCount);
-      const isWin = Math.random() > finalProbOfNotWinning;
-
-      if (isWin) {
-        try {
-          // 异步设置中奖记录并调用API
-          await gameStore.setPrizeRecord(gameStore.clickedPacketCount);
-        } catch (error) {
-          console.error('设置中奖记录失败:', error);
-        }
-      }
-      
-      endGame(isWin);
+      endGame();  // 直接调用 endGame，不再进行本地计算
     }
   }, 1000);
 }
@@ -142,10 +130,32 @@ function handleClick(event: MouseEvent, packet: HTMLElement) {
   packet.remove();
 }
 
-function endGame(isWin: boolean, prize?: { amount: number }) {
-  if (timerInterval) clearInterval(timerInterval);
-  if (rainInterval) clearInterval(rainInterval);
-  emit('game-finished', { isWin, prize });
+async function endGame() {
+  try {
+    // 总是调用后端API记录参与
+    const result = await drawLottery({
+      clickedCount: gameStore.clickedPacketCount
+    });
+
+    const isWin = result?.data?.isWin === 1;
+
+    if (isWin) {
+      // 只在后端确认中奖时设置奖品记录
+      await gameStore.setPrizeRecord(gameStore.clickedPacketCount, {
+        isWin: result.data.isWin,
+        prizeName: result.data.prizeName || undefined,
+        id: result.data.id
+      });
+    }
+
+    emit('game-finished', {
+      isWin: !!isWin,
+      prize: isWin ? { amount: gameStore.prizeRecord?.amount || 0 } : undefined
+    });
+  } catch (error) {
+    console.error('游戏结束处理失败:', error);
+    emit('game-finished', { isWin: false });
+  }
 }
 
 onMounted(() => {

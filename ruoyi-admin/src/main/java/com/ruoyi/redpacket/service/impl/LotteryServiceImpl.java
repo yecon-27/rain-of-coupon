@@ -64,19 +64,13 @@ public class LotteryServiceImpl implements ILotteryService {
         return true;
     }
     
-    @Override
-    @Transactional
-    public DrawResult executeDraw(Long userId) {
-        // 默认点击数量为1（兼容原有接口）
-        return executeDraw(userId, 1);
-    }
-    
     /**
      * 执行抽奖 - 基于红包雨点击数量
      * @param userId 用户ID
      * @param clickedCount 本轮游戏中点击的红包数量（1-100）
      * @return 抽奖结果
      */
+    @Override
     @Transactional
     public DrawResult executeDraw(Long userId, int clickedCount) {
         // 获取所有可用奖品
@@ -108,12 +102,13 @@ public class LotteryServiceImpl implements ILotteryService {
     }
     
     @Override
-    public void saveDrawRecord(Long userId, DrawResult result, String ipAddress) {
+    public void saveDrawRecord(Long userId, DrawResult result, String ipAddress, int clickedCount) {
         RedpacketUserParticipationLog log = new RedpacketUserParticipationLog();
         log.setUserId(userId);
         log.setIpAddress(ipAddress);
         log.setIsWin(result.isWin() ? 1 : 0);
         log.setParticipationTime(new Date());
+        log.setClickedCount(clickedCount); // 保存点击次数
         
         if (result.isWin()) {
             log.setPrizeId(result.getPrizeId());

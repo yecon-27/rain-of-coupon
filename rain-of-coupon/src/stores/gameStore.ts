@@ -52,66 +52,26 @@ export const useGameStore = defineStore('game', {
       return 188; // 默认值
     },
     
-    async setPrizeRecord(clickCount: number) {
-      try {
-        // 调用后端API保存中奖记录到数据库
-        const result = await drawLottery({
-          clickedCount: clickCount,
-          sessionId: `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-        });
-    
-        // 无论API返回什么，都保存中奖记录（因为游戏逻辑已经判定中奖）
-        const imageUrl = this.determinePrizeImage(clickCount);
-        let amount = 188;
-        let prizeName = '188元优惠券';
-        
-        if (result.data && result.data.isWin === 1) {
-          // 如果API也判定中奖，使用API返回的奖品信息
-          amount = this.getPrizeAmount(result.data.prizeName || '');
-          prizeName = result.data.prizeName || prizeName;
-        } else {
-          // 如果API判定未中奖，但游戏逻辑判定中奖，使用默认奖品信息
-          amount = this.getPrizeAmount(imageUrl);
-          if (imageUrl.includes('888')) prizeName = '888元优惠券';
-          else if (imageUrl.includes('588')) prizeName = '588元优惠券';
-        }
-        
-        this.prizeRecord = {
-          imageUrl,
-          amount,
-          timestamp: Date.now(),
-          participationId: result.data?.id,
-          prizeName
-        };
-        
-        // 持久化存储中奖记录
-        localStorage.setItem('prizeRecord', JSON.stringify(this.prizeRecord));
-        
-        return result.data;
-      } catch (error) {
-        console.error('保存中奖记录失败:', error);
-        // 如果API调用失败，仍然保存本地记录作为备份
-        const imageUrl = this.determinePrizeImage(clickCount);
-        let amount = 188;
-        let prizeName = '188元优惠券';
-        
-        if (imageUrl.includes('888')) {
-          amount = 888;
-          prizeName = '888元优惠券';
-        } else if (imageUrl.includes('588')) {
-          amount = 588;
-          prizeName = '588元优惠券';
-        }
-        
-        this.prizeRecord = {
-          imageUrl,
-          amount,
-          timestamp: Date.now(),
-          prizeName
-        };
-        
-        localStorage.setItem('prizeRecord', JSON.stringify(this.prizeRecord));
+    async setPrizeRecord(clickCount: number, apiData: { isWin: number; prizeName?: string; id?: number }) {
+      // 只在后端确认中奖时设置
+      if (apiData.isWin !== 1) {
+        return;
       }
+    
+      const imageUrl = this.determinePrizeImage(clickCount);
+      const amount = this.getPrizeAmount(apiData.prizeName || '');
+      const prizeName = apiData.prizeName || '优惠券';
+    
+      this.prizeRecord = {
+        imageUrl,
+        amount,
+        timestamp: Date.now(),
+        participationId: apiData.id,
+        prizeName
+      };
+    
+      // 持久化存储
+      localStorage.setItem('prizeRecord', JSON.stringify(this.prizeRecord));
     },
     
     // 添加清除localStorage的方法

@@ -49,6 +49,14 @@ public class RedpacketUserParticipationLog extends BaseEntity
     @Excel(name = "是否使用(0未使用 1已使用)")
     private Integer isUsed;
 
+    /** 点击次数 */
+    @Excel(name = "点击次数")
+    private Integer clickedCount;
+
+    public void setClickedCount(Integer clickedCount) {
+        this.clickedCount = clickedCount;
+    }
+
     public void setId(Long id) 
     {
         this.id = id;

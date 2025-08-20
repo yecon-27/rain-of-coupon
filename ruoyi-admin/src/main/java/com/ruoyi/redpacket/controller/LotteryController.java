@@ -41,29 +41,25 @@ public class LotteryController extends BaseController {
      */
     @PostMapping("/draw")
     @Log(title = "用户抽奖", businessType = BusinessType.INSERT)
-    public AjaxResult draw(HttpServletRequest request) {
+    public AjaxResult draw(@RequestBody(required = false) Map<String, Integer> payload, HttpServletRequest request) {
         try {
-            // 获取当前用户ID
             Long userId = SecurityUtils.getUserId();
             if (userId == null) {
                 return error("请先登录");
             }
             
-            // 获取用户IP
+            int clickedCount = (payload != null && payload.containsKey("clickedCount")) ? payload.get("clickedCount") : 1;
+
             String ipAddress = IpUtils.getIpAddr(request);
             
-            // 检查抽奖资格
             if (!lotteryService.checkDrawEligibility(userId, ipAddress)) {
                 return error("抽奖资格检查失败，请检查是否已中奖或超过每日限制");
             }
             
-            // 执行抽奖
-            DrawResult result = lotteryService.executeDraw(userId);
+            DrawResult result = lotteryService.executeDraw(userId, clickedCount);
             
-            // 保存抽奖记录
-            lotteryService.saveDrawRecord(userId, result, ipAddress);
+            lotteryService.saveDrawRecord(userId, result, ipAddress, clickedCount);
             
-            // 返回抽奖结果
             Map<String, Object> data = new HashMap<>();
             data.put("isWin", result.isWin());
             data.put("prizeName", result.getPrizeName());
