@@ -151,13 +151,24 @@ public class LotteryController extends BaseController {
                 return error("请先登录");
             }
             
+            logger.info("🔍 [用户状态查询] 当前用户ID: {}", userId);
+            
             String ipAddress = IpUtils.getIpAddr(request);
             
             // 查询用户参与记录
             List<RedpacketUserParticipationLog> logs = lotteryService.getUserParticipationLogs(userId);
+            logger.info("📊 [用户状态查询] 查询到 {} 条参与记录", logs.size());
+            
+            // 打印所有记录的详细信息
+            for (RedpacketUserParticipationLog log : logs) {
+                logger.info("📝 [参与记录] ID: {}, 用户ID: {}, 是否中奖: {}, 奖品名称: {}, 参与时间: {}", 
+                           log.getId(), log.getUserId(), log.getIsWin(), log.getPrizeName(), log.getParticipationTime());
+            }
             
             // 计算状态
             boolean hasEverWon = logs.stream().anyMatch(log -> log.getIsWin() == 1);
+            logger.info("🏆 [中奖状态] hasEverWon: {}", hasEverWon);
+            
             int remainingCount = lotteryService.getRemainingDrawCount(userId);
             boolean canDraw = lotteryService.checkDrawEligibility(userId, ipAddress) && remainingCount > 0 && !hasEverWon;
             boolean isCrowded = lotteryService.isCrowded(ipAddress); // 假设有流量检查方法

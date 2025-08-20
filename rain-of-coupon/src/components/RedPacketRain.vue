@@ -155,7 +155,7 @@ async function endGame() {
     console.log('🌐 [RedPacketRain] 响应消息:', result?.msg);
     console.log('🌐 [RedPacketRain] 响应数据:', result?.data);
 
-    const isWin = result?.data?.isWin === 1;
+    const isWin = result?.data?.isWin === true;  // 或者直接使用 !!result?.data?.isWin
     console.log('🎯 [RedPacketRain] 是否中奖:', isWin);
 
     if (isWin) {

@@ -20,4 +20,3 @@ app.mount('#app')
 import { useAuthStore } from '@/stores/auth'
 const authStore = useAuthStore()
 authStore.checkAuthStatus()
-console.log('应用启动时认证状态:', authStore.isLoggedIn, authStore.currentUser)

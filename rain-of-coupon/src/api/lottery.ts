@@ -13,7 +13,7 @@ interface DrawLotteryResponse {
     userId: number
     participationTime: string
     ipAddress: string
-    isWin: number
+    isWin: boolean
     prizeId: number | null
     prizeName: string | null
     isUsed: number

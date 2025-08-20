@@ -73,8 +73,8 @@ const user = {
           } else {
             commit('SET_ROLES', ['ROLE_DEFAULT'])
           }
-          commit('SET_ID', user.userId)
-          commit('SET_NAME', user.userName)
+          commit('SET_ID', user.userId)  // 这里应该存储数字ID
+          commit('SET_NAME', user.userName)  // 这里存储用户名
           commit('SET_NICK_NAME', user.nickName)
           commit('SET_AVATAR', avatar)
           /* 初始密码提示 */

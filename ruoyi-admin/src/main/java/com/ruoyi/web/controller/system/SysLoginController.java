@@ -23,6 +23,7 @@ import com.ruoyi.framework.web.service.SysPermissionService;
 import com.ruoyi.framework.web.service.TokenService;
 import com.ruoyi.system.service.ISysConfigService;
 import com.ruoyi.system.service.ISysMenuService;
+import com.ruoyi.system.service.ISysUserService; // 新增导入
 
 /**
  * 登录验证
@@ -47,11 +48,11 @@ public class SysLoginController
     @Autowired
     private ISysConfigService configService;
 
+    @Autowired                         // 新增注入
+    private ISysUserService userService;
+
     /**
      * 登录方法
-     * 
-     * @param loginBody 登录信息
-     * @return 结果
      */
     @PostMapping("/login")
     public AjaxResult login(@RequestBody LoginBody loginBody)
@@ -61,6 +62,10 @@ public class SysLoginController
         String token = loginService.login(loginBody.getUsername(), loginBody.getPassword(), loginBody.getCode(),
                 loginBody.getUuid());
         ajax.put(Constants.TOKEN, token);
+
+        // 直接返回用户信息，避免前端再次调用 /getInfo
+        SysUser user = userService.selectUserByUserName(loginBody.getUsername());
+        ajax.put("user", user);
         return ajax;
     }
 

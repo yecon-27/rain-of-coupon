@@ -52,9 +52,9 @@ export const useGameStore = defineStore('game', {
       return 188; // Default value
     },
     
-    async setPrizeRecord(clickCount: number, apiData: { isWin: number; prizeName?: string; id?: number }) {
+    async setPrizeRecord(clickCount: number, apiData: { isWin: boolean; prizeName?: string; id?: number }) {
       // Only set prize if backend confirms a win
-      if (apiData.isWin !== 1) {
+      if (!apiData.isWin) {  // 改为boolean判断
         return;
       }
     
