@@ -13,8 +13,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * @author ruoyi
  * @date 2025-08-07
  */
-public class RedpacketUserParticipationLog extends BaseEntity
-{
+public class RedpacketUserParticipationLog extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
     /** 主键 */
@@ -135,6 +134,10 @@ public class RedpacketUserParticipationLog extends BaseEntity
     public Integer getIsUsed() 
     {
         return isUsed;
+    }
+
+    public Integer getClickedCount() {
+        return clickedCount;
     }
 
     @Override

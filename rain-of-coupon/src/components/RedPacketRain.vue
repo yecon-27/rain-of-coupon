@@ -28,7 +28,7 @@ const emit = defineEmits<{
 }>();
 
 const rainContainer = ref<HTMLDivElement | null>(null);
-const remainingTime = ref(15);
+const remainingTime = ref(30);
 const packetCount = ref(99);
 // const clickedPacketCount = ref(0); // 不再需要本地的 ref
 // const PROB_OF_NOT_WINNING_PER_PACKET = 0.95;

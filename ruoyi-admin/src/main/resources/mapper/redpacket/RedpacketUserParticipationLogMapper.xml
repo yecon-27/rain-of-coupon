@@ -13,10 +13,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="prizeId"    column="prize_id"    />
         <result property="prizeName"    column="prize_name"    />
         <result property="isUsed"    column="is_used"    />
+        <result property="clickedCount" column="clicked_count" />
     </resultMap>
 
     <sql id="selectRedpacketUserParticipationLogVo">
-        select id, user_id, participation_time, ip_address, is_win, prize_id, prize_name, is_used from redpacket_user_participation_log
+        select id, user_id, participation_time, ip_address, is_win, prize_id, prize_name, is_used, clicked_count from redpacket_user_participation_log
     </sql>
 
     <select id="selectRedpacketUserParticipationLogList" parameterType="RedpacketUserParticipationLog" resultMap="RedpacketUserParticipationLogResult">
@@ -47,6 +48,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="prizeId != null">prize_id,</if>
             <if test="prizeName != null">prize_name,</if>
             <if test="isUsed != null">is_used,</if>
+            <if test="clickedCount != null">clicked_count,</if>
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="userId != null">#{userId},</if>
@@ -56,6 +58,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="prizeId != null">#{prizeId},</if>
             <if test="prizeName != null">#{prizeName},</if>
             <if test="isUsed != null">#{isUsed},</if>
+            <if test="clickedCount != null">#{clickedCount},</if>
          </trim>
     </insert>
 
