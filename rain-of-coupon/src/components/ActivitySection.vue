@@ -63,9 +63,17 @@ const handleJoinActivity = () => {
 
 // 组件挂载时检查登录状态和加载中奖记录
 onMounted(async () => {
-  authStore.checkAuthStatus();
-  // 从数据库加载真实的中奖记录
-  await gameStore.loadPrizeRecord();
+  // 先检查认证状态
+  await authStore.checkAuthStatus();
+  
+  // 只有在已登录的情况下才加载中奖记录
+  if (authStore.isLoggedIn) {
+    try {
+      await gameStore.loadPrizeRecord();
+    } catch (error) {
+      console.error('加载中奖记录失败:', error);
+    }
+  }
 });
 </script>
 

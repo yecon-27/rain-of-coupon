@@ -12,7 +12,8 @@ import com.ruoyi.redpacket.service.ILotteryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
@@ -41,26 +42,42 @@ public class LotteryServiceImpl implements ILotteryService {
     
     @Override
     public boolean checkDrawEligibility(Long userId, String ipAddress) {
+        Logger logger = LoggerFactory.getLogger(LotteryServiceImpl.class);
+        logger.info("🔍 [抽奖资格检查] 开始检查 - userId: {}, ipAddress: {}", userId, ipAddress);
+        
         // 1. 检查活动是否有效
-        if (!isActivityValid()) {
+        boolean activityValid = isActivityValid();
+        logger.info("📅 [抽奖资格检查] 活动有效性检查: {}", activityValid);
+        if (!activityValid) {
+            logger.warn("❌ [抽奖资格检查] 活动无效，检查失败");
             return false;
         }
         
         // 2. 检查用户是否已经中过奖（核心规则：一共只能中一次）
-        if (hasEverWon(userId)) {
+        boolean hasWon = hasEverWon(userId);
+        logger.info("🏆 [抽奖资格检查] 用户是否已中奖: {}", hasWon);
+        if (hasWon) {
+            logger.warn("❌ [抽奖资格检查] 用户已中过奖，检查失败");
             return false;
         }
         
         // 3. 检查今日参与次数（每天3次机会）
-        if (getRemainingDrawCount(userId) <= 0) {
+        int remainingCount = getRemainingDrawCount(userId);
+        logger.info("🎯 [抽奖资格检查] 剩余抽奖次数: {}", remainingCount);
+        if (remainingCount <= 0) {
+            logger.warn("❌ [抽奖资格检查] 今日抽奖次数已用完，检查失败");
             return false;
         }
         
         // 4. 检查IP频率限制（1小时内同一IP最多10次）
-        if (checkIpFrequencyLimit(ipAddress)) {
+        boolean ipLimited = checkIpFrequencyLimit(ipAddress);
+        logger.info("🌐 [抽奖资格检查] IP频率限制检查: {}", ipLimited);
+        if (ipLimited) {
+            logger.warn("❌ [抽奖资格检查] IP频率超限，检查失败");
             return false;
         }
         
+        logger.info("✅ [抽奖资格检查] 所有检查通过，用户具备抽奖资格");
         return true;
     }
     
@@ -103,31 +120,49 @@ public class LotteryServiceImpl implements ILotteryService {
     
     @Override
     public void saveDrawRecord(Long userId, DrawResult result, String ipAddress, int clickedCount) {
+        LoggerFactory.getLogger(LotteryServiceImpl.class).info("开始保存抽奖记录 - userId: {}, isWin: {}, clickedCount: {}", userId, result.isWin(), clickedCount);
+        
         RedpacketUserParticipationLog log = new RedpacketUserParticipationLog();
         log.setUserId(userId);
         log.setIpAddress(ipAddress);
         log.setIsWin(result.isWin() ? 1 : 0);
         log.setParticipationTime(new Date());
-        log.setClickedCount(clickedCount); // 保存点击次数
+        log.setClickedCount(clickedCount);
         
         if (result.isWin()) {
             log.setPrizeId(result.getPrizeId());
             log.setPrizeName(result.getPrizeName());
+            LoggerFactory.getLogger(LotteryServiceImpl.class).info("中奖记录 - prizeId: {}, prizeName: {}", result.getPrizeId(), result.getPrizeName());
         }
         
-        participationLogMapper.insertRedpacketUserParticipationLog(log);
+        LoggerFactory.getLogger(LotteryServiceImpl.class).info("准备插入数据库 - log对象: {}", log.toString());
+        
+        try {
+            int insertResult = participationLogMapper.insertRedpacketUserParticipationLog(log);
+            LoggerFactory.getLogger(LotteryServiceImpl.class).info("数据库插入结果: {}, 生成的ID: {}", insertResult, log.getId());
+        } catch (Exception e) {
+            LoggerFactory.getLogger(LotteryServiceImpl.class).error("数据库插入失败", e);
+            throw e;
+        }
     }
     
     @Override
     public int getRemainingDrawCount(Long userId) {
+        Logger logger = LoggerFactory.getLogger(LotteryServiceImpl.class);
+        
         // 获取活动配置的每日参与次数限制
         RedpacketEventConfig config = getEventConfig();
         int maxDrawsPerDay = config != null ? config.getMaxDrawsPerDay().intValue() : 3;
+        logger.info("📊 [剩余次数] 每日最大抽奖次数: {}", maxDrawsPerDay);
         
         // 查询今日已参与次数
         int todayDrawCount = getTodayParticipationCount(userId);
+        logger.info("📊 [剩余次数] 今日已参与次数: {}", todayDrawCount);
         
-        return Math.max(0, maxDrawsPerDay - todayDrawCount);
+        int remaining = Math.max(0, maxDrawsPerDay - todayDrawCount);
+        logger.info("📊 [剩余次数] 计算结果: {}", remaining);
+        
+        return remaining;
     }
     
     @Override
@@ -180,14 +215,24 @@ public class LotteryServiceImpl implements ILotteryService {
     }
     
     @Override
+    // 在 isActivityValid 方法中添加日志
     public boolean isActivityValid() {
-        RedpacketEventConfig config = getEventConfig();
-        if (config == null) {
-            return false;
-        }
-        
-        Date now = new Date();
-        return now.after(config.getStartTime()) && now.before(config.getEndTime());
+    Logger logger = LoggerFactory.getLogger(LotteryServiceImpl.class);
+    
+    RedpacketEventConfig config = getEventConfig();
+    logger.info("📋 [活动配置] 获取到的配置: {}", config);
+    
+    if (config == null) {
+        logger.warn("❌ [活动配置] 配置为空");
+        return false;
+    }
+    
+    Date now = new Date();
+    boolean isValid = now.after(config.getStartTime()) && now.before(config.getEndTime());
+    logger.info("⏰ [活动配置] 当前时间: {}, 开始时间: {}, 结束时间: {}, 活动有效: {}", 
+                now, config.getStartTime(), config.getEndTime(), isValid);
+    
+    return isValid;
     }
     
     /**
@@ -290,20 +335,25 @@ public class LotteryServiceImpl implements ILotteryService {
     /**
      * 检查IP频率限制
      */
+    // 如果这个方法存在，添加调试日志
     private boolean checkIpFrequencyLimit(String ipAddress) {
-        RedpacketUserParticipationLog queryLog = new RedpacketUserParticipationLog();
-        queryLog.setIpAddress(ipAddress);
-        
-        List<RedpacketUserParticipationLog> logs = 
-            participationLogMapper.selectRedpacketUserParticipationLogList(queryLog);
-        
-        // 检查1小时内的请求次数
-        Date oneHourAgo = new Date(System.currentTimeMillis() - 60 * 60 * 1000);
-        long recentCount = logs.stream()
-                .filter(log -> log.getParticipationTime().after(oneHourAgo))
-                .count();
-        
-        return recentCount >= 10L; // 1小时内超过10次则限制
+    Logger logger = LoggerFactory.getLogger(LotteryServiceImpl.class);
+    logger.info("🌐 [IP限制] 检查IP: {}", ipAddress);
+    
+    // 这里添加具体的IP频率检查逻辑和日志
+    RedpacketUserParticipationLog queryLog = new RedpacketUserParticipationLog();
+    queryLog.setIpAddress(ipAddress);
+    
+    List<RedpacketUserParticipationLog> logs = 
+        participationLogMapper.selectRedpacketUserParticipationLogList(queryLog);
+    
+    // 检查1小时内的请求次数
+    Date oneHourAgo = new Date(System.currentTimeMillis() - 60 * 60 * 1000);
+    long recentCount = logs.stream()
+            .filter(log -> log.getParticipationTime().after(oneHourAgo))
+            .count();
+    
+    return recentCount >= 10L; // 1小时内超过10次则限制
     }
     
     /**

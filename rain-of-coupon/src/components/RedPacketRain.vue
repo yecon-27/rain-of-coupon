@@ -131,29 +131,69 @@ function handleClick(event: MouseEvent, packet: HTMLElement) {
 }
 
 async function endGame() {
+  console.log('🎮 [RedPacketRain] 游戏结束，开始处理结果');
+  console.log('🎮 [RedPacketRain] 点击红包数量:', gameStore.clickedPacketCount);
+  
   try {
+    // 记录API调用前的状态
+    console.log('🌐 [RedPacketRain] 准备调用drawLottery API');
+    console.log('🌐 [RedPacketRain] 请求参数:', {
+      clickedCount: gameStore.clickedPacketCount
+    });
+    
+    const startTime = Date.now();
+    
     // 总是调用后端API记录参与
     const result = await drawLottery({
       clickedCount: gameStore.clickedPacketCount
     });
+    
+    const endTime = Date.now();
+    console.log(`🌐 [RedPacketRain] API调用完成，耗时: ${endTime - startTime}ms`);
+    console.log('🌐 [RedPacketRain] API响应:', result);
+    console.log('🌐 [RedPacketRain] 响应状态码:', result?.code);
+    console.log('🌐 [RedPacketRain] 响应消息:', result?.msg);
+    console.log('🌐 [RedPacketRain] 响应数据:', result?.data);
 
     const isWin = result?.data?.isWin === 1;
+    console.log('🎯 [RedPacketRain] 是否中奖:', isWin);
 
     if (isWin) {
+      console.log('🏆 [RedPacketRain] 用户中奖，设置奖品记录');
+      console.log('🏆 [RedPacketRain] 奖品信息:', {
+        isWin: result.data.isWin,
+        prizeName: result.data.prizeName,
+        id: result.data.id
+      });
+      
       // 只在后端确认中奖时设置奖品记录
       await gameStore.setPrizeRecord(gameStore.clickedPacketCount, {
         isWin: result.data.isWin,
         prizeName: result.data.prizeName || undefined,
         id: result.data.id
       });
+    } else {
+      console.log('😔 [RedPacketRain] 用户未中奖');
     }
 
+    console.log('✅ [RedPacketRain] 游戏结果处理完成，发送事件给父组件');
     emit('game-finished', {
       isWin: !!isWin,
       prize: isWin ? { amount: gameStore.prizeRecord?.amount || 0 } : undefined
     });
   } catch (error) {
-    console.error('游戏结束处理失败:', error);
+    console.error('❌ [RedPacketRain] 游戏结束处理失败:', error);
+    console.error('❌ [RedPacketRain] 错误详情:', {
+      name: (error as Error).name,
+      message:(error as Error).message,
+      stack: (error as Error).stack
+    });
+    
+    // 检查是否是网络错误
+    if ((error as Error).message.includes('fetch')) {
+      console.error('🌐 [RedPacketRain] 网络请求失败，请检查后端服务');
+    }
+    
     emit('game-finished', { isWin: false });
   }
 }

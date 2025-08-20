@@ -9,8 +9,15 @@ if (import.meta.env.DEV) {
 }
 
 const app = createApp(App)
+const pinia = createPinia()
 
-app.use(createPinia())
+app.use(pinia)
 app.use(router)
 
 app.mount('#app')
+
+// 应用挂载后立即检查认证状态
+import { useAuthStore } from '@/stores/auth'
+const authStore = useAuthStore()
+authStore.checkAuthStatus()
+console.log('应用启动时认证状态:', authStore.isLoggedIn, authStore.currentUser)

@@ -151,6 +151,7 @@ public class RedpacketUserParticipationLog extends BaseEntity {
             .append("prizeId", getPrizeId())
             .append("prizeName", getPrizeName())
             .append("isUsed", getIsUsed())
+            .append("clickedCount", getClickedCount())  // 添加这一行
             .toString();
     }
 }

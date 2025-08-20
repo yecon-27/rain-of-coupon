@@ -83,7 +83,12 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080
 
 // 通用请求函数
 const request = async (url: string, options: RequestInit = {}) => {
-  const token = getToken()
+  const token = getToken();
+  
+  console.log('🔗 [Request] 开始HTTP请求');
+  console.log('🔗 [Request] URL:', `${API_BASE_URL}${url}`);
+  console.log('🔗 [Request] Token存在:', !!token);
+  console.log('🔗 [Request] Token值:', token ? `${token.substring(0, 20)}...` : 'null');
   
   const config: RequestInit = {
     ...options,
@@ -92,38 +97,72 @@ const request = async (url: string, options: RequestInit = {}) => {
       ...(token && { 'Authorization': `Bearer ${token}` }),
       ...options.headers
     }
-  }
+  };
+  
+  console.log('🔗 [Request] 请求配置:', {
+    method: config.method || 'GET',
+    headers: config.headers,
+    body: config.body ? 'Present' : 'None'
+  });
 
   try {
-    const response = await fetch(`${API_BASE_URL}${url}`, config)
+    console.log('🔗 [Request] 发送请求...');
+    const response = await fetch(`${API_BASE_URL}${url}`, config);
+    
+    console.log('🔗 [Request] 收到响应');
+    console.log('🔗 [Request] 响应状态:', response.status, response.statusText);
+    console.log('🔗 [Request] 响应头:', Object.fromEntries(response.headers.entries()));
     
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
+      console.error('❌ [Request] HTTP错误:', response.status, response.statusText);
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
     
-    const data = await response.json()
-    return data
+    const data = await response.json();
+    console.log('✅ [Request] 响应数据:', data);
+    
+    return data;
   } catch (error) {
-    console.error('API Request Error:', error)
-    throw error
+    console.error('❌ [Request] 请求失败:', error);
+    console.error('❌ [Request] 错误类型:', (error as Error).constructor.name);
+    console.error('❌ [Request] 错误消息:', (error as Error).message);
+    throw error;
   }
 }
 
 // 参与红包雨（领取优惠券）
 // 后端写入 redpacket_user_participation_log 表
 export const drawLottery = async (data: DrawLotteryRequest = {}): Promise<DrawLotteryResponse> => {
-  return request('/redpacket/lottery/draw', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'repeatSubmit': 'false'
-    },
-    body: JSON.stringify({
-      clickedCount: data.clickedCount || 1,
-      sessionId: data.sessionId || null,
-      ...data
-    })
-  }) as Promise<DrawLotteryResponse>
+  console.log('🚀 [API] drawLottery 开始调用');
+  console.log('🚀 [API] 请求数据:', data);
+  
+  const requestBody = {
+    clickedCount: data.clickedCount || 1,
+    sessionId: data.sessionId || null,
+    ...data
+  };
+  
+  console.log('🚀 [API] 最终请求体:', requestBody);
+  console.log('🚀 [API] 请求URL:', '/redpacket/lottery/draw');
+  
+  try {
+    const result = await request('/redpacket/lottery/draw', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'repeatSubmit': 'false'
+      },
+      body: JSON.stringify(requestBody)
+    }) as Promise<DrawLotteryResponse>;
+    
+    console.log('✅ [API] drawLottery 调用成功');
+    console.log('✅ [API] 返回结果:', result);
+    
+    return result;
+  } catch (error) {
+    console.error('❌ [API] drawLottery 调用失败:', error);
+    throw error;
+  }
 }
 
 // 获取用户参与记录
