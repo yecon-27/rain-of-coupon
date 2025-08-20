@@ -37,7 +37,7 @@ const loading = ref(true)
 // 计算属性：获取优惠券奖励
 const couponRewards = computed(() => {
   // 直接使用 game store 中的 userRewards，只显示优惠券类型
-  return gameStore.userRewards.filter(reward => reward.type === 'coupon')
+  return gameStore.userRewards?.filter(reward => reward.type === 'coupon') || []
 })
 
 // 修改检查用户状态方法
@@ -48,13 +48,17 @@ const checkUserStatus = async () => {
       return;
     }
 
-    // 初始化数据并获取用户奖励
-    gameStore.initializeData()
-    await gameStore.getUserRewards(authStore.currentUser?.id || '')
+    // 确保正确调用loadPrizeRecord方法
+    if (gameStore.loadPrizeRecord) {
+      await gameStore.loadPrizeRecord();
+    } else {
+      console.warn('loadPrizeRecord方法未定义');
+    }
     
   } catch (error: unknown) {
     console.error('获取用户奖励失败:', error);
   } finally {
+    
     loading.value = false;
   }
 };

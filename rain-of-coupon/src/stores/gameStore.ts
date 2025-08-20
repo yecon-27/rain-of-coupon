@@ -159,15 +159,17 @@ export const useGameStore = defineStore('game', {
         }
       } catch (error) {
         console.error('从数据库加载中奖记录失败:', error);
-        // 降级到从localStorage读取
-        this.loadPrizeRecord();
+        // 修改：直接从 localStorage 加载，避免递归
+        const localRecord = localStorage.getItem('prizeRecord');
+        if (localRecord) {
+          this.prizeRecord = JSON.parse(localRecord);
+        }
       }
     },
     
-    // 更新现有方法
+    // 更新 loadPrizeRecord 只调用 FromDB
     async loadPrizeRecord() {
-      // 优先从数据库查询
       await this.loadPrizeRecordFromDB();
-    },
+    }
   },
 });
