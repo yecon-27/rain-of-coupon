@@ -51,10 +51,10 @@ const getPrizeImageUrl = (): string => {
   
   let imageUrl = ''
   if (amount >= 888) {
-    imageUrl = '/image/coupon/满2500且消费一道特色菜可使用.png'
+    imageUrl = '/image/coupon/满2500元且消费一道特色菜可使用.png'
     console.log('🎫 [CouponCard] 使用888元券图片')
   } else if (amount >= 588) {
-    imageUrl = '/image/coupon/满1500且消费一道特色菜可使用.png'
+    imageUrl = '/image/coupon/满1500元且消费一道特色菜可使用.png'
     console.log('🎫 [CouponCard] 使用588元券图片')
   } else {
     imageUrl = '/image/coupon/满500元且消费一道特色菜可使用.png'
