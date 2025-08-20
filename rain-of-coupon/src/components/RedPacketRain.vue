@@ -19,9 +19,9 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 import { API_CONFIG } from '@/config/api';
 import { useGameStore } from '@/stores/gameStore';
-import { drawLottery } from '@/api/lottery';  // 添加此导入
+import { drawLottery } from '@/api/lottery';
 
-const gameStore = useGameStore(); // 初始化 store
+const gameStore = useGameStore();
 
 const emit = defineEmits<{
   (event: 'game-finished', payload: { isWin: boolean; prize?: { amount: number } }): void;
@@ -30,19 +30,64 @@ const emit = defineEmits<{
 const rainContainer = ref<HTMLDivElement | null>(null);
 const remainingTime = ref(30);
 const packetCount = ref(99);
-// const clickedPacketCount = ref(0); // 不再需要本地的 ref
-// const PROB_OF_NOT_WINNING_PER_PACKET = 0.95;
 let timerInterval: number | null = null;
 const rainInterval: number | null = null;
 let activePackets = 0;
 const maxActivePackets = 99;
-const columnPositions = ['15%', '60%', '85%'];
-let currentColumn = 0;
 
 const calculateRainInterval = () => {
-  // 确保50秒内掉落99个红包
   return Math.max(100, (50 * 1000) / 99);
 };
+
+// 生成随机飘落参数（确保在视图内）
+function getRandomFallParams() {
+  // 获取视口宽度
+  const viewportWidth = window.innerWidth;
+  // 红包宽度（固定为120px）
+  const packetWidth = 120;
+  // 计算红包可飘落的范围（确保红包完全在视口内）
+  const minLeft = (packetWidth / 2) / viewportWidth * 100;
+  const maxLeft = 100 - minLeft;
+  
+  // 动态调整水平位置，确保红包完全在视口内，并整体向左偏移10%
+  const left = Math.max(minLeft, Math.min(maxLeft, Math.random() * (maxLeft - minLeft) + minLeft - 10));
+  
+  // 计算最大允许的水平偏移值
+  const maxOffset = Math.min(
+    viewportWidth * 0.1, // 最大偏移为视口宽度的10%
+    (100 - left) * viewportWidth / 100 - packetWidth / 2, // 右侧剩余空间
+    left * viewportWidth / 100 - packetWidth / 2 // 左侧剩余空间
+  );
+  
+  return {
+    left: left,
+    duration: Math.random() * 2 + 5,
+    horizontalOffset: (Math.random() - 0.5) * maxOffset * 0.8
+  };
+}
+
+// 创建流星尾迹效果
+function createMeteorTrail(packet: HTMLElement) {
+  const trail = document.createElement('div');
+  trail.className = 'meteor-trail';
+  
+  // 设置尾迹样式（更亮、更大、更明显）
+  trail.style.position = 'absolute';
+  trail.style.width = '6px';
+  trail.style.height = '100px';
+  trail.style.background = 'linear-gradient(to bottom, rgba(255, 215, 0, 1), rgba(255, 215, 0, 0.8), rgba(255, 215, 0, 0.5), transparent)';
+  trail.style.borderRadius = '50%';
+  trail.style.pointerEvents = 'none';
+  trail.style.zIndex = '1';
+  trail.style.filter = 'blur(2px)';
+  
+  // 位置跟随红包
+  trail.style.left = packet.style.left;
+  trail.style.top = packet.style.top;
+  trail.style.transform = 'translateX(-50%) translateY(-100px)';
+  
+  return trail;
+}
 
 function startRain() {
   const generatePacket = () => {
@@ -59,39 +104,112 @@ function startRain() {
     packet.src = getImageUrl('luckyBag.png');
     packet.className = 'red-packet';
     
-    // 调整红包尺寸为100x100px
-    packet.width = 120;
-    packet.height = 120;
-    packet.style.width = '140px';
-    packet.style.height = '140px';
-    packet.style.maxWidth = '140px';
-    packet.style.maxHeight = '140px';
+    // 获取随机参数
+    const params = getRandomFallParams();
+    
+    // 固定红包大小为100px
+    const fixedSize = 130;
+    packet.style.width = `${fixedSize}px`;
+    packet.style.height = `${fixedSize}px`;
+    packet.style.maxWidth = `${fixedSize}px`;
+    packet.style.maxHeight = `${fixedSize}px`;
     packet.style.objectFit = 'contain';
-
-    // 调整红包位置（20%, 50%, 80%）
-    packet.style.left = columnPositions[currentColumn];
-    currentColumn = (currentColumn + 1) % columnPositions.length;
-    packet.style.animationDuration = `${Math.random() * 2 + 3}s`;
+    packet.style.position = 'absolute';
+    packet.style.cursor = 'pointer';
+    packet.style.transition = 'transform 0.1s ease';
+    packet.style.webkitTapHighlightColor = 'transparent';
+    packet.style.touchAction = 'manipulation';
+    packet.style.zIndex = '2';
+    
+    // 设置初始位置
+    packet.style.left = `${params.left}%`;
+    packet.style.top = '-150px';
+    
+    // 创建流星尾迹
+    const trail = createMeteorTrail(packet, params);
+    
+    // 创建简化的垂直飘落动画（限制在视图内）
+    const keyframes = [
+      {
+        transform: `translateY(-150px) translateX(0px)`,
+        opacity: '0'
+      },
+      {
+        transform: `translateY(50px) translateX(${Math.max(-50, Math.min(50, params.horizontalOffset * 0.2))}px)`,
+        opacity: '1',
+        offset: 0.1
+      },
+      {
+        transform: `translateY(calc(100vh + 150px)) translateX(${Math.max(-50, Math.min(50, params.horizontalOffset))}px)`,
+        opacity: '0.8'
+      }
+    ];
+    
+    // 尾迹动画
+    const trailKeyframes = [
+      {
+        transform: `translateX(-50%) translateY(-210px)`,
+        opacity: '0'
+      },
+      {
+        transform: `translateX(-50%) translateY(-10px)`,
+        opacity: '0.8',
+        offset: 0.1
+      },
+      {
+        transform: `translateX(-50%) translateY(calc(100vh + 90px))`,
+        opacity: '0'
+      }
+    ];
+    
+    const animation = packet.animate(keyframes, {
+      duration: params.duration * 1000,
+      easing: 'linear',
+      fill: 'forwards'
+    });
+    
+    const trailAnimation = trail.animate(trailKeyframes, {
+      duration: params.duration * 1000,
+      easing: 'linear',
+      fill: 'forwards'
+    });
 
     activePackets++;
     packetCount.value = Math.max(0, packetCount.value - 1);
 
+    // 点击事件
     packet.addEventListener('click', (event: MouseEvent) => {
       activePackets--;
-      handleClick(event, packet);
+      animation.cancel();
+      trailAnimation.cancel();
+      handleClick(event, packet, trail);
     });
 
-    packet.addEventListener('animationend', () => {
+    // 动画结束事件
+    animation.addEventListener('finish', () => {
       activePackets--;
-      packet.remove();
+      if (packet.parentNode) {
+        packet.remove();
+      }
+      if (trail.parentNode) {
+        trail.remove();
+      }
     });
 
-    rainContainer.value.appendChild(packet);
+    // 悬停效果
+    packet.addEventListener('mouseenter', () => {
+      packet.style.transform = 'scale(1.1)';
+    });
+    
+    packet.addEventListener('mouseleave', () => {
+      packet.style.transform = 'scale(1)';
+    });
 
-    void packet.offsetHeight;
+    rainContainer.value.appendChild(trail); // 先添加尾迹
+    rainContainer.value.appendChild(packet); // 再添加红包
 
     if (packetCount.value > 0) {
-      const nextInterval = calculateRainInterval();
+      const nextInterval = calculateRainInterval() + Math.random() * 300;
       setTimeout(generatePacket, nextInterval);
     }
   };
@@ -113,21 +231,31 @@ function startTimer() {
       clearInterval(timerInterval as number);
       if (rainInterval) clearInterval(rainInterval);
       
-      endGame();  // 直接调用 endGame，不再进行本地计算
+      endGame();
     }
   }, 1000);
 }
 
-function handleClick(event: MouseEvent, packet: HTMLElement) {
-  // 阻止事件冒泡，防止意外触发
+function handleClick(event: MouseEvent, packet: HTMLElement, trail?: HTMLElement) {
   event.stopPropagation();
   event.preventDefault();
 
-  // 调用 store 中的 action 来增加点击计数
   gameStore.incrementClickedPacketCount();
-
-  // 移除被点击的红包
-  packet.remove();
+  
+  // 添加点击效果
+  packet.style.transform = 'scale(1.3)';
+  packet.style.opacity = '0';
+  
+  if (trail) {
+    trail.style.opacity = '0';
+  }
+  
+  setTimeout(() => {
+    packet.remove();
+    if (trail && trail.parentNode) {
+      trail.remove();
+    }
+  }, 100);
 }
 
 async function endGame() {
@@ -135,7 +263,6 @@ async function endGame() {
   console.log('🎮 [RedPacketRain] 点击红包数量:', gameStore.clickedPacketCount);
   
   try {
-    // 记录API调用前的状态
     console.log('🌐 [RedPacketRain] 准备调用drawLottery API');
     console.log('🌐 [RedPacketRain] 请求参数:', {
       clickedCount: gameStore.clickedPacketCount
@@ -143,7 +270,6 @@ async function endGame() {
     
     const startTime = Date.now();
     
-    // 总是调用后端API记录参与
     const result = await drawLottery({
       clickedCount: gameStore.clickedPacketCount
     });
@@ -155,7 +281,7 @@ async function endGame() {
     console.log('🌐 [RedPacketRain] 响应消息:', result?.msg);
     console.log('🌐 [RedPacketRain] 响应数据:', result?.data);
 
-    const isWin = result?.data?.isWin === true;  // 或者直接使用 !!result?.data?.isWin
+    const isWin = result?.data?.isWin === true;
     console.log('🎯 [RedPacketRain] 是否中奖:', isWin);
 
     if (isWin) {
@@ -166,7 +292,6 @@ async function endGame() {
         id: result.data.id
       });
       
-      // 只在后端确认中奖时设置奖品记录
       await gameStore.setPrizeRecord(gameStore.clickedPacketCount, {
         isWin: result.data.isWin,
         prizeName: result.data.prizeName || undefined,
@@ -189,7 +314,6 @@ async function endGame() {
       stack: (error as Error).stack
     });
     
-    // 检查是否是网络错误
     if ((error as Error).message.includes('fetch')) {
       console.error('🌐 [RedPacketRain] 网络请求失败，请检查后端服务');
     }
@@ -217,6 +341,7 @@ onUnmounted(() => {
   touch-action: manipulation;
   user-select: none;
   -webkit-user-select: none;
+  overflow: hidden; /* 确保内容不会溢出 */
 }
 
 .timer,
@@ -290,27 +415,18 @@ onUnmounted(() => {
   height: 100%;
   z-index: 5;
   touch-action: manipulation;
+  overflow: hidden; /* 防止红包超出容器 */
 }
 
-/* 红包样式（缩小范围） */
+/* 红包样式 */
 .red-packet {
-  position: absolute;
-  animation: fall linear infinite;
-  cursor: pointer;
-  transition: transform 0.1s ease;
-  padding: 3px;
-  margin: -3px;
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
+  pointer-events: auto;
+  filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.3)); /* 添加金色光晕 */
 }
 
-.red-packet:hover,
-.red-packet:active {
-  transform: scale(1.2);
-}
-
-@keyframes fall {
-  0% { transform: translateY(-100px) rotate(0deg); }
-  100% { transform: translateY(100vh) rotate(360deg); }
+/* 流星尾迹样式（更亮、更大） */
+.meteor-trail {
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+  filter: blur(2px);
 }
 </style>
