@@ -9,6 +9,7 @@ import com.ruoyi.common.utils.ServletUtils;
 import com.ruoyi.common.utils.ip.IpUtils;
 import com.ruoyi.redpacket.domain.DrawResult;
 import com.ruoyi.redpacket.domain.RedpacketPrize;
+import com.ruoyi.redpacket.domain.RedpacketUserParticipationLog;
 import com.ruoyi.redpacket.service.ILotteryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +18,9 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.stream.Collectors;
 
 /**
  * 抽奖控制器
@@ -24,8 +28,9 @@ import java.util.Map;
  * @author ruoyi
  * @date 2025-08-06
  */
+// 修改控制器映射以匹配前端
 @RestController
-@RequestMapping("/api/lottery")
+@RequestMapping("/redpacket/lottery")
 public class LotteryController extends BaseController {
     
     @Autowired
@@ -139,6 +144,9 @@ public class LotteryController extends BaseController {
     /**
      * 检查用户抽奖资格
      */
+    /**
+     * 获取用户状态（查询 redpacket_user_participation_log）
+     */
     @GetMapping("/status")
     public AjaxResult getStatus(HttpServletRequest request) {
         try {
@@ -148,32 +156,49 @@ public class LotteryController extends BaseController {
             }
             
             String ipAddress = IpUtils.getIpAddr(request);
-            boolean eligible = lotteryService.checkDrawEligibility(userId, ipAddress);
-            boolean activityValid = lotteryService.isActivityValid();
-            boolean hasWon = lotteryService.hasWonToday(userId);
+            
+            // 查询用户参与记录
+            List<RedpacketUserParticipationLog> logs = lotteryService.getUserParticipationLogs(userId);
+            
+            // 计算状态
+            boolean hasEverWon = logs.stream().anyMatch(log -> log.getIsWin() == 1);
             int remainingCount = lotteryService.getRemainingDrawCount(userId);
+            boolean canDraw = lotteryService.checkDrawEligibility(userId, ipAddress) && remainingCount > 0 && !hasEverWon;
+            boolean isCrowded = lotteryService.isCrowded(ipAddress); // 假设有流量检查方法
+            
+            // 今日参与和中奖记录
+            List<Map<String, Object>> todayParticipations = logs.stream()
+                .filter(log -> {
+                    LocalDate participationDate = log.getParticipationTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                    return participationDate.equals(LocalDate.now());
+                })
+                .map(log -> {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("id", log.getId());
+                    map.put("participationTime", log.getParticipationTime());
+                    map.put("isWin", log.getIsWin());
+                    // 添加其他字段
+                    return map;
+                }).collect(Collectors.toList());
+            
+            List<Map<String, Object>> winRecords = logs.stream()
+                .filter(log -> log.getIsWin() == 1)
+                .map(log -> {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("id", log.getId());
+                    map.put("participationTime", log.getParticipationTime());
+                    map.put("prizeName", log.getPrizeName());
+                    // 添加其他字段
+                    return map;
+                }).collect(Collectors.toList());
             
             Map<String, Object> data = new HashMap<>();
-            data.put("eligible", eligible);
-            data.put("activityValid", activityValid);
-            data.put("hasWonToday", hasWon);
+            data.put("canDraw", canDraw);
+            data.put("hasEverWon", hasEverWon);
+            // data.put("isCrowded", isCrowded);
             data.put("remainingCount", remainingCount);
-            data.put("canDraw", eligible && activityValid && !hasWon && remainingCount > 0);
-            
-            // 返回不能抽奖的原因
-            if (!eligible || !activityValid || hasWon || remainingCount <= 0) {
-                String reason = "";
-                if (!activityValid) {
-                    reason = "活动未开始或已结束";
-                } else if (hasWon) {
-                    reason = "今日已中奖";
-                } else if (remainingCount <= 0) {
-                    reason = "今日抽奖次数已用完";
-                } else {
-                    reason = "IP请求过于频繁";
-                }
-                data.put("reason", reason);
-            }
+            data.put("todayParticipations", todayParticipations);
+            data.put("winRecords", winRecords);
             
             return success(data);
             

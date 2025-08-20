@@ -1,5 +1,5 @@
 package com.ruoyi.redpacket.service;
-
+import com.ruoyi.redpacket.domain.RedpacketUserParticipationLog;
 import com.ruoyi.redpacket.domain.DrawResult;
 import com.ruoyi.redpacket.domain.RedpacketPrize;
 import java.util.List;
@@ -76,6 +76,20 @@ public interface ILotteryService {
      * @return 抽奖记录列表
      */
     List<Object> getUserDrawRecords(Long userId);
+    
+    /**
+     * 获取用户参与日志
+     * @param userId 用户ID
+     * @return 参与日志列表
+     */
+    List<RedpacketUserParticipationLog> getUserParticipationLogs(Long userId);
+
+    /**
+     * 检查是否拥挤（流量控制）
+     * @param ipAddress IP地址
+     * @return 是否拥挤
+     */
+    boolean isCrowded(String ipAddress);
     
     /**
      * 检查活动是否有效

@@ -223,6 +223,9 @@ public class LotteryServiceImpl implements ILotteryService {
         // 计算调整后的总概率权重
         BigDecimal totalWeight = BigDecimal.ZERO;
         for (RedpacketPrize prize : prizes) {
+            if (prize.getProbability() == null) {
+                continue; // 跳过概率为null的奖品
+            }
             BigDecimal adjustedProbability = prize.getProbability()
                     .multiply(BigDecimal.valueOf(finalMultiplier));
             totalWeight = totalWeight.add(adjustedProbability);
@@ -316,4 +319,22 @@ public class LotteryServiceImpl implements ILotteryService {
             eventConfigMapper.selectRedpacketEventConfigList(new RedpacketEventConfig());
         return configs.isEmpty() ? null : configs.get(0);
     }
+
+
+    @Override
+    public List<RedpacketUserParticipationLog> getUserParticipationLogs(Long userId) {
+        RedpacketUserParticipationLog query = new RedpacketUserParticipationLog();
+        query.setUserId(userId);
+        return participationLogMapper.selectRedpacketUserParticipationLogList(query);
+    }
+
+    @Override
+    public boolean isCrowded(String ipAddress) {
+        // 实现流量检查逻辑，例如检查IP在一定时间内的请求次数
+        // 这里假设使用Redis或其他方式计数，示例为简单实现
+        // 实际中需要注入RedisTemplate或其他计数器
+        // return checkIpFrequencyLimit(ipAddress); // 复用现有方法，如果有
+        return false; // 临时返回false，需实现实际逻辑
+    }
+
 }
