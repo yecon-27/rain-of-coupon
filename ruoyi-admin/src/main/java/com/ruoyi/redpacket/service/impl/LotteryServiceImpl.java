@@ -242,8 +242,13 @@ public class LotteryServiceImpl implements ILotteryService {
      * @return 中奖奖品，null表示未中奖
      */
     private RedpacketPrize executeClickBasedProbabilityDraw(int clickedCount, List<RedpacketPrize> prizes) {
-        // 限制点击数量范围
-        clickedCount = Math.max(1, Math.min(100, clickedCount));
+        // 如果没有点击任何红包，直接返回未中奖
+        if (clickedCount <= 10) {
+            return null;
+        }
+        
+        // 限制点击数量上限
+        clickedCount = Math.min(100, clickedCount);
         
         // 基于点击数量计算概率加成系数
         // 使用对数函数，让概率增长更平滑且有上限
