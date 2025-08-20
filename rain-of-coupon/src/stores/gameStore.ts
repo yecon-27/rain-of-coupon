@@ -49,18 +49,18 @@ export const useGameStore = defineStore('game', {
       if (prizeName.includes('188')) return 188;
       if (prizeName.includes('588')) return 588;
       if (prizeName.includes('888')) return 888;
-      return 188; // 默认值
+      return 188; // Default value
     },
     
     async setPrizeRecord(clickCount: number, apiData: { isWin: number; prizeName?: string; id?: number }) {
-      // 只在后端确认中奖时设置
+      // Only set prize if backend confirms a win
       if (apiData.isWin !== 1) {
         return;
       }
     
       const imageUrl = this.determinePrizeImage(clickCount);
       const amount = this.getPrizeAmount(apiData.prizeName || '');
-      const prizeName = apiData.prizeName || '优惠券';
+      const prizeName = apiData.prizeName || 'Coupon';
     
       this.prizeRecord = {
         imageUrl,
@@ -70,27 +70,27 @@ export const useGameStore = defineStore('game', {
         prizeName
       };
     
-      // 持久化存储
+      // Persist to storage
       localStorage.setItem('prizeRecord', JSON.stringify(this.prizeRecord));
     },
     
-    // 添加清除localStorage的方法
+    // Method to clear localStorage
     clearPrizeRecord() {
       this.prizeRecord = null;
       localStorage.removeItem('prizeRecord');
     },
     
-    // 新增：从数据库加载用户中奖记录
+    // Load user's prize record from the database
     async loadPrizeRecordFromDB() {
       try {
         const userStatus = await getUserStatus();
         
-        // 检查用户是否有中奖记录
+        // Check if the user has any winning records
         if (userStatus.hasEverWon && userStatus.winRecords.length > 0) {
-          // 获取最新的中奖记录
+          // Get the latest winning record
           const latestWin = userStatus.winRecords[0];
           
-          // 根据奖品名称确定图片URL和金额
+          // Determine image URL and amount based on prize name
           let imageUrl = `${API_CONFIG.imageURL}188.png`;
           let amount = 188;
           
@@ -107,19 +107,19 @@ export const useGameStore = defineStore('game', {
             amount,
             timestamp: new Date(latestWin.participationTime).getTime(),
             participationId: latestWin.id,
-            prizeName: latestWin.prizeName || '优惠券'
+            prizeName: latestWin.prizeName || 'Coupon'
           };
           
-          // 同步到localStorage
+          // Sync with localStorage
           localStorage.setItem('prizeRecord', JSON.stringify(this.prizeRecord));
         } else {
-          // 用户没有中奖记录，清除本地数据
+          // User has no winning records, clear local data
           this.prizeRecord = null;
           localStorage.removeItem('prizeRecord');
         }
       } catch (error) {
-        console.error('从数据库加载中奖记录失败:', error);
-        // 修改：直接从 localStorage 加载，避免递归
+        console.error('Failed to load prize record from DB:', error);
+        // Fallback to localStorage to avoid recursion
         const localRecord = localStorage.getItem('prizeRecord');
         if (localRecord) {
           this.prizeRecord = JSON.parse(localRecord);
@@ -127,7 +127,7 @@ export const useGameStore = defineStore('game', {
       }
     },
     
-    // 更新 loadPrizeRecord 只调用 FromDB
+    // Update loadPrizeRecord to only call FromDB
     async loadPrizeRecord() {
       await this.loadPrizeRecordFromDB();
     }
