@@ -14,17 +14,17 @@
 
     <!-- 券包内容 -->
     <div v-else class="coupon-container">
-      <CouponCard :rewards="couponRewards" />
+      <!-- 不再传递rewards，让CouponCard自己读取gameStore -->
+      <CouponCard />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-// 修改导入语句 - 使用正确的 game store
-import { useGameStore } from '@/stores/game'
+import { useGameStore } from '@/stores/gameStore'
 import CouponCard from '@/components/CouponCard.vue'
 
 const router = useRouter()
@@ -34,34 +34,27 @@ const gameStore = useGameStore()
 // 状态管理
 const loading = ref(true)
 
-// 计算属性：获取优惠券奖励
-const couponRewards = computed(() => {
-  // 直接使用 game store 中的 userRewards，只显示优惠券类型
-  return gameStore.userRewards?.filter(reward => reward.type === 'coupon') || []
-})
-
-// 修改检查用户状态方法
+// 检查用户状态方法
 const checkUserStatus = async () => {
   try {
+    console.log('🎫 [CouponPage] 开始检查用户状态')
+    
     if (!authStore.isLoggedIn) {
-      router.push('/login?redirect=/coupon');
-      return;
+      console.log('🎫 [CouponPage] 用户未登录，跳转到登录页')
+      router.push('/login?redirect=/coupon')
+      return
     }
 
-    // 确保正确调用loadPrizeRecord方法
-    if (gameStore.loadPrizeRecord) {
-      await gameStore.loadPrizeRecord();
-    } else {
-      console.warn('loadPrizeRecord方法未定义');
-    }
+    console.log('🎫 [CouponPage] 用户已登录')
+    // CouponCard组件会自己加载中奖记录，这里不需要重复加载
     
-  } catch (error: unknown) {
-    console.error('获取用户奖励失败:', error);
+  } catch (error) {
+    console.error('🎫 [CouponPage] 检查用户状态失败:', error)
   } finally {
-    
-    loading.value = false;
+    loading.value = false
+    console.log('🎫 [CouponPage] 加载状态设置为false')
   }
-};
+}
 
 // 返回主页
 const goBack = () => {

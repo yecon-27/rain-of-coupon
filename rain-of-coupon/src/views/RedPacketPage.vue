@@ -26,8 +26,10 @@ import RedPacketRain from '@/components/RedPacketRain.vue'
 import PrizeModal from '@/components/PrizeModal.vue'
 import EncourageTip from '@/components/EncourageTip.vue'
 import { API_CONFIG } from '@/config/api'
+import { useGameStore } from '@/stores/gameStore'
 
 const router = useRouter()
+const gameStore = useGameStore()
 const gameState = ref<'playing' | 'finished'>('playing')
 const showPrize = ref(false)
 const showEncourage = ref(false)
@@ -42,14 +44,28 @@ interface Prize {
 }
 const prize = ref<Prize | null>(null)
 
-const handleGameFinished = (result: { isWin: boolean; prize?: Prize }) => {
+const handleGameFinished = async (result: { isWin: boolean; prize?: Prize }) => {
+  console.log('🎮 [RedPacketPage] 游戏结束，结果:', result)
+  
   gameState.value = 'finished'
   
-  if (result.isWin) {
-    prize.value = result.prize as Prize
+  // 重新加载用户状态以获取最新的中奖信息
+  try {
+    await gameStore.loadPrizeRecord()
+    console.log('🎮 [RedPacketPage] 重新加载后的中奖状态:', gameStore.hasPrize)
+    console.log('🎮 [RedPacketPage] 重新加载后的中奖记录:', gameStore.prizeRecord)
+  } catch (error) {
+    console.error('🎮 [RedPacketPage] 重新加载中奖状态失败:', error)
+  }
+  
+  // 根据最新的中奖状态决定显示什么
+  if (gameStore.hasPrize) {
+    console.log('🏆 [RedPacketPage] 显示中奖弹窗')
+    prize.value = { amount: gameStore.prizeRecord?.amount || 0 }
     showPrize.value = true
     showEncourage.value = false
   } else {
+    console.log('😔 [RedPacketPage] 显示鼓励弹窗')
     showPrize.value = false
     showEncourage.value = true
   }

@@ -43,19 +43,41 @@ const getImageUrl = (filename: string) => {
 }
 
 // 处理立即挑战按钮点击
-const handleJoinActivity = () => {
+const handleJoinActivity = async () => {
+  console.log('🚀 [ActivitySection] 点击立即挑战按钮')
+  
   // 检查是否已登录
   if (!authStore.isLoggedIn) {
-    // 未登录，跳转到登录页面
+    console.log('🚀 [ActivitySection] 用户未登录，跳转到登录页面')
     router.push('/login?redirect=/')
     return
   }
 
+  console.log('🚀 [ActivitySection] 用户已登录，开始检查中奖状态')
+  console.log('🚀 [ActivitySection] 当前用户:', authStore.currentUser)
+  
+  // 确保获取最新的中奖状态
+  try {
+    console.log('🚀 [ActivitySection] 调用gameStore.loadPrizeRecord()...')
+    await gameStore.loadPrizeRecord()
+    
+    console.log('🚀 [ActivitySection] loadPrizeRecord完成')
+    console.log('🚀 [ActivitySection] 当前中奖状态:', gameStore.hasPrize)
+    console.log('🚀 [ActivitySection] 中奖记录:', gameStore.prizeRecord)
+    console.log('🚀 [ActivitySection] prizeRecord详情:', JSON.stringify(gameStore.prizeRecord, null, 2))
+  } catch (error) {
+    console.error('🚀 [ActivitySection] 加载中奖状态失败:', error)
+    console.error('🚀 [ActivitySection] 错误详情:', (error as Error).message)
+  }
+
   // 已登录，检查是否已中奖
   if (gameStore.hasPrize) {
+    console.log('🏆 [ActivitySection] 用户已中奖，跳转到中奖页面')
+    console.log('🏆 [ActivitySection] 中奖信息:', gameStore.prizeRecord)
     // 已中奖，跳转到PrizeModal页面显示中奖情况
     router.push('/prize')
   } else {
+    console.log('🎮 [ActivitySection] 用户未中奖，跳转到游戏页面')
     // 未中奖，跳转到LoadingPage开始新游戏
     router.push('/loading')
   }

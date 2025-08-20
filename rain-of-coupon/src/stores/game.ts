@@ -21,7 +21,7 @@ export interface Reward {
   isUsed: boolean
 }
 
-export const useGameStore = defineStore('game', () => {
+export const useGameStore = defineStore('game_mock', () => {
   // 状态
   const gameResults = ref<GameResult[]>([])
   const userRewards = ref<Reward[]>([])
