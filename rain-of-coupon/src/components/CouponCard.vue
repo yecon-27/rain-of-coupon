@@ -25,16 +25,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { onMounted } from 'vue'
 import { useGameStore } from '@/stores/gameStore'
 import { API_CONFIG } from '@/config/api'
 
-// Props (保持兼容性，但不再使用)
-interface Props {
-  rewards?: any[]
-}
 
-const props = defineProps<Props>()
 const gameStore = useGameStore()
 
 // 组件挂载时加载中奖记录

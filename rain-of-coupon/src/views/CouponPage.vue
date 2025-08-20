@@ -24,12 +24,12 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { useGameStore } from '@/stores/gameStore'
+
 import CouponCard from '@/components/CouponCard.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
-const gameStore = useGameStore()
+
 
 // 状态管理
 const loading = ref(true)
