@@ -225,16 +225,13 @@ public class LotteryController extends BaseController {
     @GetMapping("/stock")
     public AjaxResult checkPrizeStock() {
         try {
-            // 通过Service层获取可用奖品
-            List<RedpacketPrize> prizes = lotteryService.getAvailablePrizes();
-            
-            // 检查是否还有库存
-            boolean hasStock = prizes.stream()
-                    .anyMatch(prize -> prize.getRemainingCount() > 0);
-            
-            // 获取所有奖品信息（包括库存为0的）
+            // 获取所有奖品信息（不过滤库存）
             RedpacketPrize queryPrize = new RedpacketPrize();
             List<RedpacketPrize> allPrizes = prizeMapper.selectRedpacketPrizeList(queryPrize);
+            
+            // 检查是否还有库存
+            boolean hasStock = allPrizes.stream()
+                    .anyMatch(prize -> prize.getRemainingCount() > 0);
             
             List<Map<String, Object>> prizeList = allPrizes.stream()
                     .map(prize -> {
@@ -250,11 +247,9 @@ public class LotteryController extends BaseController {
             data.put("hasStock", hasStock);
             data.put("prizes", prizeList);
             
-            return success(data);
-            
+            return AjaxResult.success("操作成功", data);
         } catch (Exception e) {
-            logger.error("检查奖品库存失败", e);
-            return error("检查奖品库存失败");
+            return AjaxResult.error("检查奖品库存失败: " + e.getMessage());
         }
     }
 }

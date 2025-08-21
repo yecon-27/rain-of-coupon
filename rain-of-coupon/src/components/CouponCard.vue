@@ -16,7 +16,7 @@
             使用期限：{{ formatExpireDate(getExpireDate()) }}前
           </div>
           <div class="coupon-status-btn">
-            未使用
+            可使用
           </div>
         </div>
       </div>
@@ -150,7 +150,8 @@ const formatExpireDate = (dateString?: string) => {
   align-items: flex-start;
   justify-content: flex-start;
   flex-wrap: wrap;
-  width: 100%;
+  width: calc(100vw - 40px);
+  max-height: 80vh;
   gap: 0;
 }
 
@@ -158,7 +159,8 @@ const formatExpireDate = (dateString?: string) => {
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  width: 50%;
+  width: calc(100vw - 40px);
+  max-height: 80vh;
   box-sizing: border-box;
 }
 
@@ -182,7 +184,7 @@ const formatExpireDate = (dateString?: string) => {
   bottom: 30%;
   left: 50%;
   transform: translateX(-50%);
-  color: rgb(178, 34, 34);
+  color: #f35917;
   font-size: 20px;
   font-weight: 500;
   text-align: center;
@@ -195,13 +197,13 @@ const formatExpireDate = (dateString?: string) => {
   bottom: 8%;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 14px;
+  font-size: 30px;
   font-weight: 600;
   text-align: center;
   white-space: nowrap;
   padding: 6px 16px;
   border-radius: 20px;
-  background: #4CAF50;
+  background: rgb(82, 175, 5);
   color: white;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
   cursor: default;
@@ -209,7 +211,7 @@ const formatExpireDate = (dateString?: string) => {
 }
 
 .coupon-status-btn.used {
-  background: #2196F3;
+  background: red;
   color: white;
 }
 
@@ -226,14 +228,14 @@ const formatExpireDate = (dateString?: string) => {
   }
 
   .coupon-expiry {
-    font-size: 13px;
-    bottom: 30%;
+    font-size: 30px;
+    bottom: 25%;
     padding: 3px 6px;
     white-space: nowrap;
   }
 
   .coupon-status-btn {
-    font-size: 12px;
+    font-size: 20px;
     bottom: 8%;
     padding: 4px 12px;
   }

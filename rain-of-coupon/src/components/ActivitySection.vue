@@ -16,6 +16,13 @@
     <div class="center-button">
       <img :src="getImageUrl('button.png')" alt="立即挑战" class="challenge-btn" @click="handleJoinActivity" />
     </div>
+
+    <!-- 奖品库存提示弹窗 -->
+    <PrizeStockTip 
+      :visible="showPrizeStockTip" 
+      @close="handlePrizeStockClose"
+      @view-rules="handleViewRules"
+    />
   </div>
 </template>
 
@@ -45,8 +52,11 @@ const getImageUrl = (filename: string) => {
 }
 
 // 处理立即挑战按钮点击
+// 添加奖品库存数据
 const showPrizeStockTip = ref(false)
+const prizeStockData = ref([])
 
+// 修改 handleJoinActivity 方法
 const handleJoinActivity = async () => {
   console.log('🚀 [ActivitySection] 用户点击立即挑战按钮')
   
@@ -58,29 +68,31 @@ const handleJoinActivity = async () => {
   }
 
   console.log('🚀 [ActivitySection] 用户已登录，开始检查奖品库存')
-  console.log('🔍 [ActivitySection] API_BASE_URL:', import.meta.env.VITE_API_BASE_URL)
   
   try {
     console.log('🔍 [ActivitySection] 准备调用checkPrizeStock API...')
     // 检查奖品库存
     const stockResponse = await checkPrizeStock()
     console.log('🎁 [ActivitySection] 奖品库存检查结果:', stockResponse)
+    console.log('🎁 [ActivitySection] stockResponse.code:', stockResponse.code)
+    console.log('🎁 [ActivitySection] stockResponse.data:', stockResponse.data)
     console.log('🎁 [ActivitySection] hasStock值:', stockResponse?.data?.hasStock)
     
-    if (stockResponse.code === 200 && !stockResponse.data.hasStock) {
-      console.log('🎁 [ActivitySection] 奖品已发放完毕，显示提示')
-      showPrizeStockTip.value = true
-      return
+    if (stockResponse && stockResponse.code === 200 && stockResponse.data) {
+      if (stockResponse.data.hasStock === false) {
+        console.log('🎁 [ActivitySection] 奖品已发放完毕，显示提示')
+        // 保存奖品数据
+        prizeStockData.value = stockResponse.data.prizes || []
+        showPrizeStockTip.value = true
+        console.log('🎁 [ActivitySection] showPrizeStockTip设置为:', showPrizeStockTip.value)
+        console.log('🎁 [ActivitySection] prizeStockData设置为:', prizeStockData.value)
+        return
+      }
     }
     
     console.log('🎁 [ActivitySection] 奖品库存充足，继续检查中奖状态')
   } catch (error) {
     console.error('🎁 [ActivitySection] 检查奖品库存失败:', error)
-    console.error('🎁 [ActivitySection] 错误详情:', {
-      name: (error as Error)?.name,
-      message: (error as Error)?.message,
-      stack: (error as Error)?.stack
-    })
     // 如果检查失败，继续正常流程
   }
 
@@ -108,10 +120,12 @@ const handleJoinActivity = async () => {
 
 const handlePrizeStockClose = () => {
   showPrizeStockTip.value = false
+  prizeStockData.value = []
 }
 
 const handleViewRules = () => {
   showPrizeStockTip.value = false
+  prizeStockData.value = []
   // 触发显示规则弹窗
   emit('showRules')
 }
@@ -372,6 +386,7 @@ onMounted(async () => {
 <!-- 奖品库存提示 -->
 <PrizeStockTip 
   :visible="showPrizeStockTip" 
+  :prizes="prizeStockData"
   @close="handlePrizeStockClose"
   @view-rules="handleViewRules"
 />
