@@ -246,3 +246,21 @@ export const logout = async () => {
     method: 'POST'
   })
 }
+
+
+// 检查奖品库存
+export const checkPrizeStock = async (): Promise<{
+  code: number
+  data: {
+    hasStock: boolean
+    prizes: Array<{
+      id: number
+      prizeName: string
+      totalCount: number
+      remainingCount: number
+    }>
+  }
+  msg: string
+}> => {
+  return request('/redpacket/lottery/stock')
+}

@@ -3,6 +3,7 @@ import com.ruoyi.redpacket.domain.RedpacketUserParticipationLog;
 import com.ruoyi.redpacket.domain.DrawResult;
 import com.ruoyi.redpacket.domain.RedpacketPrize;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 抽奖服务接口
@@ -97,4 +98,11 @@ public interface ILotteryService {
      * @return 是否有效
      */
     boolean isActivityValid();
+
+    /**
+     * 检查奖品库存
+     * 
+     * @return 库存检查结果
+     */
+    Map<String, Object> checkPrizeStock();
 }

@@ -20,14 +20,16 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useGameStore } from '@/stores/gameStore'
+import { checkPrizeStock } from '@/api/lottery'
+import PrizeStockTip from './PrizeStockTip.vue'
 import { API_CONFIG } from '@/config/api'
 
 // 定义事件
-defineEmits<{
+const emit = defineEmits<{
   showRules: []
   myCoupons: []
 }>()
@@ -43,8 +45,10 @@ const getImageUrl = (filename: string) => {
 }
 
 // 处理立即挑战按钮点击
+const showPrizeStockTip = ref(false)
+
 const handleJoinActivity = async () => {
-  console.log('🚀 [ActivitySection] 点击立即挑战按钮')
+  console.log('🚀 [ActivitySection] 用户点击立即挑战按钮')
   
   // 检查是否已登录
   if (!authStore.isLoggedIn) {
@@ -53,9 +57,33 @@ const handleJoinActivity = async () => {
     return
   }
 
-  console.log('🚀 [ActivitySection] 用户已登录，开始检查中奖状态')
-  console.log('🚀 [ActivitySection] 当前用户:', authStore.currentUser)
+  console.log('🚀 [ActivitySection] 用户已登录，开始检查奖品库存')
+  console.log('🔍 [ActivitySection] API_BASE_URL:', import.meta.env.VITE_API_BASE_URL)
   
+  try {
+    console.log('🔍 [ActivitySection] 准备调用checkPrizeStock API...')
+    // 检查奖品库存
+    const stockResponse = await checkPrizeStock()
+    console.log('🎁 [ActivitySection] 奖品库存检查结果:', stockResponse)
+    console.log('🎁 [ActivitySection] hasStock值:', stockResponse?.data?.hasStock)
+    
+    if (stockResponse.code === 200 && !stockResponse.data.hasStock) {
+      console.log('🎁 [ActivitySection] 奖品已发放完毕，显示提示')
+      showPrizeStockTip.value = true
+      return
+    }
+    
+    console.log('🎁 [ActivitySection] 奖品库存充足，继续检查中奖状态')
+  } catch (error) {
+    console.error('🎁 [ActivitySection] 检查奖品库存失败:', error)
+    console.error('🎁 [ActivitySection] 错误详情:', {
+      name: (error as Error)?.name,
+      message: (error as Error)?.message,
+      stack: (error as Error)?.stack
+    })
+    // 如果检查失败，继续正常流程
+  }
+
   // 确保获取最新的中奖状态
   try {
     console.log('🚀 [ActivitySection] 调用gameStore.loadPrizeRecord()...')
@@ -64,23 +92,28 @@ const handleJoinActivity = async () => {
     console.log('🚀 [ActivitySection] loadPrizeRecord完成')
     console.log('🚀 [ActivitySection] 当前中奖状态:', gameStore.hasPrize)
     console.log('🚀 [ActivitySection] 中奖记录:', gameStore.prizeRecord)
-    console.log('🚀 [ActivitySection] prizeRecord详情:', JSON.stringify(gameStore.prizeRecord, null, 2))
   } catch (error) {
     console.error('🚀 [ActivitySection] 加载中奖状态失败:', error)
-    console.error('🚀 [ActivitySection] 错误详情:', (error as Error).message)
   }
 
   // 已登录，检查是否已中奖
   if (gameStore.hasPrize) {
     console.log('🏆 [ActivitySection] 用户已中奖，跳转到中奖页面')
-    console.log('🏆 [ActivitySection] 中奖信息:', gameStore.prizeRecord)
-    // 已中奖，跳转到PrizeModal页面显示中奖情况
     router.push('/prize')
   } else {
-    console.log('🎮 [ActivitySection] 用户未中奖，跳转到游戏页面')
-    // 未中奖，跳转到LoadingPage开始新游戏
+    console.log('🎮 [ActivitySection] 用户未中奖，跳转到加载页面')
     router.push('/loading')
   }
+}
+
+const handlePrizeStockClose = () => {
+  showPrizeStockTip.value = false
+}
+
+const handleViewRules = () => {
+  showPrizeStockTip.value = false
+  // 触发显示规则弹窗
+  emit('showRules')
 }
 
 // 组件挂载时检查登录状态和加载中奖记录
@@ -335,3 +368,10 @@ onMounted(async () => {
   }
 }
 </style>
+
+<!-- 奖品库存提示 -->
+<PrizeStockTip 
+  :visible="showPrizeStockTip" 
+  @close="handlePrizeStockClose"
+  @view-rules="handleViewRules"
+/>

@@ -17,6 +17,9 @@ import org.slf4j.LoggerFactory;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.Random;
 import java.util.stream.Collectors;
 
@@ -392,6 +395,42 @@ public class LotteryServiceImpl implements ILotteryService {
         // 实际中需要注入RedisTemplate或其他计数器
         // return checkIpFrequencyLimit(ipAddress); // 复用现有方法，如果有
         return false; // 临时返回false，需实现实际逻辑
+    }
+
+    @Override
+    public Map<String, Object> checkPrizeStock() {
+        Map<String, Object> result = new HashMap<>();
+        
+        try {
+            // 获取所有奖品
+            RedpacketPrize queryPrize = new RedpacketPrize();
+            List<RedpacketPrize> allPrizes = prizeMapper.selectRedpacketPrizeList(queryPrize);
+            
+            // 检查是否还有库存
+            boolean hasStock = allPrizes.stream()
+                    .anyMatch(prize -> prize.getRemainingCount() > 0);
+            
+            // 构建奖品列表
+            List<Map<String, Object>> prizeList = allPrizes.stream()
+                    .map(prize -> {
+                        Map<String, Object> map = new HashMap<>();
+                        map.put("id", prize.getId());
+                        map.put("prizeName", prize.getPrizeName());
+                        map.put("totalCount", prize.getTotalCount());
+                        map.put("remainingCount", prize.getRemainingCount());
+                        return map;
+                    }).collect(Collectors.toList());
+            
+            result.put("hasStock", hasStock);
+            result.put("prizes", prizeList);
+            
+        } catch (Exception e) {
+            LoggerFactory.getLogger(LotteryServiceImpl.class).error("检查奖品库存失败", e);
+            result.put("hasStock", true); // 出错时默认有库存，避免阻塞用户
+            result.put("prizes", new ArrayList<>());
+        }
+        
+        return result;
     }
 
 }

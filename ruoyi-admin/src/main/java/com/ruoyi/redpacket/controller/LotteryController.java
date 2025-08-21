@@ -11,6 +11,7 @@ import com.ruoyi.redpacket.domain.DrawResult;
 import com.ruoyi.redpacket.domain.RedpacketPrize;
 import com.ruoyi.redpacket.domain.RedpacketUserParticipationLog;
 import com.ruoyi.redpacket.service.ILotteryService;
+import com.ruoyi.redpacket.mapper.RedpacketPrizeMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,6 +36,9 @@ public class LotteryController extends BaseController {
     
     @Autowired
     private ILotteryService lotteryService;
+    
+    @Autowired
+    private RedpacketPrizeMapper prizeMapper;
     
     /**
      * 执行抽奖
@@ -212,6 +216,45 @@ public class LotteryController extends BaseController {
         } catch (Exception e) {
             logger.error("获取用户状态失败", e);
             return error("获取用户状态失败");
+        }
+    }
+    
+    /**
+     * 检查奖品库存
+     */
+    @GetMapping("/stock")
+    public AjaxResult checkPrizeStock() {
+        try {
+            // 通过Service层获取可用奖品
+            List<RedpacketPrize> prizes = lotteryService.getAvailablePrizes();
+            
+            // 检查是否还有库存
+            boolean hasStock = prizes.stream()
+                    .anyMatch(prize -> prize.getRemainingCount() > 0);
+            
+            // 获取所有奖品信息（包括库存为0的）
+            RedpacketPrize queryPrize = new RedpacketPrize();
+            List<RedpacketPrize> allPrizes = prizeMapper.selectRedpacketPrizeList(queryPrize);
+            
+            List<Map<String, Object>> prizeList = allPrizes.stream()
+                    .map(prize -> {
+                        Map<String, Object> map = new HashMap<>();
+                        map.put("id", prize.getId());
+                        map.put("prizeName", prize.getPrizeName());
+                        map.put("totalCount", prize.getTotalCount());
+                        map.put("remainingCount", prize.getRemainingCount());
+                        return map;
+                    }).collect(Collectors.toList());
+            
+            Map<String, Object> data = new HashMap<>();
+            data.put("hasStock", hasStock);
+            data.put("prizes", prizeList);
+            
+            return success(data);
+            
+        } catch (Exception e) {
+            logger.error("检查奖品库存失败", e);
+            return error("检查奖品库存失败");
         }
     }
 }
