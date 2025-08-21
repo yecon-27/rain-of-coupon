@@ -71,7 +71,6 @@
 
     <el-table v-loading="loading" :data="resourceList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="资源ID" align="center" prop="id" />
       <el-table-column label="资源名称" align="center" prop="resourceName" />
       <el-table-column label="资源标识" align="center" prop="resourceKey" />
       <el-table-column label="文件名" align="center" prop="fileName" />

@@ -216,7 +216,6 @@
 
     <el-table v-loading="loading" :data="trafficStatsList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="统计ID" align="center" prop="id" />
       <el-table-column label="统计时间" align="center" prop="statTime" width="180">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.statTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>

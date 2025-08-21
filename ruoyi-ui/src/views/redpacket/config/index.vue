@@ -77,7 +77,6 @@
 
     <el-table v-loading="loading" :data="configList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="主键" align="center" prop="id" />
       <el-table-column label="活动开始时间" align="center" prop="startTime" width="180">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.startTime, '{y}-{m}-{d}') }}</span>
@@ -90,6 +89,26 @@
       </el-table-column>
       <el-table-column label="并发用户上限" align="center" prop="maxUsers" />
       <el-table-column label="每日最大抽奖次数" align="center" prop="maxDrawsPerDay" />
+      <el-table-column label="第一轮开始时间" align="center" prop="firstRoundStart" width="180">
+        <template slot-scope="scope">
+          <span>{{ parseTime(scope.row.firstRoundStart, '{y}-{m}-{d}') }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="第一轮结束时间" align="center" prop="firstRoundEnd" width="180">
+        <template slot-scope="scope">
+          <span>{{ parseTime(scope.row.firstRoundEnd, '{y}-{m}-{d}') }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="第二轮开始时间" align="center" prop="secondRoundStart" width="180">
+        <template slot-scope="scope">
+          <span>{{ parseTime(scope.row.secondRoundStart, '{y}-{m}-{d}') }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="第二轮结束时间" align="center" prop="secondRoundEnd" width="180">
+        <template slot-scope="scope">
+          <span>{{ parseTime(scope.row.secondRoundEnd, '{y}-{m}-{d}') }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
@@ -143,6 +162,38 @@
         <el-form-item label="每日最大抽奖次数" prop="maxDrawsPerDay">
           <el-input v-model="form.maxDrawsPerDay" placeholder="请输入每日最大抽奖次数" />
         </el-form-item>
+        <el-form-item label="第一轮开始时间" prop="firstRoundStart">
+          <el-date-picker clearable
+            v-model="form.firstRoundStart"
+            type="date"
+            value-format="yyyy-MM-dd"
+            placeholder="请选择第一轮开始时间">
+          </el-date-picker>
+        </el-form-item>
+        <el-form-item label="第一轮结束时间" prop="firstRoundEnd">
+          <el-date-picker clearable
+            v-model="form.firstRoundEnd"
+            type="date"
+            value-format="yyyy-MM-dd"
+            placeholder="请选择第一轮结束时间">
+          </el-date-picker>
+        </el-form-item>
+        <el-form-item label="第二轮开始时间" prop="secondRoundStart">
+          <el-date-picker clearable
+            v-model="form.secondRoundStart"
+            type="date"
+            value-format="yyyy-MM-dd"
+            placeholder="请选择第二轮开始时间">
+          </el-date-picker>
+        </el-form-item>
+        <el-form-item label="第二轮结束时间" prop="secondRoundEnd">
+          <el-date-picker clearable
+            v-model="form.secondRoundEnd"
+            type="date"
+            value-format="yyyy-MM-dd"
+            placeholder="请选择第二轮结束时间">
+          </el-date-picker>
+        </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitForm">确 定</el-button>
@@ -177,9 +228,9 @@ export default {
       title: "",
       // 是否显示弹出层
       open: false,
-      // 每日最大抽奖次数时间范围
+      // 第二轮结束时间时间范围
       daterangeStartTime: [],
-      // 每日最大抽奖次数时间范围
+      // 第二轮结束时间时间范围
       daterangeEndTime: [],
       // 查询参数
       queryParams: {
@@ -203,7 +254,10 @@ export default {
         ],
         maxDrawsPerDay: [
           { required: true, message: "每日最大抽奖次数不能为空", trigger: "blur" }
-        ]
+        ],
+        roundType: [
+          { required: true, message: "抽奖轮次类型不能为空", trigger: "change" }
+        ],
       }
     }
   },
@@ -241,7 +295,13 @@ export default {
         startTime: null,
         endTime: null,
         maxUsers: null,
-        maxDrawsPerDay: null
+        maxDrawsPerDay: null,
+        roundType: null,
+        firstRoundStart: null,
+        firstRoundEnd: null,
+        secondRoundStart: null,
+        secondRoundEnd: null,
+        couponRecycleEnabled: null
       }
       this.resetForm("form")
     },

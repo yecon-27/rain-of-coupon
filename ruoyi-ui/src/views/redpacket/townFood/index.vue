@@ -71,7 +71,6 @@
 
     <el-table v-loading="loading" :data="townFoodList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="特色菜ID" align="center" prop="id" />
       <el-table-column label="美食名称" align="center" prop="foodName" />
       <el-table-column label="排名" align="center" prop="ranking" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">

@@ -10,10 +10,16 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="endTime"    column="end_time"    />
         <result property="maxUsers"    column="max_users"    />
         <result property="maxDrawsPerDay"    column="max_draws_per_day"    />
+        <result property="roundType"    column="round_type"    />
+        <result property="firstRoundStart"    column="first_round_start"    />
+        <result property="firstRoundEnd"    column="first_round_end"    />
+        <result property="secondRoundStart"    column="second_round_start"    />
+        <result property="secondRoundEnd"    column="second_round_end"    />
+        <result property="couponRecycleEnabled"    column="coupon_recycle_enabled"    />
     </resultMap>
 
     <sql id="selectRedpacketEventConfigVo">
-        select id, start_time, end_time, max_users, max_draws_per_day from redpacket_event_config
+        select id, start_time, end_time, max_users, max_draws_per_day, round_type, first_round_start, first_round_end, second_round_start, second_round_end, coupon_recycle_enabled from redpacket_event_config
     </sql>
 
     <select id="selectRedpacketEventConfigList" parameterType="RedpacketEventConfig" resultMap="RedpacketEventConfigResult">
@@ -36,12 +42,24 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="endTime != null">end_time,</if>
             <if test="maxUsers != null">max_users,</if>
             <if test="maxDrawsPerDay != null">max_draws_per_day,</if>
+            <if test="roundType != null and roundType != ''">round_type,</if>
+            <if test="firstRoundStart != null">first_round_start,</if>
+            <if test="firstRoundEnd != null">first_round_end,</if>
+            <if test="secondRoundStart != null">second_round_start,</if>
+            <if test="secondRoundEnd != null">second_round_end,</if>
+            <if test="couponRecycleEnabled != null">coupon_recycle_enabled,</if>
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="startTime != null">#{startTime},</if>
             <if test="endTime != null">#{endTime},</if>
             <if test="maxUsers != null">#{maxUsers},</if>
             <if test="maxDrawsPerDay != null">#{maxDrawsPerDay},</if>
+            <if test="roundType != null and roundType != ''">#{roundType},</if>
+            <if test="firstRoundStart != null">#{firstRoundStart},</if>
+            <if test="firstRoundEnd != null">#{firstRoundEnd},</if>
+            <if test="secondRoundStart != null">#{secondRoundStart},</if>
+            <if test="secondRoundEnd != null">#{secondRoundEnd},</if>
+            <if test="couponRecycleEnabled != null">#{couponRecycleEnabled},</if>
          </trim>
     </insert>
 
@@ -52,6 +70,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="endTime != null">end_time = #{endTime},</if>
             <if test="maxUsers != null">max_users = #{maxUsers},</if>
             <if test="maxDrawsPerDay != null">max_draws_per_day = #{maxDrawsPerDay},</if>
+            <if test="roundType != null and roundType != ''">round_type = #{roundType},</if>
+            <if test="firstRoundStart != null">first_round_start = #{firstRoundStart},</if>
+            <if test="firstRoundEnd != null">first_round_end = #{firstRoundEnd},</if>
+            <if test="secondRoundStart != null">second_round_start = #{secondRoundStart},</if>
+            <if test="secondRoundEnd != null">second_round_end = #{secondRoundEnd},</if>
+            <if test="couponRecycleEnabled != null">coupon_recycle_enabled = #{couponRecycleEnabled},</if>
         </trim>
         where id = #{id}
     </update>

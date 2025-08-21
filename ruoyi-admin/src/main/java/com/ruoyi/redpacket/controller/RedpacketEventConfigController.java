@@ -25,7 +25,7 @@ import com.ruoyi.common.core.page.TableDataInfo;
  * 活动配置Controller
  * 
  * @author ruoyi
- * @date 2025-08-06
+ * @date 2025-08-21
  */
 @RestController
 @RequestMapping("/redpacket/config")

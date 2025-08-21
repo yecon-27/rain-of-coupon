@@ -63,7 +63,6 @@
 
     <el-table v-loading="loading" :data="prizeList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="奖品ID" align="center" prop="id" />
       <el-table-column label="奖品名称" align="center" prop="prizeName" />
       <el-table-column label="奖品总数量" align="center" prop="totalCount" />
       <el-table-column label="剩余数量" align="center" prop="remainingCount" />

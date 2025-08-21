@@ -11,7 +11,7 @@ import com.ruoyi.redpacket.service.IRedpacketEventConfigService;
  * 活动配置Service业务层处理
  * 
  * @author ruoyi
- * @date 2025-08-06
+ * @date 2025-08-21
  */
 @Service
 public class RedpacketEventConfigServiceImpl implements IRedpacketEventConfigService 

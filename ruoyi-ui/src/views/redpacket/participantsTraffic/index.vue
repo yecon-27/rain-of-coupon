@@ -1,62 +1,13 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="用户ID" prop="userId">
+      <el-form-item label="用户" prop="userId">
         <el-input
           v-model="queryParams.userId"
-          placeholder="请输入用户ID"
+          placeholder="请输入用户"
           clearable
           @keyup.enter.native="handleQuery"
         />
-      </el-form-item>
-      <el-form-item label="会话ID" prop="sessionId">
-        <el-input
-          v-model="queryParams.sessionId"
-          placeholder="请输入会话ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="IP地址" prop="ipAddress">
-        <el-input
-          v-model="queryParams.ipAddress"
-          placeholder="请输入IP地址"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="加入时间">
-        <el-date-picker
-          v-model="daterangeJoinTime"
-          style="width: 240px"
-          value-format="yyyy-MM-dd"
-          type="daterange"
-          range-separator="-"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-        ></el-date-picker>
-      </el-form-item>
-      <el-form-item label="离开时间">
-        <el-date-picker
-          v-model="daterangeLeaveTime"
-          style="width: 240px"
-          value-format="yyyy-MM-dd"
-          type="daterange"
-          range-separator="-"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-        ></el-date-picker>
-      </el-form-item>
-      <el-form-item label="最后心跳时间">
-        <el-date-picker
-          v-model="daterangeLastHeartbeat"
-          style="width: 240px"
-          value-format="yyyy-MM-dd"
-          type="daterange"
-          range-separator="-"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-        ></el-date-picker>
       </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-select v-model="queryParams.status" placeholder="请选择状态" clearable>
@@ -65,14 +16,6 @@
           <el-option label="已过期" value="expired" />
           <el-option label="已离开" value="left" />
         </el-select>
-      </el-form-item>
-      <el-form-item label="队列位置" prop="queuePosition">
-        <el-input
-          v-model="queryParams.queuePosition"
-          placeholder="请输入队列位置"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
       </el-form-item>
       <el-form-item label="创建时间">
         <el-date-picker
@@ -118,29 +61,10 @@
 
     <el-table v-loading="loading" :data="participantsTrafficList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="主键ID" align="center" prop="id" />
-      <el-table-column label="用户ID" align="center" prop="userId">
+      <el-table-column label="用户" align="center" prop="userId">
         <template slot-scope="scope">
           <span v-if="scope.row.userId">{{ scope.row.userId }}</span>
           <el-tag v-else type="info" size="mini">匿名</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column label="会话ID" align="center" prop="sessionId" />
-      <el-table-column label="IP地址" align="center" prop="ipAddress" />
-      <el-table-column label="加入时间" align="center" prop="joinTime" width="180">
-        <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.joinTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="离开时间" align="center" prop="leaveTime" width="180">
-        <template slot-scope="scope">
-          <span v-if="scope.row.leaveTime">{{ parseTime(scope.row.leaveTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
-          <el-tag v-else type="success" size="mini">在线</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column label="最后心跳时间" align="center" prop="lastHeartbeat" width="180">
-        <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.lastHeartbeat, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
         </template>
       </el-table-column>
       <el-table-column label="状态" align="center" prop="status">
@@ -152,20 +76,9 @@
           <el-tag v-else type="default">{{ scope.row.status }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="队列位置" align="center" prop="queuePosition">
-        <template slot-scope="scope">
-          <span v-if="scope.row.queuePosition">第{{ scope.row.queuePosition }}位</span>
-          <span v-else>-</span>
-        </template>
-      </el-table-column>
       <el-table-column label="创建时间" align="center" prop="createdAt" width="180">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.createdAt, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="更新时间" align="center" prop="updatedAt" width="180">
-        <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.updatedAt, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
@@ -195,12 +108,6 @@
         <el-form-item label="用户ID" prop="userId">
           <el-input v-model="form.userId" disabled />
         </el-form-item>
-        <el-form-item label="会话ID" prop="sessionId">
-          <el-input v-model="form.sessionId" disabled />
-        </el-form-item>
-        <el-form-item label="IP地址" prop="ipAddress">
-          <el-input v-model="form.ipAddress" disabled />
-        </el-form-item>
         <el-form-item label="当前状态" prop="currentStatus">
           <el-tag v-if="form.status === 'active'" type="success">活跃</el-tag>
           <el-tag v-else-if="form.status === 'queued'" type="warning">排队中</el-tag>
@@ -214,9 +121,6 @@
             <el-radio label="expired">已过期</el-radio>
             <el-radio label="left">已离开</el-radio>
           </el-radio-group>
-        </el-form-item>
-        <el-form-item label="队列位置" prop="queuePosition" v-if="form.status === 'queued'">
-          <el-input-number v-model="form.queuePosition" :min="1" :max="999" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">

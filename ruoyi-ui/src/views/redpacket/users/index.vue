@@ -73,7 +73,6 @@
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="用户id" align="center" prop="userId" />
       <el-table-column label="用户名" align="center" prop="username" />
-      <el-table-column label="邮箱" align="center" prop="email" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button

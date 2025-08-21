@@ -36,14 +36,6 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="中奖奖品ID" prop="prizeId">
-        <el-input
-          v-model="queryParams.prizeId"
-          placeholder="请输入中奖奖品ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
       <el-form-item label="奖品名称" prop="prizeName">
         <el-input
           v-model="queryParams.prizeName"
@@ -114,7 +106,6 @@
 
     <el-table v-loading="loading" :data="participationLogList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="主键" align="center" prop="id" />
       <el-table-column label="用户ID" align="center" prop="userId" />
       <el-table-column label="参与时间" align="center" prop="participationTime" width="180">
         <template slot-scope="scope">
@@ -123,7 +114,6 @@
       </el-table-column>
       <el-table-column label="IP记录" align="center" prop="ipAddress" />
       <el-table-column label="是否中奖(0未中奖 1中奖)" align="center" prop="isWin" />
-      <el-table-column label="中奖奖品ID" align="center" prop="prizeId" />
       <el-table-column label="奖品名称" align="center" prop="prizeName" />
       <el-table-column label="是否使用(0未使用 1已使用)" align="center" prop="isUsed" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">

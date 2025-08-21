@@ -77,7 +77,6 @@
 
     <el-table v-loading="loading" :data="trafficConfigList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="配置ID" align="center" prop="id" />
       <el-table-column label="配置键" align="center" prop="configKey" :show-overflow-tooltip="true" />
       <el-table-column label="配置值" align="center" prop="configValue" />
       <el-table-column label="配置描述" align="center" prop="description" :show-overflow-tooltip="true" />

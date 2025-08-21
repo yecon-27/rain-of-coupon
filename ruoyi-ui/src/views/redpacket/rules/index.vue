@@ -63,8 +63,6 @@
 
     <el-table v-loading="loading" :data="rulesList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="规则ID" align="center" prop="id" />
-      <el-table-column label="规则类型" align="center" prop="ruleType" />
       <el-table-column label="规则标题" align="center" prop="ruleTitle" />
       <el-table-column label="规则内容" align="center" prop="ruleContent" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">

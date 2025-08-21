@@ -7,7 +7,7 @@ import com.ruoyi.redpacket.domain.RedpacketEventConfig;
  * 活动配置Service接口
  * 
  * @author ruoyi
- * @date 2025-08-06
+ * @date 2025-08-21
  */
 public interface IRedpacketEventConfigService 
 {
