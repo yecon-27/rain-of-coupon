@@ -29,14 +29,14 @@ const emit = defineEmits<{
 
 const rainContainer = ref<HTMLDivElement | null>(null);
 const remainingTime = ref(30);
-const packetCount = ref(99);
+const packetCount = ref(500);
 let timerInterval: number | null = null;
 const rainInterval: number | null = null;
 let activePackets = 0;
-const maxActivePackets = 99;
+const maxActivePackets = 300;
 
 const calculateRainInterval = () => {
-  return Math.max(100, (50 * 1000) / 99);
+  return Math.max(50, (30 * 1000) / 99);
 };
 
 // 生成随机飘落参数（确保在视图内）
@@ -50,7 +50,7 @@ function getRandomFallParams() {
   const maxLeft = 100 - minLeft;
   
   // 动态调整水平位置，确保红包完全在视口内，并整体向左偏移10%
-  const left = Math.max(minLeft, Math.min(maxLeft, Math.random() * (maxLeft - minLeft) + minLeft - 10));
+  const left = Math.max(minLeft, Math.min(maxLeft, Math.random() * (maxLeft - minLeft) + minLeft - 20));
   
   // 计算最大允许的水平偏移值
   const maxOffset = Math.min(
@@ -61,7 +61,7 @@ function getRandomFallParams() {
   
   return {
     left: left,
-    duration: Math.random() * 2 + 5,
+    duration: Math.random() * 1 + 2, // 缩短下落时间，加快速度
     horizontalOffset: (Math.random() - 0.5) * maxOffset * 0.8
   };
 }
