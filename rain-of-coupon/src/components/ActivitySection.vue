@@ -16,13 +16,6 @@
     <div class="center-button">
       <img :src="getImageUrl('button.png')" alt="立即挑战" class="challenge-btn" @click="handleJoinActivity" />
     </div>
-
-    <!-- 奖品库存提示弹窗 -->
-    <PrizeStockTip 
-      :visible="showPrizeStockTip" 
-      @close="handlePrizeStockClose"
-      @view-rules="handleViewRules"
-    />
   </div>
 </template>
 

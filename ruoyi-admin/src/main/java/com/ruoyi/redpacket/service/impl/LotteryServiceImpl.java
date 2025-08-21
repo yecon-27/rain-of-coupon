@@ -432,5 +432,94 @@ public class LotteryServiceImpl implements ILotteryService {
         
         return result;
     }
+    
+    @Override
+    public Map<String, Object> getCurrentActiveRound() {
+        Map<String, Object> result = new HashMap<>();
+        
+        try {
+            RedpacketEventConfig config = getEventConfig();
+            if (config == null) {
+                result.put("id", 1);
+                result.put("roundNumber", 1);
+                result.put("isRecycleRound", false);
+                result.put("startTime", new Date());
+                result.put("endTime", new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000));
+                result.put("isActive", true);
+                result.put("message", "默认轮次");
+                return result;
+            }
+            
+            Date now = new Date();
+            
+            // 检查第一轮是否活跃
+            if (config.getFirstRoundStart() != null && config.getFirstRoundEnd() != null) {
+                if (now.after(config.getFirstRoundStart()) && now.before(config.getFirstRoundEnd())) {
+                    result.put("id", 1);
+                    result.put("roundNumber", 1);
+                    result.put("isRecycleRound", false);
+                    result.put("startTime", config.getFirstRoundStart());
+                    result.put("endTime", config.getFirstRoundEnd());
+                    result.put("isActive", true);
+                    result.put("message", "第一轮抽奖进行中");
+                    return result;
+                }
+            }
+            
+            // 检查第二轮是否活跃
+            if (config.getSecondRoundStart() != null && config.getSecondRoundEnd() != null) {
+                if (now.after(config.getSecondRoundStart()) && now.before(config.getSecondRoundEnd())) {
+                    result.put("id", 2);
+                    result.put("roundNumber", 2);
+                    result.put("isRecycleRound", true);
+                    result.put("startTime", config.getSecondRoundStart());
+                    result.put("endTime", config.getSecondRoundEnd());
+                    result.put("isActive", true);
+                    result.put("message", "第二轮回流抽奖进行中");
+                    return result;
+                }
+            }
+            
+            // 如果都不在活跃时间内，返回最近的轮次信息
+            if (config.getFirstRoundStart() != null && now.before(config.getFirstRoundStart())) {
+                result.put("id", 1);
+                result.put("roundNumber", 1);
+                result.put("isRecycleRound", false);
+                result.put("startTime", config.getFirstRoundStart());
+                result.put("endTime", config.getFirstRoundEnd());
+                result.put("isActive", false);
+                result.put("message", "第一轮抽奖尚未开始");
+            } else if (config.getSecondRoundStart() != null && now.before(config.getSecondRoundStart())) {
+                result.put("id", 2);
+                result.put("roundNumber", 2);
+                result.put("isRecycleRound", true);
+                result.put("startTime", config.getSecondRoundStart());
+                result.put("endTime", config.getSecondRoundEnd());
+                result.put("isActive", false);
+                result.put("message", "第二轮抽奖尚未开始");
+            } else {
+                result.put("id", 1);
+                result.put("roundNumber", 1);
+                result.put("isRecycleRound", false);
+                result.put("startTime", config.getFirstRoundStart());
+                result.put("endTime", config.getFirstRoundEnd());
+                result.put("isActive", false);
+                result.put("message", "活动已结束");
+            }
+            
+        } catch (Exception e) {
+            LoggerFactory.getLogger(LotteryServiceImpl.class).error("获取当前轮次失败", e);
+            // 返回默认轮次信息
+            result.put("id", 1);
+            result.put("roundNumber", 1);
+            result.put("isRecycleRound", false);
+            result.put("startTime", new Date());
+            result.put("endTime", new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000));
+            result.put("isActive", true);
+            result.put("message", "默认轮次");
+        }
+        
+        return result;
+    }
 
 }

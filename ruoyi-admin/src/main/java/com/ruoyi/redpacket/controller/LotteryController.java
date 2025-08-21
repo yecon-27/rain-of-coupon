@@ -1,5 +1,6 @@
 package com.ruoyi.redpacket.controller;
 
+import com.ruoyi.common.annotation.Anonymous;
 import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
@@ -250,6 +251,20 @@ public class LotteryController extends BaseController {
             return AjaxResult.success("操作成功", data);
         } catch (Exception e) {
             return AjaxResult.error("检查奖品库存失败: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * 获取当前活跃轮次信息
+     */
+    @GetMapping("/current-round")
+    public AjaxResult getCurrentActiveRound() {
+        try {
+            Map<String, Object> roundInfo = lotteryService.getCurrentActiveRound();
+            return AjaxResult.success("获取轮次信息成功", roundInfo);
+        } catch (Exception e) {
+            logger.error("获取当前轮次失败", e);
+            return AjaxResult.error("获取当前轮次失败: " + e.getMessage());
         }
     }
 }

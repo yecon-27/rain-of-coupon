@@ -105,4 +105,11 @@ public interface ILotteryService {
      * @return 库存检查结果
      */
     Map<String, Object> checkPrizeStock();
+    
+    /**
+     * 获取当前活跃轮次信息
+     * 
+     * @return 当前轮次信息
+     */
+    Map<String, Object> getCurrentActiveRound();
 }

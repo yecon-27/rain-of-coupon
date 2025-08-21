@@ -9,7 +9,7 @@
       <div class="prize-content" v-if="gameStore.hasPrize">
         <div class="prize-image-container" @click="navigateToHome">
           <img 
-            :src="gameStore.getPrizeImageUrl" 
+            :src="gameStore.getPrizeImageUrl ?? undefined"
             :alt="`${gameStore.prizeRecord?.amount}元优惠券`"
             class="prize-image"
           />

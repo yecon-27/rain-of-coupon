@@ -2,18 +2,18 @@
   <div v-if="visible" class="prize-stock-tip-overlay">
     <div class="prize-stock-tip-modal">
       <div class="tip-header">
-        <h3>🎁 奖品发放提醒</h3>
+        <h3>🎁 {{ getHeaderTitle() }}</h3>
       </div>
       
       <div class="tip-content">
         <div class="icon-container">
-          <div class="gift-icon">🎁</div>
+          <div class="gift-icon">{{ getIconEmoji() }}</div>
         </div>
         <p class="main-message">
-          本轮奖品已发放完毕
+          {{ getMainMessage() }}
         </p>
         <p class="sub-message">
-          请等待优惠券回流后的第二次抽奖
+          {{ getSubMessage() }}
         </p>
         
         <div class="prize-list" v-if="prizes && prizes.length > 0">
@@ -24,6 +24,16 @@
               {{ prize.remainingCount }}/{{ prize.totalCount }}
             </span>
           </div>
+        </div>
+        
+        <!-- 轮次信息显示 -->
+        <div class="round-info" v-if="currentRound">
+          <div class="round-badge" :class="getRoundBadgeClass()">
+            {{ getRoundText() }}
+          </div>
+          <p class="round-description">
+            {{ getRoundDescription() }}
+          </p>
         </div>
       </div>
       
@@ -49,17 +59,77 @@ interface Prize {
   remainingCount: number
 }
 
+interface LotteryRound {
+  id: number
+  roundNumber: number
+  isRecycleRound: boolean
+  startTime: string
+  endTime: string
+  isActive: boolean
+}
+
 interface Props {
   visible: boolean
   prizes?: Prize[]
+  currentRound?: LotteryRound | null
 }
 
-defineProps<Props>()
+const props = defineProps<Props>()
 
 const emit = defineEmits<{
   close: []
   viewRules: []
 }>()
+
+// 根据轮次类型获取不同的提示信息
+const getHeaderTitle = () => {
+  if (props.currentRound?.isRecycleRound) {
+    return '第二轮抽奖提醒'
+  }
+  return '奖品发放提醒'
+}
+
+const getIconEmoji = () => {
+  if (props.currentRound?.isRecycleRound) {
+    return '🔄'
+  }
+  return '🎁'
+}
+
+const getMainMessage = () => {
+  if (props.currentRound?.isRecycleRound) {
+    return '第二轮回流奖品已发放完毕'
+  }
+  return '本轮奖品已发放完毕'
+}
+
+const getSubMessage = () => {
+  if (props.currentRound?.isRecycleRound) {
+    return '所有优惠券已被领取，感谢您的参与！'
+  }
+  return '请等待优惠券回流后的第二轮抽奖'
+}
+
+const getRoundText = () => {
+  if (props.currentRound?.isRecycleRound) {
+    return '第二轮（回流轮次）'
+  }
+  return '第一轮（首发轮次）'
+}
+
+const getRoundBadgeClass = () => {
+  if (props.currentRound?.isRecycleRound) {
+    return 'round-recycle'
+  }
+  return 'round-first'
+}
+
+const getRoundDescription = () => {
+  if (props.currentRound?.isRecycleRound) {
+    return '基于未使用优惠券的回流抽奖'
+  }
+  return '基于原始奖品库存的抽奖'
+}
 
 const handleKnow = () => {
   emit('close')
@@ -351,4 +421,43 @@ const handleViewRules = () => {
     width: 100%;
   }
 }
+
+/* 保持原有样式，新增轮次相关样式 */
+
+.round-info {
+  margin-top: 20px;
+  padding: 15px;
+  background: linear-gradient(135deg, #f0f8ff, #e6f3ff);
+  border-radius: 12px;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  text-align: center;
+}
+
+.round-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.round-badge.round-first {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  color: white;
+}
+
+.round-badge.round-recycle {
+  background: linear-gradient(135deg, #10b981, #047857);
+  color: white;
+}
+
+.round-description {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* 保持所有原有样式不变 */
 </style>

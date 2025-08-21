@@ -264,3 +264,20 @@ export const checkPrizeStock = async (): Promise<{
 }> => {
   return request('/redpacket/lottery/stock')
 }
+
+// 获取当前活跃轮次信息
+export const getCurrentActiveRound = async (): Promise<{
+  code: number
+  data: {
+    id: number
+    roundNumber: number
+    isRecycleRound: boolean
+    startTime: string
+    endTime: string
+    isActive: boolean
+    message?: string
+  }
+  msg: string
+}> => {
+  return request('/redpacket/lottery/current-round')
+}
