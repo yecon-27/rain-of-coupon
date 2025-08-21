@@ -35,13 +35,16 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useTrafficStore } from '@/stores/traffic'
 import { useUIStore } from '@/stores/ui'
+import { useGameStore } from '@/stores/gameStore'
 import LoadingAnim from '@/components/LoadingAnim.vue'
 import ProgressBar from '@/components/ProgressBar.vue'
+import { getUserStatus } from '@/api/lottery'
 
 const router = useRouter()
 const authStore = useAuthStore()
 const trafficStore = useTrafficStore()
 const uiStore = useUIStore()
+const gameStore = useGameStore()
 
 // 状态管理
 const progressBarRef = ref<InstanceType<typeof ProgressBar> | null>(null)
@@ -89,12 +92,44 @@ const performTrafficCheck = async () => {
   }
 }
 
-// 显示拥挤提示
-const showCrowdingMessage = () => {
-  // 设置UI状态显示拥挤提示
-  uiStore.setCrowdingTip(true)
-  // 跳转回首页
-  router.push('/')
+// 显示拥挤提示或警告提示
+const showCrowdingMessage = async () => {
+  try {
+    console.log('🔍 [LoadingPage] 检查用户参与状态以决定显示哪种提示')
+    
+    // 加载用户的参与记录（不仅仅是中奖记录）
+    await gameStore.loadPrizeRecord()
+    
+    // 检查用户今日是否已经参与过活动
+    // 这里需要调用后端API获取用户的参与状态
+    const response = await getUserStatus() // 需要导入这个API
+    const userStatus = response.data || response
+    
+    console.log('🔍 [LoadingPage] 用户参与状态:', userStatus)
+    console.log('🔍 [LoadingPage] 今日参与次数:', userStatus.todayParticipations?.length || 0)
+    console.log('🔍 [LoadingPage] 剩余抽奖次数:', userStatus.remainingCount)
+    
+    // 如果用户今日已经参与过活动（不管是否中奖），显示WarningTip
+    if (userStatus.todayParticipations && userStatus.todayParticipations.length > 0) {
+      console.log('⚠️ [LoadingPage] 用户今日已参与过活动，显示WarningTip')
+      // 用户已参与过活动，跳转到首页并显示WarningTip
+      router.push('/?showWarning=true')
+    } else if (userStatus.remainingCount <= 0) {
+      console.log('⚠️ [LoadingPage] 用户今日抽奖次数已用完，显示WarningTip')
+      // 用户今日抽奖次数已用完，显示WarningTip
+      router.push('/?showWarning=true')
+    } else {
+      console.log('🚫 [LoadingPage] 用户可以参与活动但流量拥挤，显示CrowdingTip')
+      // 用户可以参与活动，但因为流量问题无法加入，显示拥挤提示
+      uiStore.setCrowdingTip(true)
+      router.push('/')
+    }
+  } catch (error) {
+    console.error('🔍 [LoadingPage] 检查参与状态失败:', error)
+    // 如果检查失败，默认显示拥挤提示
+    uiStore.setCrowdingTip(true)
+    router.push('/')
+  }
 }
 
 // 开始加载检查

@@ -53,13 +53,13 @@ public class LotteryServiceImpl implements ILotteryService {
             return false;
         }
         
-        // 2. 检查用户是否已经中过奖（核心规则：一共只能中一次）
-        boolean hasWon = hasEverWon(userId);
-        logger.info("🏆 [抽奖资格检查] 用户是否已中奖: {}", hasWon);
-        if (hasWon) {
-            logger.warn("❌ [抽奖资格检查] 用户已中过奖，检查失败");
-            return false;
-        }
+        // 2. 检查用户是否已经中过奖（核心规则：一共只能中一次） - 根据需求注释掉此限制
+        // boolean hasWon = hasEverWon(userId);
+        // logger.info("🏆 [抽奖资格检查] 用户是否已中奖: {}", hasWon);
+        // if (hasWon) {
+        //     logger.warn("❌ [抽奖资格检查] 用户已中过奖，检查失败");
+        //     return false;
+        // }
         
         // 3. 检查今日参与次数（每天3次机会）
         int remainingCount = getRemainingDrawCount(userId);
@@ -97,11 +97,11 @@ public class LotteryServiceImpl implements ILotteryService {
             return new DrawResult(false, "奖品已发完，感谢参与！");
         }
         
-        // 检查用户是否已经中过奖
-        if (hasEverWon(userId)) {
-            // 已中奖用户参与，但强制未中奖
-            return new DrawResult(false, "感谢参与，继续体验红包雨吧！");
-        }
+        // 检查用户是否已经中过奖 - 根据需求注释掉此限制
+        // if (hasEverWon(userId)) {
+        //     // 已中奖用户参与，但强制未中奖
+        //     return new DrawResult(false, "感谢参与，继续体验红包雨吧！");
+        // }
         
         // 执行基于点击数量的概率抽奖算法
         RedpacketPrize wonPrize = executeClickBasedProbabilityDraw(clickedCount, availablePrizes);
@@ -152,7 +152,7 @@ public class LotteryServiceImpl implements ILotteryService {
         
         // 获取活动配置的每日参与次数限制
         RedpacketEventConfig config = getEventConfig();
-        int maxDrawsPerDay = config != null ? config.getMaxDrawsPerDay().intValue() : 3;
+        int maxDrawsPerDay = config != null ? config.getMaxDrawsPerDay().intValue() : 0; // 从数据库配置读取，默认为3
         logger.info("📊 [剩余次数] 每日最大抽奖次数: {}", maxDrawsPerDay);
         
         // 查询今日已参与次数
@@ -357,6 +357,13 @@ public class LotteryServiceImpl implements ILotteryService {
     long recentCount = logs.stream()
             .filter(log -> log.getParticipationTime().after(oneHourAgo))
             .count();
+    
+    logger.info("🌐 [IP限制] 1小时内请求次数: {}", recentCount);
+    // 如果1小时内请求次数超过阈值（例如3次），则触发限制
+    if (recentCount >= 3) {
+        logger.info("🚫 [IP限制] 触发限制，IP: {}", ipAddress);
+        return true;
+    }
     
     return recentCount >= 10L; // 1小时内超过10次则限制
     }

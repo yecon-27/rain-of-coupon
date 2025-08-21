@@ -15,8 +15,8 @@
     <!-- 蒙版层（当有overlay时显示） -->
     <div v-if="uiStore.showOverlay" class="overlay-mask"></div>
 
-    <!-- 拥挤提示组件 -->
-    <CrowdingTip :visible="uiStore.showCrowdingTip" />
+    <!-- 警告提示组件 -->
+    <WarningTip :visible="showWarningTip" @close="showWarningTip = false" />
 
     <!-- 规则弹窗组件 -->
     <RulePopup 
@@ -37,7 +37,7 @@ import ActivitySection from '@/components/ActivitySection.vue'
 import FoodDisplaySection from '@/components/FoodDisplaySection.vue'
 import Top10FoodSection from '@/components/Top10FoodSection.vue'
 import SpecialityFoodSection from '@/components/SpecialityFoodSection.vue'
-import CrowdingTip from '@/components/CrowdingTip.vue'
+import WarningTip from '@/components/WarningTip.vue'
 import RulePopup from '@/components/RulePopup.vue'
 
 // 路由和认证
@@ -48,6 +48,7 @@ const top10Foods = ref<FoodItem[]>([])
 const specialityFoods = ref<FoodItem[]>([])
 const loading = ref(false)
 const showRulePopup = ref(false)
+const showWarningTip = ref(false)
 
 // 获取美食列表数据
 const fetchFoodData = async () => {
@@ -122,10 +123,10 @@ onMounted(() => {
   authStore.checkAuthStatus()
   fetchFoodData()
   
-  // 检查URL参数，如果有showCrowding=true则显示拥挤提示
+  // 检查URL参数，如果有showWarning=true则显示警告提示
   const urlParams = new URLSearchParams(window.location.search)
-  if (urlParams.get('showCrowding') === 'true') {
-    uiStore.setCrowdingTip(true)
+  if (urlParams.get('showWarning') === 'true') {
+    showWarningTip.value = true
     // 清除URL参数
     window.history.replaceState({}, '', window.location.pathname)
   }
