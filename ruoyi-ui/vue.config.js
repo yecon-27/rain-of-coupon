@@ -9,9 +9,9 @@ const CompressionPlugin = require('compression-webpack-plugin')
 
 const name = process.env.VUE_APP_TITLE || '若依管理系统' // 网页标题
 
-const baseUrl = 'http://172.16.100.197:8080' // 后端接口
+const baseUrl = 'http://localhost:8080' // 后端接口
 
-const port = process.env.port || process.env.npm_config_port || 80 // 端口
+const port = process.env.port || process.env.npm_config_port || 3000 // 端口
 
 // vue.config.js 配置说明
 //官方vue.config.js 参考文档 https://cli.vuejs.org/zh/config/#css-loaderoptions
@@ -31,14 +31,9 @@ module.exports = {
   // webpack-dev-server 相关配置
   devServer: {
     host: '0.0.0.0',
-    port: port,
+    public: 'http://172.16.100.197:3000',  // 改为3000端口
+    port: 3000,  // 前端服务端口改为3000
     open: true,
-    // 开发环境禁用缓存
-    headers: {
-      'Cache-Control': 'no-cache, no-store, must-revalidate',
-      'Pragma': 'no-cache',
-      'Expires': '0'
-    },
     proxy: {
       // detail: https://cli.vuejs.org/config/#devserver-proxy
       [process.env.VUE_APP_BASE_API]: {
