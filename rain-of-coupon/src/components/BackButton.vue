@@ -13,11 +13,16 @@ import { useUIStore } from '@/stores/ui'
 const router = useRouter()
 const uiStore = useUIStore()
 
-const goBack = () => {
-  // 重置所有overlay状态
-  uiStore.resetAllOverlays()
-  // 返回首页
-  router.push('/')
+const goBack = async () => {
+  console.log('返回按钮被点击了，开始执行 goBack 函数。');
+  uiStore.resetAllOverlays();
+    await router.push('/').then(() => {
+    window.location.reload();
+    console.log('路由导航成功，页面应该已跳转到首页。');
+  }).catch(err => {
+    console.error('Navigation failed:', err);
+    window.location.reload();
+  });
 }
 </script>
 
@@ -30,6 +35,7 @@ const goBack = () => {
   flex-direction: column;
   gap: 12px;
   z-index: 1001;
+  pointer-events:auto;
 }
 
 .back-btn {
@@ -51,6 +57,7 @@ const goBack = () => {
   justify-content: center;
   margin: 0;
   position: relative;
+  pointer-events: auto;
 }
 
 .back-text {

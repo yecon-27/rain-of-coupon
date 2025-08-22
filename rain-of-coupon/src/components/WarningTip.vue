@@ -11,10 +11,10 @@
       </div>
       
       <!-- 标题 -->
-      <h3 class="warning-title">今日已参与</h3>
+      <h3 class="warning-title">今天已参与</h3>
       
       <!-- 提示文本 -->
-      <p class="warning-text">你今天已经抽过奖了，<br>过会再试试吧～</p>
+      <p class="warning-text">过会再试试吧！<br>一天共有三次机会哦～</p>
       
       <!-- 按钮 -->
       <button @click="handleConfirm" class="confirm-button">

@@ -14,7 +14,7 @@ import type {
 // 红包雨抽奖状态管理
 export const useLotteryStore = defineStore('lottery', () => {
   // 用户状态
-  const userStatus = ref<UserStatus>({
+  const userStatus = ref<User>({
     canDraw: false,
     remainingCount: 3,
     todayDrawCount: 0,

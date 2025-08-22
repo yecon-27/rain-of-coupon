@@ -2,21 +2,33 @@
   <div class="activity-section">
     <img :src="getImageUrl('home.png')" alt="首页背景" class="activity-bg" />
 
-    <!-- 登录状态显示 -->
     <div v-if="authStore.isLoggedIn" class="login-status">
       <span class="user-info">{{ authStore.currentUser?.nickname || '用户' }}</span>
       <button @click="authStore.logout" class="logout-btn">登出</button>
     </div>
 
-    <!-- 右侧按钮组 -->
     <img :src="getImageUrl('gz.png')" alt="规则" class="rule-btn" @click="$emit('showRules')" />
     <img :src="getImageUrl('qb.png')" alt="券包" class="coupon-btn" @click="$emit('myCoupons')" />
 
-    <!-- 底部居中按钮 -->
     <div class="center-button">
       <img :src="getImageUrl('button.png')" alt="立即挑战" class="challenge-btn" @click="handleJoinActivity" />
     </div>
   </div>
+
+  <PrizeStockTip 
+    :visible="showPrizeStockTip" 
+    :prizes="prizeStockData"
+    @close="handlePrizeStockClose"
+    @view-rules="handleViewRules"
+  />
+  <WarningTip
+    :visible="showWarningTip"
+    @close="handleWarningClose"
+  />
+  <CrowdingTip
+    :visible="showCrowdingTip"
+    @close="handleCrowdingClose"
+  />
 </template>
 
 <script setup lang="ts">
@@ -24,8 +36,11 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useGameStore } from '@/stores/gameStore'
-import { checkPrizeStock } from '@/api/lottery'
+// 从你的 lottery.ts 文件中导入需要的 API
+import { checkPrizeStock, getUserStatus, drawLottery } from '@/api/lottery'
 import PrizeStockTip from './PrizeStockTip.vue'
+import WarningTip from './WarningTip.vue'
+import CrowdingTip from './CrowdingTip.vue'
 import { API_CONFIG } from '@/config/api'
 
 // 定义事件
@@ -39,103 +54,128 @@ const router = useRouter()
 const authStore = useAuthStore()
 const gameStore = useGameStore()
 
+// 弹窗状态变量
+const showPrizeStockTip = ref(false)
+const showWarningTip = ref(false)
+const showCrowdingTip = ref(false)
+const prizeStockData = ref([])
+
 // 获取图片URL
 const getImageUrl = (filename: string) => {
   return `${API_CONFIG.imageURL}${filename}`
 }
 
-// 处理立即挑战按钮点击
-// 添加奖品库存数据
-const showPrizeStockTip = ref(false)
-const prizeStockData = ref([])
+// 维护一个唯一的会话ID，用于后端判断同一个窗口的多次抽奖
+const sessionId = ref(localStorage.getItem('sessionId') || Math.random().toString(36).substring(2, 15));
 
-// 修改 handleJoinActivity 方法
-const handleJoinActivity = async () => {
-  console.log('🚀 [ActivitySection] 用户点击立即挑战按钮')
-  
-  // 检查是否已登录
-  if (!authStore.isLoggedIn) {
-    console.log('🚀 [ActivitySection] 用户未登录，跳转到登录页面')
-    router.push('/login?redirect=/')
-    return
-  }
-
-  console.log('🚀 [ActivitySection] 用户已登录，开始检查奖品库存')
-  
-  try {
-    console.log('🔍 [ActivitySection] 准备调用checkPrizeStock API...')
-    // 检查奖品库存
-    const stockResponse = await checkPrizeStock()
-    console.log('🎁 [ActivitySection] 奖品库存检查结果:', stockResponse)
-    console.log('🎁 [ActivitySection] stockResponse.code:', stockResponse.code)
-    console.log('🎁 [ActivitySection] stockResponse.data:', stockResponse.data)
-    console.log('🎁 [ActivitySection] hasStock值:', stockResponse?.data?.hasStock)
-    
-    if (stockResponse && stockResponse.code === 200 && stockResponse.data) {
-      if (stockResponse.data.hasStock === false) {
-        console.log('🎁 [ActivitySection] 奖品已发放完毕，显示提示')
-        // 保存奖品数据
-        prizeStockData.value = stockResponse.data.prizes || []
-        showPrizeStockTip.value = true
-        console.log('🎁 [ActivitySection] showPrizeStockTip设置为:', showPrizeStockTip.value)
-        console.log('🎁 [ActivitySection] prizeStockData设置为:', prizeStockData.value)
-        return
-      }
-    }
-    
-    console.log('🎁 [ActivitySection] 奖品库存充足，继续检查中奖状态')
-  } catch (error) {
-    console.error('🎁 [ActivitySection] 检查奖品库存失败:', error)
-    // 如果检查失败，继续正常流程
-  }
-
-  // 确保获取最新的中奖状态
-  try {
-    console.log('🚀 [ActivitySection] 调用gameStore.loadPrizeRecord()...')
-    await gameStore.loadPrizeRecord()
-    
-    console.log('🚀 [ActivitySection] loadPrizeRecord完成')
-    console.log('🚀 [ActivitySection] 当前中奖状态:', gameStore.hasPrize)
-    console.log('🚀 [ActivitySection] 中奖记录:', gameStore.prizeRecord)
-  } catch (error) {
-    console.error('🚀 [ActivitySection] 加载中奖状态失败:', error)
-  }
-
-  // 已登录，检查是否已中奖
-  if (gameStore.hasPrize) {
-    console.log('🏆 [ActivitySection] 用户已中奖，跳转到中奖页面')
-    router.push('/prize')
-  } else {
-    console.log('🎮 [ActivitySection] 用户未中奖，跳转到加载页面')
-    router.push('/loading')
-  }
-}
-
+// 关闭弹窗的方法
 const handlePrizeStockClose = () => {
   showPrizeStockTip.value = false
-  prizeStockData.value = []
+}
+
+const handleWarningClose = () => {
+  showWarningTip.value = false
+}
+
+const handleCrowdingClose = () => {
+  showCrowdingTip.value = false
 }
 
 const handleViewRules = () => {
   showPrizeStockTip.value = false
   prizeStockData.value = []
-  // 触发显示规则弹窗
   emit('showRules')
 }
 
-// 组件挂载时检查登录状态和加载中奖记录
-onMounted(async () => {
-  // 先检查认证状态
-  await authStore.checkAuthStatus();
+// 主要的点击处理函数
+const handleJoinActivity = async () => {
+  console.log('🚀 [ActivitySection] 用户点击立即挑战按钮');
   
-  // 只有在已登录的情况下才加载中奖记录
-  if (authStore.isLoggedIn) {
-    try {
-      await gameStore.loadPrizeRecord();
-    } catch (error) {
-      console.error('加载中奖记录失败:', error);
-    }
+  // 每次点击时，先重置所有弹窗状态
+  showPrizeStockTip.value = false;
+  showWarningTip.value = false;
+  showCrowdingTip.value = false;
+
+  // 优先级1: 检查是否已登录
+  if (!authStore.isLoggedIn) {
+    console.log('🚀 [ActivitySection] 用户未登录，跳转到登录页面');
+    router.push('/login?redirect=/');
+    return;
   }
+  
+  try {
+    // 并行获取所有必要数据，减少等待时间
+    console.log('🔍 [ActivitySection] 并行调用 getUserStatus 和 checkPrizeStock API...');
+    const [statusRes, stockRes] = await Promise.all([getUserStatus({ sessionId: sessionId.value }), checkPrizeStock()]);
+
+    let userStatus = statusRes?.data;
+    let stockResponse = stockRes?.data;
+
+    console.log('🔍 [ActivitySection] getUserStatus 响应:', userStatus);
+    console.log('🎁 [ActivitySection] checkPrizeStock 响应:', stockResponse);
+    
+    // 加载中奖记录，这是最高优先级
+    await gameStore.loadPrizeRecord();
+    console.log('🏆 [ActivitySection] 当前中奖状态:', gameStore.hasPrize);
+
+    // --- 优先级判断链 ---
+
+    // 优先级1: 已中奖
+    if (gameStore.hasPrize) {
+      console.log('🏆 [ActivitySection] 用户已中奖，跳转到中奖页面');
+      router.push('/prize');
+      return;
+    }
+
+    // 优先级2: 奖品库存不足
+    if (stockResponse && stockResponse.hasStock === false) {
+      console.log('🎁 [ActivitySection] 奖品已发放完毕，显示 PrizeStockTip');
+      prizeStockData.value = stockResponse.prizes || [];
+      showPrizeStockTip.value = true;
+      return;
+    }
+
+    // 优先级3: 今日抽奖次数已用完或在同一会话中多次抽奖
+    if (userStatus && userStatus.canDraw === false) {
+      console.log('⚠️ [ActivitySection] 用户今日抽奖次数已用完，显示 WarningTip');
+      showWarningTip.value = true;
+      return;
+    }
+    
+    // 优先级4: 服务器流量拥挤
+    if (userStatus && userStatus.isCrowded === true) {
+      console.log('🚦 [ActivitySection] 活动流量拥挤，显示 CrowdingTip');
+      showCrowdingTip.value = true;
+      return;
+    }
+    
+    // 默认情况: 所有检查通过，直接执行抽奖逻辑
+    console.log('✅ [ActivitySection] 所有检查通过，开始执行抽奖');
+    const drawResponse = await drawLottery({ sessionId: sessionId.value });
+
+    if (drawResponse.code === 200 && drawResponse.data?.isWin) {
+      console.log('🏆 [ActivitySection] 抽奖成功并中奖，跳转到 PrizePage');
+      await gameStore.loadPrizeRecord(); // 重新加载中奖记录
+      router.push('/prize');
+    } else {
+      console.log('💔 [ActivitySection] 抽奖成功但未中奖，跳转到 LoadingPage');
+      // 未中奖，跳转到 LoadingPage，这部分逻辑可以根据你的需求调整
+      router.push('/loading');
+    }
+
+  } catch (error) {
+    console.error('❌ [ActivitySection] API 调用或抽奖失败:', error);
+    // 抽奖失败，可以显示拥挤提示或其他通用错误提示
+    showCrowdingTip.value = true;
+  }
+}
+
+// 组件挂载时检查登录状态，并保存 sessionId
+onMounted(() => {
+  if (!localStorage.getItem('sessionId')) {
+    localStorage.setItem('sessionId', sessionId.value);
+  }
+  authStore.checkAuthStatus();
 });
 </script>
 

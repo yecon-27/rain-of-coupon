@@ -173,10 +173,10 @@ onUnmounted(() => {
   width: 100vw;
   height: 100vh;
   background: rgba(0, 0, 0, 0.5);
-  display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 9999;
+  z-index: 1000;
+  pointer-events:auto;
   padding: 20px;
   box-sizing: border-box;
 }
@@ -188,6 +188,7 @@ onUnmounted(() => {
   gap: 20px;
   max-width: 90vw;
   max-height: 90vh;
+  pointer-events: auto;
 }
 
 .crowding-image {

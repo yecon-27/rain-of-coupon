@@ -35,6 +35,13 @@ import Layout from "@/layout";
  */
 
 // 公共路由
+export const routes = [
+  {
+    path: '/',
+    name: 'Home',
+    component: Home
+  }
+];
 export const constantRoutes = [
   {
     path: "/redirect",
@@ -178,7 +185,16 @@ const createRouter = () =>
   });
 
 const router = createRouter();
-
+// 添加全局前置守卫
+router.beforeEach((to, from, next) => {
+  console.log(`导航开始: 从 ${from.fullPath} 到 ${to.fullPath}`);
+  
+  // 在这里可以添加逻辑来检查是否满足导航条件
+  // ...
+  
+  // 确保调用 next() 来继续导航
+  next();
+});
 // Detail see: https://github.com/vuejs/vue-router/issues/1234#issuecomment-357941465
 export function resetRouter() {
   const newRouter = createRouter();
