@@ -28,7 +28,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted,onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useUIStore } from '@/stores/ui'
@@ -50,6 +50,16 @@ const loading = ref(false)
 const showRulePopup = ref(false)
 const showWarningTip = ref(false)
 
+let sessionTimer: number | null = null;
+// 定义更新 sessionId 的函数
+const updateSessionId = () => {
+    console.log('🔄 30分钟定时器触发，正在更新 sessionId');
+    // 生成一个新的 sessionId
+    const newSessionId = Math.random().toString(36).substring(2, 15);
+    // 覆盖 localStorage 中的旧值
+    localStorage.setItem('sessionId', newSessionId);
+    console.log('✅ sessionId 已更新为:', newSessionId);
+};
 // 获取美食列表数据
 const fetchFoodData = async () => {
   loading.value = true
@@ -129,7 +139,16 @@ onMounted(() => {
     showWarningTip.value = true
     // 清除URL参数
     window.history.replaceState({}, '', window.location.pathname)
+    sessionTimer = setInterval(updateSessionId, 30 * 60 * 1000);
   }
+})
+// 组件卸载时清除定时器，防止内存泄漏
+onBeforeUnmount(() => {
+    if (sessionTimer) {
+        clearInterval(sessionTimer);
+        sessionTimer = null;
+        console.log('🧹 页面卸载，定时器已清除');
+    }
 })
 </script>
 
