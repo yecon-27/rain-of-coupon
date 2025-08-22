@@ -1,4 +1,6 @@
 package com.ruoyi.redpacket.controller;
+
+import com.ruoyi.common.annotation.Anonymous;
 import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
@@ -15,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.time.LocalDate;
@@ -147,56 +149,50 @@ public class LotteryController extends BaseController {
      * 获取用户状态（查询 redpacket_user_participation_log）
      */
     @GetMapping("/status")
+    @Anonymous // 允许未登录访问
     public AjaxResult getStatus(HttpServletRequest request, @RequestParam(required = false) String sessionId) {
         try {
             Long userId = SecurityUtils.getUserId();
-            if (userId == null) {
-                return error("请先登录");
-            }
+            String ipAddress = IpUtils.getIpAddr(request);
             
             logger.info("🔍 [用户状态查询] 当前用户ID: {}", userId);
             
-            String ipAddress = IpUtils.getIpAddr(request);
-            // 新增：检查同一会话是否已参与
-            boolean hasParticipatedInSession = false;
-            if (sessionId != null && !sessionId.isEmpty()) {
-                hasParticipatedInSession = lotteryService.hasParticipatedInSession(userId, sessionId);
+            // 默认值处理，避免空指针
+            int todayRemainingCount = 0;
+            boolean hasEverWon = false;
+            List<RedpacketUserParticipationLog> logs = Collections.emptyList();
+
+            if (userId != null) {
+                // 如果用户已登录，获取精确的参与和剩余次数
+                todayRemainingCount = lotteryService.getTodayRemainingCount(userId);
+                hasEverWon = lotteryService.hasEverWon(userId);
+                // 获取用户所有参与记录
+                logs = lotteryService.getUserParticipationLogs(userId);
             }
-            // 查询用户参与记录
-            List<RedpacketUserParticipationLog> logs = lotteryService.getUserParticipationLogs(userId);
-            logger.info("📊 [用户状态查询] 查询到 {} 条参与记录", logs.size());
+
+            // 获取当前活动轮次信息及流量拥挤状态
+            Map<String, Object> roundInfo = lotteryService.getCurrentActiveRound();
+            String roundName = roundInfo.containsKey("id") ? "round" + roundInfo.get("id") : "";
+            boolean isCrowded = lotteryService.isCrowded(roundName);
+
+            // 检查同一会话是否已参与，仅对已登录用户有效
+            boolean hasParticipatedInSession = (userId != null && sessionId != null) && lotteryService.hasParticipatedInSession(userId, sessionId);
+
+            // 最终抽奖资格判断：服务层检查 + 会话检查
+            boolean canDraw = lotteryService.checkDrawEligibility(userId, ipAddress) && !hasParticipatedInSession;
             
-            // 打印所有记录的详细信息
-            for (RedpacketUserParticipationLog log : logs) {
-                logger.info("📝 [参与记录] ID: {}, 用户ID: {}, 是否中奖: {}, 奖品名称: {}, 参与时间: {}", 
-                           log.getId(), log.getUserId(), log.getIsWin(), log.getPrizeName(), log.getParticipationTime());
-            }
-            
-            // 计算状态
-            boolean hasEverWon = logs.stream().anyMatch(log -> log.getIsWin() == 1);
-            logger.info("🏆 [中奖状态] hasEverWon: {}", hasEverWon);
-            
-            int todayParticipationsCount = lotteryService.getTodayParticipationsCount(userId);
-            int todayRemainingCount = lotteryService.getTodayRemainingCount(userId);
-            
-            // 确保 canDraw 包含了 hasParticipatedInSession 的判断
-            boolean canDraw = lotteryService.checkDrawEligibility(userId, ipAddress) && !lotteryService.hasEverWon(userId) && !hasParticipatedInSession;
-            boolean isCrowded = lotteryService.isCrowded(ipAddress);
-            
-            // 今日参与和中奖记录
+            // 按日期和中奖状态过滤记录
             List<Map<String, Object>> todayParticipations = logs.stream()
-                .filter(log -> {
-                    LocalDate participationDate = log.getParticipationTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-                    return participationDate.equals(LocalDate.now());
-                })
+                .filter(log -> log.getParticipationTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDate().equals(LocalDate.now()))
                 .map(log -> {
                     Map<String, Object> map = new HashMap<>();
                     map.put("id", log.getId());
                     map.put("participationTime", log.getParticipationTime());
                     map.put("isWin", log.getIsWin());
-                    // 添加其他字段
+                    map.put("clickedCount", log.getClickedCount());
                     return map;
-                }).collect(Collectors.toList());
+                })
+                .collect(Collectors.toList());
             
             List<Map<String, Object>> winRecords = logs.stream()
                 .filter(log -> log.getIsWin() == 1)
@@ -205,25 +201,25 @@ public class LotteryController extends BaseController {
                     map.put("id", log.getId());
                     map.put("participationTime", log.getParticipationTime());
                     map.put("prizeName", log.getPrizeName());
-                    // 添加其他字段
                     return map;
-                }).collect(Collectors.toList());
-            
+                })
+                .collect(Collectors.toList());
+
+            // 组装响应数据
             Map<String, Object> data = new HashMap<>();
             data.put("canDraw", canDraw);
-            data.put("hasEverWon", lotteryService.hasEverWon(userId));
+            data.put("hasEverWon", hasEverWon);
             data.put("isCrowded", isCrowded);
             data.put("remainingCount", todayRemainingCount);
-            data.put("todayParticipations", new ArrayList<>()); // 你可以根据需要从服务层获取真实数据
-            data.put("winRecords", new ArrayList<>()); // 你可以根据需要从服务层获取真实数据
-            data.put("todayParticipationsCount", todayParticipationsCount);
-            
-            
-            return success(data);
-            
+            data.put("todayParticipations", todayParticipations);
+            data.put("winRecords", winRecords);
+            data.put("todayParticipationsCount", todayParticipations.size()); // 根据过滤后的列表计算
+
+            return AjaxResult.success("获取用户状态成功", data);
+
         } catch (Exception e) {
             logger.error("获取用户状态失败", e);
-            return error("获取用户状态失败");
+            return AjaxResult.error("获取用户状态失败");
         }
     }
     
