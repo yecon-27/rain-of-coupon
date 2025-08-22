@@ -190,8 +190,12 @@ export const getPrizes = async () => {
 }
 
 // 获取用户状态
-export const getUserStatus = async (): Promise<UserStatusResponse> => {
-  return request('/redpacket/lottery/status') as Promise<UserStatusResponse>
+// 获取用户状态
+export const getUserStatus = async (data: { sessionId?: string | null } = {}): Promise<UserStatusResponse> => {
+  const params = new URLSearchParams({
+    ...(data.sessionId && { sessionId: data.sessionId })
+  })
+  return request(`/redpacket/lottery/status?${params}`) as Promise<UserStatusResponse>
 }
 
 // 获取活动配置

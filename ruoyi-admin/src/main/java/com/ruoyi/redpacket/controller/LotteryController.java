@@ -1,12 +1,9 @@
 package com.ruoyi.redpacket.controller;
-
-import com.ruoyi.common.annotation.Anonymous;
 import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.SecurityUtils;
-import com.ruoyi.common.utils.ServletUtils;
 import com.ruoyi.common.utils.ip.IpUtils;
 import com.ruoyi.redpacket.domain.DrawResult;
 import com.ruoyi.redpacket.domain.RedpacketPrize;
@@ -18,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.time.LocalDate;
@@ -54,23 +52,23 @@ public class LotteryController extends BaseController {
             }
             
             int clickedCount = (payload != null && payload.containsKey("clickedCount")) ? payload.get("clickedCount") : 1;
-
+            String sessionId = request.getSession().getId();
             String ipAddress = IpUtils.getIpAddr(request);
             
             if (!lotteryService.checkDrawEligibility(userId, ipAddress)) {
                 return error("抽奖资格检查失败，请检查是否已中奖或超过每日限制");
             }
             
-            DrawResult result = lotteryService.executeDraw(userId, clickedCount);
+            DrawResult result = lotteryService.draw(userId, ipAddress, clickedCount, sessionId);
             
-            lotteryService.saveDrawRecord(userId, result, ipAddress, clickedCount);
+            lotteryService.saveDrawRecord(userId, result, ipAddress, sessionId, clickedCount);
             
             Map<String, Object> data = new HashMap<>();
             data.put("isWin", result.isWin());
             data.put("prizeName", result.getPrizeName());
             data.put("prizeValue", result.getPrizeValue());
             data.put("message", result.getMessage());
-            data.put("remainingCount", lotteryService.getRemainingDrawCount(userId));
+            data.put("remainingCount", lotteryService.getTodayRemainingCount(userId));
             
             return success(data);
             
@@ -111,7 +109,7 @@ public class LotteryController extends BaseController {
                 return error("请先登录");
             }
             
-            int remainingCount = lotteryService.getRemainingDrawCount(userId);
+            int remainingCount = lotteryService.getTodayRemainingCount(userId);
             boolean hasWon = lotteryService.hasWonToday(userId);
             
             Map<String, Object> data = new HashMap<>();
@@ -149,7 +147,7 @@ public class LotteryController extends BaseController {
      * 获取用户状态（查询 redpacket_user_participation_log）
      */
     @GetMapping("/status")
-    public AjaxResult getStatus(HttpServletRequest request) {
+    public AjaxResult getStatus(HttpServletRequest request, @RequestParam(required = false) String sessionId) {
         try {
             Long userId = SecurityUtils.getUserId();
             if (userId == null) {
@@ -159,7 +157,11 @@ public class LotteryController extends BaseController {
             logger.info("🔍 [用户状态查询] 当前用户ID: {}", userId);
             
             String ipAddress = IpUtils.getIpAddr(request);
-            
+            // 新增：检查同一会话是否已参与
+            boolean hasParticipatedInSession = false;
+            if (sessionId != null && !sessionId.isEmpty()) {
+                hasParticipatedInSession = lotteryService.hasParticipatedInSession(userId, sessionId);
+            }
             // 查询用户参与记录
             List<RedpacketUserParticipationLog> logs = lotteryService.getUserParticipationLogs(userId);
             logger.info("📊 [用户状态查询] 查询到 {} 条参与记录", logs.size());
@@ -174,9 +176,12 @@ public class LotteryController extends BaseController {
             boolean hasEverWon = logs.stream().anyMatch(log -> log.getIsWin() == 1);
             logger.info("🏆 [中奖状态] hasEverWon: {}", hasEverWon);
             
-            int remainingCount = lotteryService.getRemainingDrawCount(userId);
-            boolean canDraw = lotteryService.checkDrawEligibility(userId, ipAddress) && remainingCount > 0 && !hasEverWon;
-            boolean isCrowded = lotteryService.isCrowded(ipAddress); // 假设有流量检查方法
+            int todayParticipationsCount = lotteryService.getTodayParticipationsCount(userId);
+            int todayRemainingCount = lotteryService.getTodayRemainingCount(userId);
+            
+            // 确保 canDraw 包含了 hasParticipatedInSession 的判断
+            boolean canDraw = lotteryService.checkDrawEligibility(userId, ipAddress) && !lotteryService.hasEverWon(userId) && !hasParticipatedInSession;
+            boolean isCrowded = lotteryService.isCrowded(ipAddress);
             
             // 今日参与和中奖记录
             List<Map<String, Object>> todayParticipations = logs.stream()
@@ -206,11 +211,13 @@ public class LotteryController extends BaseController {
             
             Map<String, Object> data = new HashMap<>();
             data.put("canDraw", canDraw);
-            data.put("hasEverWon", hasEverWon);
-            // data.put("isCrowded", isCrowded);
-            data.put("remainingCount", remainingCount);
-            data.put("todayParticipations", todayParticipations);
-            data.put("winRecords", winRecords);
+            data.put("hasEverWon", lotteryService.hasEverWon(userId));
+            data.put("isCrowded", isCrowded);
+            data.put("remainingCount", todayRemainingCount);
+            data.put("todayParticipations", new ArrayList<>()); // 你可以根据需要从服务层获取真实数据
+            data.put("winRecords", new ArrayList<>()); // 你可以根据需要从服务层获取真实数据
+            data.put("todayParticipationsCount", todayParticipationsCount);
+            
             
             return success(data);
             

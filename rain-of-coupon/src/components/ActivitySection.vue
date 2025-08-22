@@ -106,7 +106,7 @@ const handleJoinActivity = async () => {
   try {
     // 并行获取所有必要数据，减少等待时间
     console.log('🔍 [ActivitySection] 并行调用 getUserStatus 和 checkPrizeStock API...');
-    const [statusRes, stockRes] = await Promise.all([getUserStatus({ sessionId: sessionId.value }), checkPrizeStock()]);
+const [statusRes, stockRes] = await Promise.all([getUserStatus({ sessionId: sessionId.value }), checkPrizeStock()]);
 
     let userStatus = statusRes?.data;
     let stockResponse = stockRes?.data;
@@ -166,7 +166,8 @@ const handleJoinActivity = async () => {
   } catch (error) {
     console.error('❌ [ActivitySection] API 调用或抽奖失败:', error);
     // 抽奖失败，可以显示拥挤提示或其他通用错误提示
-    showCrowdingTip.value = true;
+    showWarningTip.value = true;
+    return;
   }
 }
 

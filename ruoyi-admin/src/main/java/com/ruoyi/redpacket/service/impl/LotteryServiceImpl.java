@@ -65,7 +65,7 @@ public class LotteryServiceImpl implements ILotteryService {
         // }
         
         // 3. 检查今日参与次数（每天3次机会）
-        int remainingCount = getRemainingDrawCount(userId);
+        int remainingCount = getTodayRemainingCount(userId);
         logger.info("🎯 [抽奖资格检查] 剩余抽奖次数: {}", remainingCount);
         if (remainingCount <= 0) {
             logger.warn("❌ [抽奖资格检查] 今日抽奖次数已用完，检查失败");
@@ -92,7 +92,7 @@ public class LotteryServiceImpl implements ILotteryService {
      */
     @Override
     @Transactional
-    public DrawResult executeDraw(Long userId, int clickedCount) {
+    public DrawResult draw(Long userId, String ipAddress, int clickedCount, String sessionId) {
         // 获取所有可用奖品
         List<RedpacketPrize> availablePrizes = getAvailablePrizes();
         
@@ -122,7 +122,7 @@ public class LotteryServiceImpl implements ILotteryService {
     }
     
     @Override
-    public void saveDrawRecord(Long userId, DrawResult result, String ipAddress, int clickedCount) {
+    public void saveDrawRecord(Long userId, DrawResult result, String ipAddress, String sessionId, int clickedCount) {
         LoggerFactory.getLogger(LotteryServiceImpl.class).info("开始保存抽奖记录 - userId: {}, isWin: {}, clickedCount: {}", userId, result.isWin(), clickedCount);
         
         RedpacketUserParticipationLog log = new RedpacketUserParticipationLog();
@@ -148,9 +148,15 @@ public class LotteryServiceImpl implements ILotteryService {
             throw e;
         }
     }
-    
     @Override
-    public int getRemainingDrawCount(Long userId) {
+    public int getTodayParticipationsCount(Long userId) {
+        RedpacketUserParticipationLog query = new RedpacketUserParticipationLog();
+        query.setUserId(userId);
+        return participationLogMapper.countUserTodayParticipations(query);
+    }
+
+    @Override
+    public int getTodayRemainingCount(Long userId) {
         Logger logger = LoggerFactory.getLogger(LotteryServiceImpl.class);
         
         // 获取活动配置的每日参与次数限制
@@ -297,29 +303,9 @@ public class LotteryServiceImpl implements ILotteryService {
         return null; // 未中奖
     }
     
-    /**
-     * 执行加权随机抽奖算法（原始版本，保留备用）
-     */
-    private RedpacketPrize executeWeightedRandom(List<RedpacketPrize> prizes) {
-        // 计算总概率权重
-        BigDecimal totalWeight = prizes.stream()
-                .map(RedpacketPrize::getProbability)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-        
-        // 生成随机数
-        double randomValue = random.nextDouble();
-        BigDecimal randomWeight = totalWeight.multiply(BigDecimal.valueOf(randomValue));
-        
-        // 根据权重选择奖品
-        BigDecimal currentWeight = BigDecimal.ZERO;
-        for (RedpacketPrize prize : prizes) {
-            currentWeight = currentWeight.add(prize.getProbability());
-            if (randomWeight.compareTo(currentWeight) <= 0) {
-                return prize;
-            }
-        }
-        
-        return null; // 未中奖
+    @Override
+    public List<RedpacketPrize> getAllPrizes() {
+        return prizeMapper.selectRedpacketPrizeList(new RedpacketPrize());
     }
     
     /**
@@ -432,7 +418,14 @@ public class LotteryServiceImpl implements ILotteryService {
         
         return result;
     }
-    
+    @Override
+    public boolean hasParticipatedInSession(Long userId, String sessionId) {
+        RedpacketUserParticipationLog query = new RedpacketUserParticipationLog();
+        query.setUserId(userId);
+        query.setSessionId(sessionId);
+        // 使用 count 方法而不是查询整个列表，更高效
+        return participationLogMapper.countUserParticipationsBySessionId(query) > 0;
+    }
     @Override
     public Map<String, Object> getCurrentActiveRound() {
         Map<String, Object> result = new HashMap<>();

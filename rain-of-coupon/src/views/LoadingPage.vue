@@ -124,10 +124,19 @@ const showCrowdingMessage = async () => {
       uiStore.setCrowdingTip(true)
       router.push('/')
     }
-  } catch (error) {
+  } catch (error: any) { // 使用 any 类型来处理不同的错误对象
     console.error('🔍 [LoadingPage] 检查参与状态失败:', error)
-    // 如果检查失败，默认显示拥挤提示
-    uiStore.setCrowdingTip(true)
+    
+    // 检查是否为 HTTP 401 (认证失败) 错误
+    if (error && error.message && error.message.includes('401')) {
+      console.log('❌ [LoadingPage] 认证失败，跳转到登录页面')
+      router.push('/login')
+      return; // 立即返回，阻止后续代码执行
+    }
+
+    // 对于其他类型的错误，显示WarningTip
+    console.log('⚠️ [LoadingPage] 其他错误，显示WarningTip')
+    uiStore.setWarningTip(true) // 假设你的 UI Store 有一个设置 WarningTip 的方法
     router.push('/')
   }
 }

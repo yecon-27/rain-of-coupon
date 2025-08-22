@@ -22,6 +22,9 @@ public class RedpacketUserParticipationLog extends BaseEntity {
     /** 用户ID */
     @Excel(name = "用户ID")
     private Long userId;
+    /** 抽奖会话ID，用于标记同一窗口的多次抽奖 */
+    @Excel(name = "抽奖会话ID")
+    private String sessionId;
 
     /** 参与时间 */
     @JsonFormat(pattern = "yyyy-MM-dd")
@@ -75,7 +78,16 @@ public class RedpacketUserParticipationLog extends BaseEntity {
     {
         return userId;
     }
+    // 新增 sessionId 的 Getter 和 Setter
+    public String getSessionId()
+    {
+        return sessionId;
+    }
 
+    public void setSessionId(String sessionId)
+    {
+        this.sessionId = sessionId;
+    }
     public void setParticipationTime(Date participationTime) 
     {
         this.participationTime = participationTime;

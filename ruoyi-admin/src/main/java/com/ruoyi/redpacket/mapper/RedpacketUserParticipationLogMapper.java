@@ -26,7 +26,20 @@ public interface RedpacketUserParticipationLogMapper
      * @return 用户参与记录（记录所有参与行为）集合
      */
     public List<RedpacketUserParticipationLog> selectRedpacketUserParticipationLogList(RedpacketUserParticipationLog redpacketUserParticipationLog);
-
+    /**
+     * 查询用户今日参与次数
+     *
+     * @param redpacketUserParticipationLog 包含userId和participationTime的对象
+     * @return 今日参与次数
+     */
+    public int countUserTodayParticipations(RedpacketUserParticipationLog redpacketUserParticipationLog);
+    /**
+     * 根据用户ID和会话ID统计参与次数
+     *
+     * @param redpacketUserParticipationLog 包含userId和sessionId的对象
+     * @return 参与次数
+     */
+    public int countUserParticipationsBySessionId(RedpacketUserParticipationLog redpacketUserParticipationLog);
     /**
      * 新增用户参与记录（记录所有参与行为）
      * 
