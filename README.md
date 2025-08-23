@@ -1,4 +1,4 @@
-_[English](./README.md)_/ _[中文](./README.cn.md)_
+_[English](./README.md)_ / _[中文](./README.cn.md)_
 
 ## Red Envelope Rain Mini Program
 
