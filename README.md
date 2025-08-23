@@ -1,4 +1,4 @@
-🌐 Language Switch | 语言切换: [English](./README.md) | [中文](./README.cn.md)
+_[English](./README.md)_/ _[中文](./README.cn.md)_
 
 ## Red Envelope Rain Mini Program
 
