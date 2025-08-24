@@ -3,23 +3,23 @@
     <div class="countdown-overlay"></div>
     <div class="countdown-content">
       <!-- 准备阶段：显示 zbh.png -->
-      <img 
+      <DynamicImage 
         v-if="currentPhase === 'prepare'"
-        :src="getImageUrl('zbh.png')"
+        resource-key="prepare_image"
+        fallback-url="/src/assets/coupon/zbh.png"
         alt="准备图片"
-        class="prepare-image"
+        class-name="prepare-image"
         :class="{ 'slide-in': isSlideIn, 'slide-out': isSlideOut }"
-        @error="handleImageError"
       />
       
       <!-- 倒计时阶段：显示 3、2、1 -->
-      <img 
+      <DynamicImage 
         v-if="currentPhase === 'countdown'"
-        :src="getImageUrl(`${currentNumber}.png`)"
+        :resource-key="`countdown_${currentNumber}`"
+        :fallback-url="`/src/assets/coupon/${currentNumber}.png`"
         :alt="`倒计时数字${currentNumber}`"
-        class="countdown-image"
+        class-name="countdown-image"
         :class="{ 'animate': isAnimating }"
-        @error="handleImageError"
       />
     </div>
   </div>
@@ -27,7 +27,7 @@
 
 <script setup lang="ts">
 import { ref, onUnmounted } from 'vue'
-import { API_CONFIG } from '@/config/api'
+import DynamicImage from './DynamicImage.vue'
 
 type Phase = 'prepare' | 'countdown'
 
@@ -42,19 +42,6 @@ let timer: number | null = null
 const emit = defineEmits<{
   finished: []
 }>()
-
-// 获取图片URL - 修复后端图片路径
-// 获取图片URL
-const getImageUrl = (filename: string) => {
-  return `${API_CONFIG.imageURL}${filename}`
-}
-
-// 图片加载错误处理
-const handleImageError = (event: Event) => {
-  const img = event.target as HTMLImageElement
-  console.error('图片加载失败:', img.src)
-  // 可以设置一个默认图片或显示错误信息
-}
 
 const startCountdown = () => {
   isVisible.value = true
@@ -107,6 +94,8 @@ const startCountdownPhase = () => {
   
   countdown()
 }
+
+
 
 const stopCountdown = () => {
   if (timer) {

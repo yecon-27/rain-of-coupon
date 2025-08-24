@@ -56,24 +56,28 @@ interface DrawCountResponse {
 }
 
 interface UserStatusResponse {
-  canDraw: boolean
-  hasEverWon: boolean
-  isCrowded: boolean
-  remainingCount: number
-  todayParticipations: Array<{
-    id: number
-    participationTime: string
-    isWin: number
-    clickedCount: number
-    winProbability: number
-  }>
-  winRecords: Array<{
-    id: number
-    participationTime: string
-    prizeName: string
-    isUsed: number
-    clickedCount: number
-  }>
+  code: number
+  msg: string
+  data: {
+    canDraw: boolean
+    hasEverWon: boolean
+    isCrowded: boolean
+    remainingCount: number
+    todayParticipations: Array<{
+      id: number
+      participationTime: string
+      isWin: number
+      clickedCount: number
+      winProbability: number
+    }>
+    winRecords: Array<{
+      id: number
+      participationTime: string
+      prizeName: string
+      isUsed: number
+      clickedCount: number
+    }>
+  }
 }
 
 import { getToken } from '@/utils/auth'

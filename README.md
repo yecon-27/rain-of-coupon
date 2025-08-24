@@ -67,6 +67,8 @@ Visit `http://localhost:3000` to access the application.
 - [Database Design](./docs/database-design.md) - Database schema and design
 - [Deployment Guide](./docs/deployment-guide.md) - Production deployment instructions
 - [User Flow](./docs/user-flow.md) - Page flow and component guide
+- [Security Analysis](./docs/security-analysis.md) - Image resource security analysis
+- [Security Fix](./docs/security-fix-implementation.md) - Security fix implementation guide
 
 ## Core Features
 

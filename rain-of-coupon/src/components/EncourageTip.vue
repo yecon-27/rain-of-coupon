@@ -1,13 +1,12 @@
 <template>
   <div class="encourage-tip">
     <div class="modal-content">
-      <img 
-        :src="getEncourageImageUrl()" 
+      <DynamicImage 
+        resource-key="luck_plus" 
+        fallback-url="/src/assets/coupon/福气+1.png"
         alt="福气+1按钮" 
-        class="encourage-image" 
+        class-name="encourage-image" 
         @click="goToHome"
-        @error="handleImageError"
-        @load="handleImageLoad"
       />
     </div>
   </div>
@@ -15,40 +14,14 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
+import DynamicImage from './DynamicImage.vue'
 
 const router = useRouter()
-
-// 获取鼓励图片URL
-const getEncourageImageUrl = (): string => {
-  // 使用福气+1按钮图片
-  const imagePath = '/image/coupon/福气+1.png'
-  
-  // 构造完整URL
-  const isDev = import.meta.env.DEV
-  const baseUrl = isDev ? `http://${window.location.hostname}:8080` : 'https://your-production-domain.com'
-  const imageUrl = `${baseUrl}${imagePath}`
-  
-  console.log('🍀 [EncourageTip] 鼓励图片URL:', imagePath, '->', imageUrl)
-  return imageUrl
-}
 
 // 点击图片返回主页
 const goToHome = () => {
   console.log('🍀 [EncourageTip] 点击图片，返回主页')
   router.push('/')
-}
-
-// 图片加载错误处理
-const handleImageError = (event: Event) => {
-  const img = event.target as HTMLImageElement
-  console.error('🍀 [EncourageTip] 图片加载失败:', img.src)
-  // 可以设置一个默认图片或者显示文字提示
-}
-
-// 图片加载成功处理
-const handleImageLoad = (event: Event) => {
-  const img = event.target as HTMLImageElement
-  console.log('🍀 [EncourageTip] 图片加载成功:', img.src)
 }
 </script>
 

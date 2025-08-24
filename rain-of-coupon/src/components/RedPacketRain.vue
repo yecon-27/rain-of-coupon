@@ -1,12 +1,12 @@
 <template>
   <div class="red-packet-container">
-    <div class="timer" :style="{ backgroundImage: `url(${getImageUrl('ds.png')})` }">
+    <div class="timer" :style="{ backgroundImage: `url(${timerBgUrl})` }">
       <div class="text-container">
         <span class="timer-text">倒计时</span>
         <span class="timer-seconds">{{ remainingTime }}秒</span>
       </div>
     </div>
-    <div class="packet-count" :style="{ backgroundImage: `url(${getImageUrl('sl.png')})` }">
+    <div class="packet-count" :style="{ backgroundImage: `url(${countBgUrl})` }">
       <div class="text-container">
         <span class="count-text">x{{ gameStore.clickedPacketCount }}</span>
       </div>
@@ -17,9 +17,9 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
-import { API_CONFIG } from '@/config/api';
 import { useGameStore } from '@/stores/gameStore';
 import { drawLottery } from '@/api/lottery';
+import { imageManager } from '@/utils/imageManager';
 
 const gameStore = useGameStore();
 
@@ -34,6 +34,11 @@ let timerInterval: number | null = null;
 const rainInterval: number | null = null;
 let activePackets = 0;
 const maxActivePackets = 300;
+
+// 图片URL响应式变量
+const timerBgUrl = ref('')
+const countBgUrl = ref('')
+const redPacketUrl = ref('')
 
 const calculateRainInterval = () => {
   return Math.max(50, (30 * 1000) / 99);
@@ -101,7 +106,7 @@ function startRain() {
     if (!rainContainer.value) return;
 
     const packet = document.createElement('img');
-    packet.src = getImageUrl('luckyBag.png');
+    packet.src = redPacketUrl.value;
     packet.className = 'red-packet';
     
     // 获取随机参数
@@ -117,7 +122,7 @@ function startRain() {
     packet.style.position = 'absolute';
     packet.style.cursor = 'pointer';
     packet.style.transition = 'transform 0.1s ease';
-    packet.style.webkitTapHighlightColor = 'transparent';
+    (packet.style as any).webkitTapHighlightColor = 'transparent';
     packet.style.touchAction = 'manipulation';
     packet.style.zIndex = '2';
     
@@ -126,7 +131,7 @@ function startRain() {
     packet.style.top = '-150px';
     
     // 创建流星尾迹
-    const trail = createMeteorTrail(packet, params);
+    const trail = createMeteorTrail(packet);
     
     // 创建简化的垂直飘落动画（限制在视图内）
     const keyframes = [
@@ -217,9 +222,17 @@ function startRain() {
   generatePacket();
 }
 
-const getImageUrl = (filename: string): string => {
-  return `${API_CONFIG.imageURL}${filename}`;
-};
+// 加载图片资源
+const loadImages = async () => {
+  try {
+    timerBgUrl.value = await imageManager.getImageUrl('countdown_timer')
+    countBgUrl.value = await imageManager.getImageUrl('packet_count')
+    redPacketUrl.value = await imageManager.getImageUrl('red_packet')
+    console.log('✅ [RedPacketRain] 游戏图片加载完成')
+  } catch (error) {
+    console.error('❌ [RedPacketRain] 图片加载失败:', error)
+  }
+}
 
 function startTimer() {
   gameStore.resetClickedPacketCount();
@@ -322,7 +335,8 @@ async function endGame() {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
+  await loadImages();
   startTimer();
   startRain();
 });

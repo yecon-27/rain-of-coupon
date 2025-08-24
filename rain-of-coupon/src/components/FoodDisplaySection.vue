@@ -1,16 +1,12 @@
 <template>
   <div class="food-display-section">
-    <img :src="getImageUrl('zscp.png')" alt="展示菜品" class="food-display-img" />
+    <DynamicImage resource-key="show_dishes" fallback-url="/src/assets/coupon/zscp.png" alt="展示菜品"
+      class-name="food-display-img" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { API_CONFIG } from '@/config/api'
-
-// 获取图片URL
-const getImageUrl = (filename: string) => {
-  return `${API_CONFIG.imageURL}${filename}`
-}
+import DynamicImage from './DynamicImage.vue'
 </script>
 
 <style scoped>

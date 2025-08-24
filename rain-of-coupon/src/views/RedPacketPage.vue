@@ -1,7 +1,7 @@
 <template>
   <div class="red-packet-page">
     <!-- 使用img标签替代CSS背景，参考ActivitySection的实现 -->
-    <img :src="getImageUrl('home.png')" alt="背景" class="background-img" />
+    <img :src="backgroundImageUrl" alt="背景" class="background-img" />
     
     <!-- 灰色蒙版层 -->
     <div class="overlay"></div>
@@ -20,23 +20,30 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import RedPacketRain from '@/components/RedPacketRain.vue'
 import PrizeModal from '@/components/PrizeModal.vue'
 import EncourageTip from '@/components/EncourageTip.vue'
 import { API_CONFIG } from '@/config/api'
 import { useGameStore } from '@/stores/gameStore'
+import { simpleImageManager } from '@/utils/simpleImageManager'
 
 const router = useRouter()
 const gameStore = useGameStore()
+const backgroundImageUrl = ref('')
 const gameState = ref<'playing' | 'finished'>('playing')
 const showPrize = ref(false)
 const showEncourage = ref(false)
 
-// 获取图片URL - 与ActivitySection保持一致
-const getImageUrl = (filename: string) => {
-  return `${API_CONFIG.imageURL}${filename}`
+// 加载图片资源
+const loadImages = async () => {
+  try {
+    backgroundImageUrl.value = await simpleImageManager.getImageUrl('background_image')
+    console.log('✅ [RedPacketPage] 背景图片加载完成')
+  } catch (error) {
+    console.error('❌ [RedPacketPage] 图片加载失败:', error)
+  }
 }
 
 interface Prize {
@@ -75,6 +82,25 @@ const closeModal = () => {
   showPrize.value = false
   showEncourage.value = false
   router.push('/')
+}
+
+onMounted(async () => {
+  console.log('🎮 [RedPacketPage] 红包页面已挂载')
+  
+  // 加载图片
+  await loadImages()
+  
+  // 防止用户通过浏览器后退按钮返回
+  window.history.pushState(null, '', window.location.href)
+  window.addEventListener('popstate', preventBack)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('popstate', preventBack)
+})
+
+const preventBack = () => {
+  window.history.pushState(null, '', window.location.href)
 }
 </script>
 

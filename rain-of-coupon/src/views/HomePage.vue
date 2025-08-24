@@ -1,5 +1,7 @@
 <template>
   <div class="home-page">
+
+
     <!-- 第一部分：参与活动区域 -->
     <ActivitySection @show-rules="showRules" @my-coupons="myCoupons" />
 
@@ -15,6 +17,12 @@
     <!-- 蒙版层（当有overlay时显示） -->
     <div v-if="uiStore.showOverlay" class="overlay-mask"></div>
 
+    <!-- 临时API测试按钮
+    <div class="api-test-panel" v-if="isDev">
+      <button @click="runAPITest" class="test-btn">测试图片API</button>
+      <button @click="runNetworkTest" class="test-btn">测试网络连接</button>
+    </div> -->
+
     <!-- 警告提示组件 -->
     <WarningTip :visible="showWarningTip" @close="showWarningTip = false" />
 
@@ -28,11 +36,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted,onBeforeUnmount } from 'vue'
+import { ref, onMounted,onBeforeUnmount, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useUIStore } from '@/stores/ui'
 import { getTop10Food, getSpecialityFood, type FoodItem } from '@/api/food'
+import { testImageAPI, testNetworkConnection } from '@/utils/apiTest'
+
 import ActivitySection from '@/components/ActivitySection.vue'
 import FoodDisplaySection from '@/components/FoodDisplaySection.vue'
 import Top10FoodSection from '@/components/Top10FoodSection.vue'
@@ -49,6 +59,9 @@ const specialityFoods = ref<FoodItem[]>([])
 const loading = ref(false)
 const showRulePopup = ref(false)
 const showWarningTip = ref(false)
+const isDev = import.meta.env.DEV
+
+
 
 let sessionTimer: number | null = null;
 // 定义更新 sessionId 的函数
@@ -125,6 +138,17 @@ const myCoupons = () => {
   }
 }
 
+// API测试函数
+const runAPITest = () => {
+  testImageAPI()
+}
+
+const runNetworkTest = () => {
+  testNetworkConnection()
+}
+
+
+
 // CrowdingTip现在通过点击图片直接处理跳转，不需要额外的处理函数
 
 // 组件挂载时获取数据
@@ -132,6 +156,8 @@ onMounted(() => {
   // 检查认证状态
   authStore.checkAuthStatus()
   fetchFoodData()
+  
+
   
   // 检查URL参数，如果有showWarning=true则显示警告提示
   const urlParams = new URLSearchParams(window.location.search)
@@ -170,5 +196,28 @@ onBeforeUnmount(() => {
   height: 100vh;
   background: rgba(0, 0, 0, 0.5);
   z-index: 1000;
+}
+
+.api-test-panel {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  gap: 10px;
+  z-index: 9999;
+}
+
+.test-btn {
+  padding: 8px 16px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.test-btn:hover {
+  background: #0056b3;
 }
 </style>

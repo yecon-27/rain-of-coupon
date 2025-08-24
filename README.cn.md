@@ -71,6 +71,8 @@ npm install && npm run dev
 - [数据库设计](./docs/database-design.md) - 数据库架构和设计
 - [部署指南](./docs/deployment-guide.md) - 生产环境部署说明
 - [用户流程](./docs/user-flow.md) - 页面流程和组件说明
+- [安全分析](./docs/security-analysis.md) - 图片资源安全问题分析
+- [安全修复](./docs/security-fix-implementation.md) - 安全问题修复实施方案
 
 ## 核心功能
 

@@ -69,7 +69,8 @@ const routes: RouteRecordRaw[] = [
     path: '/clear-cache',
     name: 'clear-cache',
     component: () => import('@/views/ClearCache.vue')
-  }
+  },
+
 ]
 
 const router = createRouter({

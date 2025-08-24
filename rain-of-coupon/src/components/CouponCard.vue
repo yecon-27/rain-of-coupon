@@ -2,16 +2,24 @@
   <div class="coupon-card">
     <!-- 未中奖状态 - 只显示图片 -->
     <div v-if="!gameStore.hasPrize" class="no-coupon">
-      <img :src="getCouponImageUrl('cytzhq.png')" alt="参与挑战获取" class="coupon-image" @error="handleImageError"
-        @load="handleImageLoad" />
+      <DynamicImage 
+        resource-key="participate_coupon" 
+        fallback-url="/src/assets/coupon/cytzhq.png"
+        alt="参与挑战获取" 
+        class-name="coupon-image" 
+      />
     </div>
 
     <!-- 中奖状态 - 显示获得的优惠券 -->
     <div v-else class="coupon-display">
       <div class="coupon-item">
         <div class="coupon-content">
-          <img :src="getPrizeImageUrl()" :alt="gameStore.prizeRecord?.prizeName || '优惠券'" class="coupon-image" @error="handleImageError"
-            @load="handleImageLoad" />
+          <DynamicImage 
+            :resource-key="getPrizeImageKey()" 
+            :fallback-url="getPrizeFallbackUrl()"
+            :alt="gameStore.prizeRecord?.prizeName || '优惠券'" 
+            class-name="coupon-image" 
+          />
           <div class="coupon-expiry">
             使用期限：{{ formatExpireDate(getExpireDate()) }}前
           </div>
@@ -27,8 +35,7 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { useGameStore } from '@/stores/gameStore'
-import { API_CONFIG } from '@/config/api'
-
+import DynamicImage from './DynamicImage.vue'
 
 const gameStore = useGameStore()
 
@@ -40,28 +47,43 @@ onMounted(async () => {
   console.log('🎫 [CouponCard] 中奖记录:', gameStore.prizeRecord)
 })
 
-// 根据中奖记录获取对应的图片URL
-const getPrizeImageUrl = (): string => {
+// 获取奖品图片资源键
+const getPrizeImageKey = (): string => {
   if (!gameStore.prizeRecord) {
-    return getCouponImageUrl('/image/coupon/满500元且消费一道特色菜可使用.png')
+    return 'coupon_188'
   }
   
+  // 根据奖品金额选择对应图片
   const amount = gameStore.prizeRecord.amount
-  console.log('🎫 [CouponCard] 奖品金额:', amount)
   
-  let imageUrl = ''
   if (amount >= 888) {
-    imageUrl = '/image/coupon/满2500元且消费一道特色菜可使用.png'
     console.log('🎫 [CouponCard] 使用888元券图片')
+    return 'coupon_888'
   } else if (amount >= 588) {
-    imageUrl = '/image/coupon/满1500元且消费一道特色菜可使用.png'
     console.log('🎫 [CouponCard] 使用588元券图片')
+    return 'coupon_588'
   } else {
-    imageUrl = '/image/coupon/满500元且消费一道特色菜可使用.png'
     console.log('🎫 [CouponCard] 使用188元券图片')
+    return 'coupon_188'
+  }
+}
+
+// 获取奖品图片降级URL
+const getPrizeFallbackUrl = (): string => {
+  if (!gameStore.prizeRecord) {
+    return '/src/assets/coupon/188.png'
   }
   
-  return getCouponImageUrl(imageUrl)
+  // 根据奖品金额选择对应图片
+  const amount = gameStore.prizeRecord.amount
+  
+  if (amount >= 888) {
+    return '/src/assets/coupon/888.png'
+  } else if (amount >= 588) {
+    return '/src/assets/coupon/588.png'
+  } else {
+    return '/src/assets/coupon/188.png'
+  }
 }
 
 // 获取过期日期
@@ -71,36 +93,7 @@ const getExpireDate = (): string => {
   return expireDate.toISOString().split('T')[0]
 }
 
-// 获取优惠券图片URL
-const getCouponImageUrl = (filename: string) => {
-  let imageUrl = ''
 
-  // 如果数据库存储的是完整路径（以/开头）
-  if (filename.startsWith('/')) {
-    // 转换为完整URL
-    const isDev = import.meta.env.DEV
-    const baseUrl = isDev ? `http://${window.location.hostname}:8080` : 'https://your-production-domain.com'
-    imageUrl = `${baseUrl}${filename}`
-  } else {
-    // 如果只是文件名，使用配置的路径
-    imageUrl = `${API_CONFIG.couponImageURL}${filename}`
-  }
-
-  console.log('🎫 [CouponCard] 优惠券图片URL:', filename, '->', imageUrl)
-  return imageUrl
-}
-
-// 图片加载错误处理
-const handleImageError = (event: Event) => {
-  const img = event.target as HTMLImageElement
-  console.error('🎫 [CouponCard] 图片加载失败:', img.src)
-}
-
-// 图片加载成功处理
-const handleImageLoad = (event: Event) => {
-  const img = event.target as HTMLImageElement
-  console.log('🎫 [CouponCard] 图片加载成功:', img.src)
-}
 
 // 格式化有效期日期
 const formatExpireDate = (dateString?: string) => {

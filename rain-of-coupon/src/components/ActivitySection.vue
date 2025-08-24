@@ -1,17 +1,41 @@
 <template>
   <div class="activity-section">
-    <img :src="getImageUrl('home.png')" alt="首页背景" class="activity-bg" />
+    <DynamicImage 
+      resource-key="home_bg" 
+      fallback-url="/src/assets/coupon/home.png"
+      alt="首页背景" 
+      class-name="activity-bg"
+    />
 
     <div v-if="authStore.isLoggedIn" class="login-status">
       <span class="user-info">{{ authStore.currentUser?.nickname || '用户' }}</span>
       <button @click="authStore.logout" class="logout-btn">登出</button>
     </div>
 
-    <img :src="getImageUrl('gz.png')" alt="规则" class="rule-btn" @click="$emit('showRules')" />
-    <img :src="getImageUrl('qb.png')" alt="券包" class="coupon-btn" @click="$emit('myCoupons')" />
+    <DynamicImage 
+      resource-key="rule_btn" 
+      fallback-url="/src/assets/coupon/gz.png"
+      alt="规则" 
+      class-name="rule-btn" 
+      @click="$emit('showRules')"
+    />
+    
+    <DynamicImage 
+      resource-key="coupon_btn" 
+      fallback-url="/src/assets/coupon/qb.png"
+      alt="券包" 
+      class-name="coupon-btn" 
+      @click="$emit('myCoupons')"
+    />
 
     <div class="center-button">
-      <img :src="getImageUrl('button.png')" alt="立即挑战" class="challenge-btn" @click="handleJoinActivity" />
+      <DynamicImage 
+        resource-key="challenge_btn" 
+        fallback-url="/src/assets/coupon/button.png"
+        alt="立即挑战" 
+        class-name="challenge-btn" 
+        @click="handleJoinActivity"
+      />
     </div>
   </div>
 
@@ -41,7 +65,8 @@ import { checkPrizeStock, getUserStatus, drawLottery } from '@/api/lottery'
 import PrizeStockTip from './PrizeStockTip.vue'
 import WarningTip from './WarningTip.vue'
 import CrowdingTip from './CrowdingTip.vue'
-import { API_CONFIG } from '@/config/api'
+import DynamicImage from './DynamicImage.vue'
+import { imageManager } from '@/utils/imageManager'
 
 // 定义事件
 const emit = defineEmits<{
@@ -58,11 +83,16 @@ const gameStore = useGameStore()
 const showPrizeStockTip = ref(false)
 const showWarningTip = ref(false)
 const showCrowdingTip = ref(false)
-const prizeStockData = ref([])
+const prizeStockData = ref<Array<{ id: number; prizeName: string; totalCount: number; remainingCount: number }>>([])
 
-// 获取图片URL
-const getImageUrl = (filename: string) => {
-  return `${API_CONFIG.imageURL}${filename}`
+// 预加载主页相关图片
+const preloadImages = async () => {
+  try {
+    await imageManager.preloadByScene('主页')
+    console.log('✅ [ActivitySection] 主页图片预加载完成')
+  } catch (error) {
+    console.error('❌ [ActivitySection] 图片预加载失败:', error)
+  }
 }
 
 // 维护一个唯一的会话ID，用于后端判断同一个窗口的多次抽奖
@@ -172,11 +202,14 @@ const [statusRes, stockRes] = await Promise.all([getUserStatus({ sessionId: sess
 }
 
 // 组件挂载时检查登录状态，并保存 sessionId
-onMounted(() => {
+onMounted(async () => {
   if (!localStorage.getItem('sessionId')) {
     localStorage.setItem('sessionId', sessionId.value);
   }
   authStore.checkAuthStatus();
+  
+  // 预加载图片
+  await preloadImages();
 });
 </script>
 

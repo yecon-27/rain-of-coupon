@@ -155,4 +155,6 @@
   - [数据库设计](./database-design.md) - 数据库架构
   - [部署指南](./deployment-guide.md) - 部署说明
   - [用户流程](./user-flow.md) - 页面流程和组件说明
+  - [安全分析](./security-analysis.md) - 图片资源安全问题分析
+  - [安全修复](./security-fix-implementation.md) - 安全问题修复实施方案
 - **doc/**: 原有文档目录（待整理）

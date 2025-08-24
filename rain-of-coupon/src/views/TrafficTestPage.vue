@@ -107,7 +107,7 @@ const authStore = useAuthStore()
 const currentTime = ref(new Date().toLocaleString())
 const testCount = ref(0)
 
-let timeTimer: NodeJS.Timeout | null = null
+let timeTimer: number | null = null
 
 const isRushHour = computed(() => {
   const hour = new Date().getHours()
@@ -136,7 +136,7 @@ const getUserStatusText = (status: string) => {
 
 const checkTraffic = async () => {
   testCount.value++
-  await trafficStore.simulateTrafficCheck()
+  await trafficStore.smartTrafficCheck()
 }
 
 const joinActivity = async () => {

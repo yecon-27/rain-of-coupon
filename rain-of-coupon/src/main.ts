@@ -5,7 +5,8 @@ import router from './router'
 
 // 导入缓存清理工具（开发环境）
 if (import.meta.env.DEV) {
-  import('./utils/clearCache.js')
+  // @ts-ignore
+  import('./utils/clearCache.js').catch(console.error)
 }
 
 const app = createApp(App)

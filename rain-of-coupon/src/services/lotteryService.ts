@@ -35,32 +35,10 @@ export class LotteryService {
       const data = await getUserStatus()
       // 转换API返回的数据格式以匹配store中的类型
       const userStatus = {
-        canDraw: data.canDraw,
-        hasEverWon: data.hasEverWon,
-        isCrowded: data.isCrowded,
-        remainingCount: data.remainingCount,
-        // 转换todayParticipations格式
-        todayParticipations: data.todayParticipations.map((item) => ({
-          id: item.id,
-          userId: 0, // API返回中没有userId，使用默认值
-          participationTime: item.participationTime,
-          ipAddress: '', // API返回中没有ipAddress，使用默认值
-          isWin: item.isWin,
-          prizeId: null, // API返回中没有prizeId，使用默认值
-          prizeName: null, // API返回中没有prizeName，使用默认值
-          isUsed: 0, // API返回中没有isUsed，使用默认值
-        })),
-        // 转换winRecords格式
-        winRecords: data.winRecords.map((item) => ({
-          id: item.id,
-          userId: 0, // API返回中没有userId，使用默认值
-          participationTime: item.participationTime,
-          ipAddress: '', // API返回中没有ipAddress，使用默认值
-          isWin: 1, // 中奖记录默认为1
-          prizeId: null, // API返回中没有prizeId，使用默认值
-          prizeName: item.prizeName,
-          isUsed: item.isUsed,
-        })),
+        canDraw: data.data.canDraw,
+        hasEverWon: data.data.hasEverWon,
+        isCrowded: data.data.isCrowded,
+        remainingCount: data.data.remainingCount
       }
       this.store.setUserStatus(userStatus)
       return data
@@ -170,10 +148,14 @@ export class LotteryService {
       })
 
       if (res.code === 200) {
-        // 参与成功
-        this.store.setDrawResult(res.data)
+        // 参与成功 - 转换数据类型
+        const drawResult = {
+          ...res.data,
+          isWin: res.data.isWin ? 1 : 0 // 转换boolean为number
+        }
+        this.store.setDrawResult(drawResult)
         this.store.decreaseDrawCount()
-        this.store.addRecord(res.data)
+        this.store.addRecord(drawResult)
 
         // 如果中奖了，更新用户状态
         if (res.data.isWin) {

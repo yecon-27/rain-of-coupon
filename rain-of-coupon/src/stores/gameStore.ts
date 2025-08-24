@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
-import { API_CONFIG } from '@/config/api';
 import { drawLottery, getUserStatus } from '@/api/lottery';
+import { imageManager } from '@/utils/imageManager';
 
 interface PrizeRecord {
   imageUrl: string;
@@ -35,13 +35,18 @@ export const useGameStore = defineStore('game', {
       this.clickedPacketCount = 0;
     },
     
-    determinePrizeImage(clickCount: number): string {
-      if (clickCount >= 20) {
-        return `${API_CONFIG.imageURL}888.png`;
-      } else if (clickCount >= 10) {
-        return `${API_CONFIG.imageURL}588.png`;
-      } else {
-        return `${API_CONFIG.imageURL}188.png`;
+    async determinePrizeImage(clickCount: number): Promise<string> {
+      try {
+        if (clickCount >= 20) {
+          return await imageManager.getImageUrl('coupon_888');
+        } else if (clickCount >= 10) {
+          return await imageManager.getImageUrl('coupon_588');
+        } else {
+          return await imageManager.getImageUrl('coupon_188');
+        }
+      } catch (error) {
+        console.error('❌ [GameStore] 获取奖品图片失败:', error);
+        return await imageManager.getImageUrl('coupon_188'); // 默认使用188元券
       }
     },
 
@@ -58,7 +63,7 @@ export const useGameStore = defineStore('game', {
         return;
       }
     
-      const imageUrl = this.determinePrizeImage(clickCount);
+      const imageUrl = await this.determinePrizeImage(clickCount);
       const amount = this.getPrizeAmount(apiData.prizeName || '');
       const prizeName = apiData.prizeName || 'Coupon';
     
@@ -108,19 +113,25 @@ export const useGameStore = defineStore('game', {
           console.log('🏆 [GameStore] 最新中奖记录:', latestWin);
           
           // Determine image URL and amount based on prize name
-          let imageUrl = `${API_CONFIG.imageURL}188.png`;
+          let imageUrl = '';
           let amount = 188;
           
-          if (latestWin.prizeName?.includes('888')) {
-            imageUrl = `${API_CONFIG.imageURL}888.png`;
-            amount = 888;
-            console.log('🏆 [GameStore] 设置为888元奖品');
-          } else if (latestWin.prizeName?.includes('588')) {
-            imageUrl = `${API_CONFIG.imageURL}588.png`;
-            amount = 588;
-            console.log('🏆 [GameStore] 设置为588元奖品');
-          } else {
-            console.log('🏆 [GameStore] 设置为188元奖品（默认）');
+          try {
+            if (latestWin.prizeName?.includes('888')) {
+              imageUrl = await imageManager.getImageUrl('coupon_888');
+              amount = 888;
+              console.log('🏆 [GameStore] 设置为888元奖品');
+            } else if (latestWin.prizeName?.includes('588')) {
+              imageUrl = await imageManager.getImageUrl('coupon_588');
+              amount = 588;
+              console.log('🏆 [GameStore] 设置为588元奖品');
+            } else {
+              imageUrl = await imageManager.getImageUrl('coupon_188');
+              console.log('🏆 [GameStore] 设置为188元奖品（默认）');
+            }
+          } catch (error) {
+            console.error('❌ [GameStore] 获取奖品图片失败:', error);
+            imageUrl = await imageManager.getImageUrl('coupon_188');
           }
           
           this.prizeRecord = {
@@ -147,18 +158,25 @@ export const useGameStore = defineStore('game', {
             console.log('🏆 [GameStore] 在todayParticipations中找到中奖记录:', winningParticipation);
             
             // 根据点击次数确定奖品
-            let imageUrl = `${API_CONFIG.imageURL}188.png`;
+            let imageUrl = '';
             let amount = 188;
             let prizeName = 'Coupon 188';
             
-            if (winningParticipation.clickedCount >= 20) {
-              imageUrl = `${API_CONFIG.imageURL}888.png`;
-              amount = 888;
-              prizeName = 'Coupon 888';
-            } else if (winningParticipation.clickedCount >= 10) {
-              imageUrl = `${API_CONFIG.imageURL}588.png`;
-              amount = 588;
-              prizeName = 'Coupon 588';
+            try {
+              if (winningParticipation.clickedCount >= 20) {
+                imageUrl = await imageManager.getImageUrl('coupon_888');
+                amount = 888;
+                prizeName = 'Coupon 888';
+              } else if (winningParticipation.clickedCount >= 10) {
+                imageUrl = await imageManager.getImageUrl('coupon_588');
+                amount = 588;
+                prizeName = 'Coupon 588';
+              } else {
+                imageUrl = await imageManager.getImageUrl('coupon_188');
+              }
+            } catch (error) {
+              console.error('❌ [GameStore] 获取奖品图片失败:', error);
+              imageUrl = await imageManager.getImageUrl('coupon_188');
             }
             
             this.prizeRecord = {
@@ -196,8 +214,8 @@ export const useGameStore = defineStore('game', {
         
       } catch (error) {
         console.error('❌ [GameStore] 加载中奖记录失败:', error);
-        console.error('❌ [GameStore] 错误详情:', error.message);
-        console.error('❌ [GameStore] 错误堆栈:', error.stack);
+        console.error('❌ [GameStore] 错误详情:', error instanceof Error ? error.message : error);
+        console.error('❌ [GameStore] 错误堆栈:', error instanceof Error ? error.stack : 'No stack trace');
         
         // Fallback to localStorage to avoid recursion
         const localRecord = localStorage.getItem('prizeRecord');

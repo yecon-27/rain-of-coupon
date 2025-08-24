@@ -86,7 +86,7 @@ const handleEndGame = async () => {
     await performDraw(sessionResult.clickedCount)
   } catch (error) {
     console.error('抽奖失败:', error)
-    alert(error.message)
+    alert(error instanceof Error ? error.message : 'Unknown error')
   }
 }
 </script>

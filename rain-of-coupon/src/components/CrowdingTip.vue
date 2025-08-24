@@ -5,8 +5,13 @@
 
     <div class="crowding-content">
       <!-- 拥挤图片 -->
-      <img :src="getCrowdingImageUrl()" alt="活动拥挤" class="crowding-image" @error="handleImageError"
-        @load="handleImageLoad" @click="handleImageClick" />
+      <DynamicImage 
+        resource-key="crowding_tip" 
+        fallback-url="/src/assets/coupon/活动拥挤.png"
+        alt="活动拥挤" 
+        class-name="crowding-image" 
+        @click="handleImageClick" 
+      />
 
       <!-- 流量信息卡片 -->
       <div class="traffic-info-card" v-if="trafficStore.state.status === 'crowded'">
@@ -48,10 +53,10 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { API_CONFIG } from '@/config/api'
 import { useTrafficStore } from '@/stores/traffic'
 import { useUIStore } from '@/stores/ui'
 import BackButton from '@/components/BackButton.vue'
+import DynamicImage from './DynamicImage.vue'
 
 // Props
 interface Props {
@@ -69,26 +74,6 @@ const retryCountdown = ref(0)
 const retryDisabled = computed(() => retryCountdown.value > 0)
 
 let countdownTimer: ReturnType<typeof setInterval> | null = null
-
-// 获取活动拥挤图片URL
-const getCrowdingImageUrl = () => {
-  const filename = '活动拥挤.png'
-  let imageUrl = ''
-
-  // 如果数据库存储的是完整路径（以/开头）
-  if (filename.startsWith('/')) {
-    // 转换为完整URL
-    const isDev = import.meta.env.DEV
-    const baseUrl = isDev ? `http://${window.location.hostname}:8080` : 'https://your-production-domain.com'
-    imageUrl = `${baseUrl}${filename}`
-  } else {
-    // 如果只是文件名，使用配置的路径
-    imageUrl = `${API_CONFIG.couponImageURL}${filename}`
-  }
-
-  console.log('活动拥挤图片URL:', filename, '->', imageUrl)
-  return imageUrl
-}
 
 // 格式化等待时间
 const formatWaitTime = (seconds: number): string => {
@@ -135,18 +120,6 @@ const handleImageClick = () => {
 const handleBack = () => {
   uiStore.resetAllOverlays()
   router.push('/')
-}
-
-// 图片加载错误处理
-const handleImageError = (event: Event) => {
-  const img = event.target as HTMLImageElement
-  console.error('活动拥挤图片加载失败:', img.src)
-}
-
-// 图片加载成功处理
-const handleImageLoad = (event: Event) => {
-  const img = event.target as HTMLImageElement
-  console.log('活动拥挤图片加载成功:', img.src)
 }
 
 // 组件挂载时开始倒计时

@@ -1,43 +1,16 @@
 <template>
   <div class="loading-animation">
-    <img :src="getLoadingGifUrl()" alt="加载中..." class="loading-gif" @error="handleImageError" @load="handleImageLoad" />
+    <DynamicImage 
+      resource-key="loading_gif" 
+      fallback-url="/src/assets/coupon/加载.gif"
+      alt="加载中..." 
+      class-name="loading-gif" 
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { API_CONFIG } from '@/config/api'
-
-// 获取加载gif图片URL
-const getLoadingGifUrl = () => {
-  const filename = '加载.gif'
-  let imageUrl = ''
-
-  // 如果数据库存储的是完整路径（以/开头）
-  if (filename.startsWith('/')) {
-    // 转换为完整URL
-    const isDev = import.meta.env.DEV
-    const baseUrl = isDev ? `http://${window.location.hostname}:8080` : 'https://your-production-domain.com'
-    imageUrl = `${baseUrl}${filename}`
-  } else {
-    // 如果只是文件名，使用配置的路径
-    imageUrl = `${API_CONFIG.couponImageURL}${filename}`
-  }
-
-  console.log('加载动画URL:', filename, '->', imageUrl)
-  return imageUrl
-}
-
-// 图片加载错误处理
-const handleImageError = (event: Event) => {
-  const img = event.target as HTMLImageElement
-  console.error('加载动画图片加载失败:', img.src)
-}
-
-// 图片加载成功处理
-const handleImageLoad = (event: Event) => {
-  const img = event.target as HTMLImageElement
-  console.log('加载动画图片加载成功:', img.src)
-}
+import DynamicImage from './DynamicImage.vue'
 </script>
 
 <style scoped>

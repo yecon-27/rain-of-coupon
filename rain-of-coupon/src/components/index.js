@@ -4,6 +4,7 @@
 import BackButton from './BackButton.vue'
 import LoadingAnim from './LoadingAnim.vue'
 import LoginForm from './LoginForm.vue'
+import DynamicImage from './DynamicImage.vue'
 
 // 业务组件
 import PrizeModal from './PrizeModal.vue'
@@ -19,6 +20,7 @@ export {
   BackButton,
   LoadingAnim,
   LoginForm,
+  DynamicImage,
   
   // 业务组件
   PrizeModal,
