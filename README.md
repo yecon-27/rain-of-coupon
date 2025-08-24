@@ -11,6 +11,7 @@ A interactive lottery mini-program built with Vue 3 and Spring Boot, featuring r
 - Traffic control and congestion detection
 - Responsive design with smooth animations
 - Admin dashboard for prize and user management
+- Anonymous user access support
 
 ## Tech Stack
 
@@ -70,13 +71,13 @@ Visit `http://localhost:3000` to access the application.
 ## Core Features
 
 ### Red Envelope Rain System
-- 100 red envelopes fall in 50 seconds
+- 100 red envelopes fall in 30 seconds
 - Click-based probability algorithm (more clicks = higher win rate)
 - Daily limit of 3 attempts per user
 - Automatic stop after winning
 
 ### Anti-Fraud Mechanisms
-- IP frequency limits (10 times per hour)
+- IP frequency limits (4 times per hour)
 - Session-based user tracking with unique Session ID
 - Real-time traffic monitoring with priority handling
 - Database transaction consistency
