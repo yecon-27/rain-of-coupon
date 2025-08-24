@@ -1,6 +1,6 @@
 # Red Envelope Rain Mini Program
 
-A interactive lottery mini-program built with Vue 3 and Spring Boot, featuring real-time red envelope rain animations and intelligent probability algorithms.
+A interactive lottery mini-program built with Vue 3 and Spring Boot, featuring real-time red envelope rain animations and intelligent probability algorithms. Built on RuoYi framework with front-end and back-end separation architecture.
 
 **Language**: [English](./README.md) | [中文](./README.cn.md)
 
@@ -16,7 +16,7 @@ A interactive lottery mini-program built with Vue 3 and Spring Boot, featuring r
 ## Tech Stack
 
 - **Frontend**: Vue 3, TypeScript, Pinia, Vite
-- **Backend**: Spring Boot, MyBatis, Redis
+- **Backend**: Spring Boot, MyBatis, Redis, Spring Security, Ruoyi Framework
 - **Database**: MySQL 5.7+
 - **Deployment**: Docker, Nginx
 

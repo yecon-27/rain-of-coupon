@@ -1,6 +1,6 @@
 # 红包雨小程序
 
-基于 Vue 3 和 Spring Boot 开发的交互式抽奖小程序，具有实时红包雨动画和智能概率算法。
+基于 Vue 3 和 Spring Boot 开发的交互式抽奖小程序，具有实时红包雨动画和智能概率算法。采用前后端分离架构，基于若依框架构建。
 
 **语言**: [English](./README.md) | [中文](./README.cn.md)
 
@@ -16,7 +16,7 @@
 ## 技术栈
 
 - **前端**: Vue 3, TypeScript, Pinia, Vite
-- **后端**: Spring Boot, MyBatis, Redis
+- **后端**: Spring Boot, MyBatis, Redis, Spring Security, RuoyiFramework
 - **数据库**: MySQL 5.7+
 - **部署**: Docker, Nginx
 
