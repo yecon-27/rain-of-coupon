@@ -9,7 +9,7 @@ A interactive lottery mini-program built with Vue 3 and Spring Boot, featuring r
 - Real-time red envelope rain with click-based probability system
 - Daily participation limits with anti-fraud mechanisms
 - Traffic control and congestion detection
-- Responsive design with smooth animations
+- Multiple rounds of voting rewards
 - Admin dashboard for prize and user management
 - Anonymous user access support
 
