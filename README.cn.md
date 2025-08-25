@@ -21,11 +21,11 @@
   <tr>
     <td align="center">
       <img src="https://github.com/user-attachments/assets/d2e0c30d-af28-4b50-a8dd-5b409daeecb3" width="200"><br>
-      主页面全览 
+      主页面
     </td>
     <td align="center">
       <img src="https://github.com/user-attachments/assets/8a841fce-f5bd-455d-aa9c-2be97f212620" width="200"><br>
-      未登录状态下的规则，券包（需登录）
+      游客视图 – 规则/券包
     </td>
     <td align="center">
       <img src="https://github.com/user-attachments/assets/37017394-d83d-41ee-8a92-3f14516028fd" width="200"><br>
@@ -33,35 +33,35 @@
     </td>
     <td align="center">
       <img src="https://github.com/user-attachments/assets/26a0d42e-abef-46ac-8d2d-e18f53c73a63" width="200"><br>
-      中奖用户打开奖券页面
+      中奖用户 – 卡券页
     </td>
   </tr>
   <tr>
      <td align="center">
       <img src="https://github.com/user-attachments/assets/59a6803d-c1f7-4926-956d-d71deb245e2a" width="200"><br>
-      中奖用户打开立即挑战页面的奖券显示
+      挑战页 – 奖券显示
     </td>
     <td align="center">
       <img src="https://github.com/user-attachments/assets/307de466-9e0c-4413-b829-df89f2009d27" width="200"><br>
-      同一个用户短期抽奖两次防止刷票
+      防刷 – 限制多次抽奖
     </td>
     <td align="center">
       <img src="https://github.com/user-attachments/assets/9a9982a0-19d2-4720-9285-1a6ae3bcfb89" width="200"><br>
-      抢红包进入页面
+      红包入口
     </td>
     <td align="center">
       <img src="https://github.com/user-attachments/assets/39dbfcbc-f070-4846-af1d-a5f53460e142" width="200"><br>
-      中奖页面
+      中奖确认
     </td>
   </tr>
   <tr>
    <td align="center">
       <img src="https://github.com/user-attachments/assets/3c08099d-8b61-44b1-b636-8e6c15d43dec" width="200"><br>
-      不同用户同一个窗口id防刷票
+      防刷 – 窗口ID
     </td> 
     <td align="center">
       <img src="https://github.com/user-attachments/assets/08bf5932-b64c-41b2-aca9-e5217cbb60b6" width="200"><br>
-      中奖后卡券同步状态
+      中奖后同步
     </td>
   </tr>
 </table>
