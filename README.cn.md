@@ -76,6 +76,11 @@
 
 ## 快速开始
 
+### 编辑文件
+1. [行 11: 设置你自己的 SQL 密码](./ruoyi-admin/src/main/resources/application-druid.yml)
+2. [行 34: 为 Ruoyi 管理前端设置你的 IPv4 地址](./ruoyi-ui/vue.config.js)
+3. [行 3: 为主前端设置你的 IPv4 地址](./rain-of-coupon/.env.development)
+   
 ### 环境要求
 
 - Java 8+
