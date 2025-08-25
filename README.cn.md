@@ -70,7 +70,7 @@
 ## 技术栈
 
 - **前端**: Vue 3, TypeScript, Pinia, Vite
-- **后端**: Spring Boot, MyBatis, Redis, Spring Security, RuoyiFramework
+- **后端**: Spring Boot, MyBatis, Redis, Spring Security, Ruoyi Framework
 - **数据库**: MySQL 5.7+
 - **部署**: Docker, Nginx
 
