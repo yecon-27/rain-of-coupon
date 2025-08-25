@@ -21,3 +21,8 @@ app.mount('#app')
 import { useAuthStore } from '@/stores/auth'
 const authStore = useAuthStore()
 authStore.checkAuthStatus()
+
+// 强制启用imageManager的本地降级模式，确保使用本地图片
+import { imageManager } from '@/utils/imageManager'
+imageManager.enableLocalFallback()
+console.log('🖼️ [Main] 已启用imageManager本地降级模式，将使用本地图片资源')

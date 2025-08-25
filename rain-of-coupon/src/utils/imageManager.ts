@@ -21,10 +21,15 @@ const LOCAL_IMAGE_MAP: Record<string, string> = {
   'coupon_btn': '/src/assets/coupon/qb.png',
   'show_dishes': '/src/assets/coupon/zscp.png',
   
-  // 优惠券相关
-  'coupon_188': '/src/assets/coupon/满500元且消费一道特色菜可使用.png',
-  'coupon_588': '/src/assets/coupon/满1500元且消费一道特色菜可使用.png',
-  'coupon_888': '/src/assets/coupon/满2500元且消费一道特色菜可使用.png',
+  // 优惠券相关（用于奖品页面显示）
+  'coupon_188': '/src/assets/coupon/188.png',
+  'coupon_588': '/src/assets/coupon/588.png',
+  'coupon_888': '/src/assets/coupon/888.png',
+  
+  // 优惠券详情页面用的图片
+  'coupon_detail_188': '/src/assets/coupon/满500元且消费一道特色菜可使用.png',
+  'coupon_detail_588': '/src/assets/coupon/满1500元且消费一道特色菜可使用.png',
+  'coupon_detail_888': '/src/assets/coupon/满2500元且消费一道特色菜可使用.png',
   
   // 提示相关
   'luck_plus_btn': '/src/assets/coupon/福气+1.png',

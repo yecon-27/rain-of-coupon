@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图片测试页面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .image-test {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .image-test img {
+            width: 100px;
+            height: 100px;
+            object-fit: contain;
+            margin-right: 15px;
+            border: 1px solid #ccc;
+        }
+        .image-info {
+            flex: 1;
+        }
+        .image-path {
+            font-family: monospace;
+            background: #f8f8f8;
+            padding: 5px;
+            border-radius: 3px;
+            font-size: 12px;
+            color: #666;
+        }
+        .status {
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status.success { background: #d4edda; color: #155724; }
+        .status.error { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <h1>🖼️ 图片资源测试</h1>
+    
+    <div class="test-container">
+        <h2>奖品图片测试</h2>
+        <p>这些是应该在PrizePage和PrizeStockTip中显示的图片：</p>
+        
+        <div class="image-test">
+            <img src="/src/assets/coupon/188.png" alt="188元奖品" onerror="this.style.border='2px solid red'">
+            <div class="image-info">
+                <h3>188元奖品</h3>
+                <div class="image-path">/src/assets/coupon/188.png</div>
+                <div class="status success">应该显示这个</div>
+            </div>
+        </div>
+        
+        <div class="image-test">
+            <img src="/src/assets/coupon/588.png" alt="588元奖品" onerror="this.style.border='2px solid red'">
+            <div class="image-info">
+                <h3>588元奖品</h3>
+                <div class="image-path">/src/assets/coupon/588.png</div>
+                <div class="status success">应该显示这个</div>
+            </div>
+        </div>
+        
+        <div class="image-test">
+            <img src="/src/assets/coupon/888.png" alt="888元奖品" onerror="this.style.border='2px solid red'">
+            <div class="image-info">
+                <h3>888元奖品</h3>
+                <div class="image-path">/src/assets/coupon/888.png</div>
+                <div class="status success">应该显示这个</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="test-container">
+        <h2>优惠券详情图片（之前错误显示的）</h2>
+        <p>这些图片之前错误地显示在了奖品页面：</p>
+        
+        <div class="image-test">
+            <img src="/src/assets/coupon/满500元且消费一道特色菜可使用.png" alt="500元优惠券详情" onerror="this.style.border='2px solid red'">
+            <div class="image-info">
+                <h3>500元优惠券详情</h3>
+                <div class="image-path">/src/assets/coupon/满500元且消费一道特色菜可使用.png</div>
+                <div class="status error">之前错误显示的</div>
+            </div>
+        </div>
+        
+        <div class="image-test">
+            <img src="/src/assets/coupon/满1500元且消费一道特色菜可使用.png" alt="1500元优惠券详情" onerror="this.style.border='2px solid red'">
+            <div class="image-info">
+                <h3>1500元优惠券详情</h3>
+                <div class="image-path">/src/assets/coupon/满1500元且消费一道特色菜可使用.png</div>
+                <div class="status error">之前错误显示的</div>
+            </div>
+        </div>
+        
+        <div class="image-test">
+            <img src="/src/assets/coupon/满2500元且消费一道特色菜可使用.png" alt="2500元优惠券详情" onerror="this.style.border='2px solid red'">
+            <div class="image-info">
+                <h3>2500元优惠券详情</h3>
+                <div class="image-path">/src/assets/coupon/满2500元且消费一道特色菜可使用.png</div>
+                <div class="status error">之前错误显示的</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="test-container">
+        <h2>🔧 调试工具</h2>
+        <button onclick="testImageManager()" style="padding: 10px 20px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+            测试ImageManager
+        </button>
+        <button onclick="clearCacheAndReload()" style="padding: 10px 20px; margin: 5px; background: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer;">
+            清除缓存并刷新
+        </button>
+        <div id="debug-output" style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 5px; font-family: monospace; font-size: 12px; white-space: pre-wrap;"></div>
+    </div>
+    
+    <script>
+        function log(message) {
+            const output = document.getElementById('debug-output');
+            output.textContent += new Date().toLocaleTimeString() + ': ' + message + '\n';
+            console.log(message);
+        }
+        
+        function testImageManager() {
+            log('开始测试ImageManager...');
+            
+            // 这个函数需要在Vue应用中运行才能访问imageManager
+            log('请在浏览器控制台中运行以下代码：');
+            log('');
+            log('// 测试imageManager');
+            log('if (window.imageManager) {');
+            log('  console.log("状态:", window.imageManager.getStatus());');
+            log('  window.imageManager.enableLocalFallback();');
+            log('  Promise.all([');
+            log('    window.imageManager.getImageUrl("coupon_188"),');
+            log('    window.imageManager.getImageUrl("coupon_588"),');
+            log('    window.imageManager.getImageUrl("coupon_888")');
+            log('  ]).then(urls => console.log("URLs:", urls));');
+            log('} else {');
+            log('  console.log("imageManager未找到");');
+            log('}');
+        }
+        
+        function clearCacheAndReload() {
+            if (window.clearCacheAndReload) {
+                window.clearCacheAndReload();
+            } else {
+                log('清除缓存工具未找到，手动清除...');
+                localStorage.clear();
+                sessionStorage.clear();
+                location.reload(true);
+            }
+        }
+        
+        // 页面加载完成后检查图片
+        window.addEventListener('load', function() {
+            log('页面加载完成，检查图片状态...');
+            
+            const images = document.querySelectorAll('img');
+            images.forEach((img, index) => {
+                img.addEventListener('load', function() {
+                    log(`图片 ${index + 1} 加载成功: ${this.src}`);
+                });
+                
+                img.addEventListener('error', function() {
+                    log(`图片 ${index + 1} 加载失败: ${this.src}`);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
