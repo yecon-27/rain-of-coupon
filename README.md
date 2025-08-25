@@ -4,6 +4,8 @@ A interactive lottery mini-program built with Vue 3 and Spring Boot, featuring r
 
 **Language**: [English](./README.md) | [中文](./README.cn.md)
 
+<img width="1199" height="756" alt="4204285decf504c5b4d78ba0faece377" src="https://github.com/user-attachments/assets/9f3ef837-6ee6-48dc-a1f4-84d06d6c46b7" />
+
 ## Features
 
 - Real-time red envelope rain with click-based probability system
@@ -12,6 +14,57 @@ A interactive lottery mini-program built with Vue 3 and Spring Boot, featuring r
 - Multiple rounds of voting rewards
 - Admin dashboard for prize and user management
 - Anonymous user access support
+
+## Pages
+
+<table>
+  <tr>
+    <td align="center">
+      <img src="https://github.com/user-attachments/assets/d2e0c30d-af28-4b50-a8dd-5b409daeecb3" width="200"><br>
+      Main Dashboard
+    </td>
+    <td align="center">
+      <img src="https://github.com/user-attachments/assets/8a841fce-f5bd-455d-aa9c-2be97f212620" width="200"><br>
+      Guest View – Rules & Coupon Pack
+    </td>
+    <td align="center">
+      <img src="https://github.com/user-attachments/assets/37017394-d83d-41ee-8a92-3f14516028fd" width="200"><br>
+      Registered User View
+    </td>
+    <td align="center">
+      <img src="https://github.com/user-attachments/assets/26a0d42e-abef-46ac-8d2d-e18f53c73a63" width="200"><br>
+      Coupon Page – Winning User
+    </td>
+  </tr>
+  <tr>
+     <td align="center">
+      <img src="https://github.com/user-attachments/assets/59a6803d-c1f7-4926-956d-d71deb245e2a" width="200"><br>
+      Challenge Page – Coupon Display
+    </td>
+    <td align="center">
+      <img src="https://github.com/user-attachments/assets/307de466-9e0c-4413-b829-df89f2009d27" width="200"><br>
+      Anti-Abuse – Limit Multiple Draws
+    </td>
+    <td align="center">
+      <img src="https://github.com/user-attachments/assets/9a9982a0-19d2-4720-9285-1a6ae3bcfb89" width="200"><br>
+      Red Packet Entry
+    </td>
+    <td align="center">
+      <img src="https://github.com/user-attachments/assets/39dbfcbc-f070-4846-af1d-a5f53460e142" width="200"><br>
+      Winning Confirmation
+    </td>
+  </tr>
+  <tr>
+   <td align="center">
+      <img src="https://github.com/user-attachments/assets/3c08099d-8b61-44b1-b636-8e6c15d43dec" width="200"><br>
+      Anti-Fraud – Same Session ID
+    </td> 
+    <td align="center">
+      <img src="https://github.com/user-attachments/assets/08bf5932-b64c-41b2-aca9-e5217cbb60b6" width="200"><br>
+      Post-Win Coupon Sync
+    </td>
+  </tr>
+</table>
 
 ## Tech Stack
 
