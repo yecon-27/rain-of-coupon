@@ -4,6 +4,9 @@
 
 **语言**: [English](./README.md) | [中文](./README.cn.md)
 
+<img width="1199" height="756" alt="4204285decf504c5b4d78ba0faece377" src="https://github.com/user-attachments/assets/9f3ef837-6ee6-48dc-a1f4-84d06d6c46b7" />
+
+
 ## 功能特性
 
 - 基于点击数量的实时红包雨概率系统
@@ -12,6 +15,57 @@
 - 多轮投票回流奖品
 - 奖品和用户管理后台
 - 匿名用户访问支持
+
+## 界面预览
+<table>
+  <tr>
+    <td align="center">
+      <img src="https://github.com/user-attachments/assets/d2e0c30d-af28-4b50-a8dd-5b409daeecb3" width="200"><br>
+      主页面全览 
+    </td>
+    <td align="center">
+      <img src="https://github.com/user-attachments/assets/8a841fce-f5bd-455d-aa9c-2be97f212620" width="200"><br>
+      未登录状态下的规则，券包（需登录）
+    </td>
+    <td align="center">
+      <img src="https://github.com/user-attachments/assets/37017394-d83d-41ee-8a92-3f14516028fd" width="200"><br>
+      注册用户
+    </td>
+    <td align="center">
+      <img src="https://github.com/user-attachments/assets/26a0d42e-abef-46ac-8d2d-e18f53c73a63" width="200"><br>
+      中奖用户打开奖券页面
+    </td>
+  </tr>
+  <tr>
+     <td align="center">
+      <img src="https://github.com/user-attachments/assets/59a6803d-c1f7-4926-956d-d71deb245e2a" width="200"><br>
+      中奖用户打开立即挑战页面的奖券显示
+    </td>
+    <td align="center">
+      <img src="https://github.com/user-attachments/assets/307de466-9e0c-4413-b829-df89f2009d27" width="200"><br>
+      同一个用户短期抽奖两次防止刷票
+    </td>
+    <td align="center">
+      <img src="https://github.com/user-attachments/assets/9a9982a0-19d2-4720-9285-1a6ae3bcfb89" width="200"><br>
+      抢红包进入页面
+    </td>
+    <td align="center">
+      <img src="https://github.com/user-attachments/assets/39dbfcbc-f070-4846-af1d-a5f53460e142" width="200"><br>
+      中奖页面
+    </td>
+  </tr>
+  <tr>
+   <td align="center">
+      <img src="https://github.com/user-attachments/assets/3c08099d-8b61-44b1-b636-8e6c15d43dec" width="200"><br>
+      不同用户同一个窗口id防刷票
+    </td> 
+    <td align="center">
+      <img src="https://github.com/user-attachments/assets/08bf5932-b64c-41b2-aca9-e5217cbb60b6" width="200"><br>
+      中奖后卡券同步状态
+    </td>
+  </tr>
+</table>
+
 
 ## 技术栈
 
