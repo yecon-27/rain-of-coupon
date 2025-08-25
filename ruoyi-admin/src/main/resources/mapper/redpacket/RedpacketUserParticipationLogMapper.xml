@@ -14,6 +14,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="prizeName"    column="prize_name"    />
         <result property="isUsed"    column="is_used"    />
         <result property="clickedCount" column="clicked_count" />
+        <!-- <result property="sessionId" column="session_id" /> -->
     </resultMap>
 
     <sql id="selectRedpacketUserParticipationLogVo">
@@ -49,6 +50,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="prizeName != null">prize_name,</if>
             <if test="isUsed != null">is_used,</if>
             <if test="clickedCount != null">clicked_count,</if>
+            <!-- <if test="sessionId != null and sessionId != ''">session_id,</if> -->
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="userId != null">#{userId},</if>
@@ -59,6 +61,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="prizeName != null">#{prizeName},</if>
             <if test="isUsed != null">#{isUsed},</if>
             <if test="clickedCount != null">#{clickedCount},</if>
+            <!-- <if test="sessionId != null and sessionId != ''">#{sessionId},</if> -->
          </trim>
     </insert>
 
@@ -86,4 +89,22 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{id}
         </foreach>
     </delete>
+    
+    <!-- 查询用户今日参与次数 -->
+    <select id="countUserTodayParticipations" parameterType="RedpacketUserParticipationLog" resultType="int">
+        select count(*) from redpacket_user_participation_log
+        where user_id = #{userId}
+        and DATE(participation_time) = CURDATE()
+    </select>
+    
+    <!-- 根据用户ID和会话ID统计参与次数 - 暂时注释，因为表中没有session_id字段 -->
+    <!--
+    <select id="countUserParticipationsBySessionId" parameterType="RedpacketUserParticipationLog" resultType="int">
+        select count(*) from redpacket_user_participation_log
+        where user_id = #{userId}
+        <if test="sessionId != null and sessionId != ''">
+            and session_id = #{sessionId}
+        </if>
+    </select>
+    -->
 </mapper>

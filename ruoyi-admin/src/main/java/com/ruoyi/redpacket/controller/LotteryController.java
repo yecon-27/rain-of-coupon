@@ -65,7 +65,11 @@ public class LotteryController extends BaseController {
             
             lotteryService.saveDrawRecord(userId, result, ipAddress, sessionId, clickedCount);
             
+            // 获取保存的记录ID（需要从saveDrawRecord方法返回）
+            Long recordId = null; // 这里需要修改saveDrawRecord方法来返回ID
+            
             Map<String, Object> data = new HashMap<>();
+            data.put("id", recordId); // 添加记录ID
             data.put("isWin", result.isWin());
             data.put("prizeName", result.getPrizeName());
             data.put("prizeValue", result.getPrizeValue());
@@ -175,11 +179,11 @@ public class LotteryController extends BaseController {
             String roundName = roundInfo.containsKey("id") ? "round" + roundInfo.get("id") : "";
             boolean isCrowded = lotteryService.isCrowded(roundName);
 
-            // 检查同一会话是否已参与，仅对已登录用户有效
-            boolean hasParticipatedInSession = (userId != null && sessionId != null) && lotteryService.hasParticipatedInSession(userId, sessionId);
+            // 暂时注释会话检查，因为数据库表没有session_id字段
+            // boolean hasParticipatedInSession = (userId != null && sessionId != null) && lotteryService.hasParticipatedInSession(userId, sessionId);
 
-            // 最终抽奖资格判断：服务层检查 + 会话检查
-            boolean canDraw = lotteryService.checkDrawEligibility(userId, ipAddress) && !hasParticipatedInSession;
+            // 最终抽奖资格判断：仅使用服务层检查
+            boolean canDraw = lotteryService.checkDrawEligibility(userId, ipAddress);
             
             // 按日期和中奖状态过滤记录
             List<Map<String, Object>> todayParticipations = logs.stream()

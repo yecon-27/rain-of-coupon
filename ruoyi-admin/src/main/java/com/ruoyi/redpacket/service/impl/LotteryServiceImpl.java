@@ -123,28 +123,44 @@ public class LotteryServiceImpl implements ILotteryService {
     
     @Override
     public void saveDrawRecord(Long userId, DrawResult result, String ipAddress, String sessionId, int clickedCount) {
-        LoggerFactory.getLogger(LotteryServiceImpl.class).info("开始保存抽奖记录 - userId: {}, isWin: {}, clickedCount: {}", userId, result.isWin(), clickedCount);
+        Logger logger = LoggerFactory.getLogger(LotteryServiceImpl.class);
+        logger.info("💾 [保存记录] 开始保存抽奖记录 - userId: {}, isWin: {}, clickedCount: {}, sessionId: {}", 
+                   userId, result.isWin(), clickedCount, sessionId);
         
         RedpacketUserParticipationLog log = new RedpacketUserParticipationLog();
         log.setUserId(userId);
         log.setIpAddress(ipAddress);
+        // log.setSessionId(sessionId); // 数据库表暂无session_id字段，先注释
         log.setIsWin(result.isWin() ? 1 : 0);
         log.setParticipationTime(new Date());
         log.setClickedCount(clickedCount);
+        log.setIsUsed(0); // 默认未使用
         
         if (result.isWin()) {
             log.setPrizeId(result.getPrizeId());
             log.setPrizeName(result.getPrizeName());
-            LoggerFactory.getLogger(LotteryServiceImpl.class).info("中奖记录 - prizeId: {}, prizeName: {}", result.getPrizeId(), result.getPrizeName());
+            logger.info("🏆 [保存记录] 中奖记录 - prizeId: {}, prizeName: {}", result.getPrizeId(), result.getPrizeName());
         }
         
-        LoggerFactory.getLogger(LotteryServiceImpl.class).info("准备插入数据库 - log对象: {}", log.toString());
+        logger.info("💾 [保存记录] 准备插入数据库 - log对象详情:");
+        logger.info("💾 [保存记录]   userId: {}", log.getUserId());
+        logger.info("💾 [保存记录]   ipAddress: {}", log.getIpAddress());
+        // logger.info("💾 [保存记录]   sessionId: {}", log.getSessionId()); // 暂时注释
+        logger.info("💾 [保存记录]   isWin: {}", log.getIsWin());
+        logger.info("💾 [保存记录]   clickedCount: {}", log.getClickedCount());
+        logger.info("💾 [保存记录]   participationTime: {}", log.getParticipationTime());
         
         try {
             int insertResult = participationLogMapper.insertRedpacketUserParticipationLog(log);
-            LoggerFactory.getLogger(LotteryServiceImpl.class).info("数据库插入结果: {}, 生成的ID: {}", insertResult, log.getId());
+            logger.info("✅ [保存记录] 数据库插入成功 - 影响行数: {}, 生成的ID: {}", insertResult, log.getId());
+            
+            if (insertResult <= 0) {
+                logger.error("❌ [保存记录] 数据库插入失败 - 影响行数为0");
+                throw new RuntimeException("数据库插入失败");
+            }
         } catch (Exception e) {
-            LoggerFactory.getLogger(LotteryServiceImpl.class).error("数据库插入失败", e);
+            logger.error("❌ [保存记录] 数据库插入异常", e);
+            logger.error("❌ [保存记录] 异常详情: {}", e.getMessage());
             throw e;
         }
     }
@@ -245,61 +261,98 @@ public class LotteryServiceImpl implements ILotteryService {
     }
     
     /**
-     * 执行基于点击数量的概率抽奖算法 - 红包雨模式
+     * 执行基于点击数量的概率抽奖算法 - 红包雨模式（增强版）
      * @param clickedCount 本轮游戏中点击的红包数量（1-100）
      * @param prizes 可用奖品列表
      * @return 中奖奖品，null表示未中奖
      */
     private RedpacketPrize executeClickBasedProbabilityDraw(int clickedCount, List<RedpacketPrize> prizes) {
-        // 如果没有点击任何红包，直接返回未中奖
-        if (clickedCount <= 10) {
+        Logger logger = LoggerFactory.getLogger(LotteryServiceImpl.class);
+        logger.info("🎯 [抽奖算法] 开始执行抽奖 - 点击数量: {}, 可用奖品数: {}", clickedCount, prizes.size());
+        
+        if (clickedCount <= 0) {
+            logger.info("🎯 [抽奖算法] 点击数量为0，返回未中奖");
             return null;
+        }
+        
+        if (prizes.isEmpty()) {
+            logger.info("🎯 [抽奖算法] 没有可用奖品，返回未中奖");
+            return null;
+        }
+        
+        // 打印所有奖品信息
+        for (RedpacketPrize prize : prizes) {
+            logger.info("🎁 [奖品信息] ID: {}, 名称: {}, 概率: {}, 剩余: {}", 
+                       prize.getId(), prize.getPrizeName(), prize.getProbability(), prize.getRemainingCount());
         }
         
         // 限制点击数量上限
         clickedCount = Math.min(100, clickedCount);
         
-        // 基于点击数量计算概率加成系数
-        // 使用对数函数，让概率增长更平滑且有上限
-        // 点击1个：1.0倍，点击10个：约1.5倍，点击50个：约2.5倍，点击100个：约3.0倍
-        double probabilityMultiplier = 1.0 + Math.log(clickedCount) / Math.log(10) * 0.8;
+        // 基于点击数量计算概率加成系数（提高倍率）
+        // 使用对数函数 + 线性加成，让概率增长更明显
+        // 点击1个：1.0倍，点击10个：约2.0倍，点击50个：约4.0倍，点击100个：约6.0倍
+        double logMultiplier = 1.0 + Math.log(clickedCount) / Math.log(10) * 1.5; // 从0.8提高到1.5
         
-        // 额外的线性加成，鼓励多点击
-        // 每点击10个红包，额外增加0.1倍概率
-        double linearBonus = (clickedCount / 10.0) * 0.1;
+        // 线性加成：每点击5个红包，额外增加0.2倍概率（从每10个0.1倍提高到每5个0.2倍）
+        double linearBonus = (clickedCount / 5.0) * 0.2;
+        
+        // 额外的平方根加成，让高点击数量更有优势
+        double sqrtBonus = Math.sqrt(clickedCount) * 0.3;
         
         // 最终概率系数
-        double finalMultiplier = probabilityMultiplier + linearBonus;
+        double finalMultiplier = logMultiplier + linearBonus + sqrtBonus;
         
-        // 设置概率上限，避免过高
-        finalMultiplier = Math.min(finalMultiplier, 4.0);
+        // 设置概率上限，但比之前更高
+        finalMultiplier = Math.min(finalMultiplier, 8.0); // 从4.0提高到8.0
+        
+        logger.info("🎯 [概率加成] 点击数: {}, 对数倍率: {:.2f}, 线性加成: {:.2f}, 平方根加成: {:.2f}, 最终倍率: {:.2f}", 
+                   clickedCount, logMultiplier, linearBonus, sqrtBonus, finalMultiplier);
         
         // 计算调整后的总概率权重
         BigDecimal totalWeight = BigDecimal.ZERO;
         for (RedpacketPrize prize : prizes) {
-            if (prize.getProbability() == null) {
-                continue; // 跳过概率为null的奖品
+            if (prize.getProbability() != null && prize.getProbability().compareTo(BigDecimal.ZERO) > 0) {
+                BigDecimal adjustedProbability = prize.getProbability()
+                        .multiply(BigDecimal.valueOf(finalMultiplier));
+                totalWeight = totalWeight.add(adjustedProbability);
+                logger.info("🎯 [概率计算] 奖品: {}, 原始概率: {}, 调整后概率: {}, 累计权重: {}", 
+                           prize.getPrizeName(), prize.getProbability(), adjustedProbability, totalWeight);
             }
-            BigDecimal adjustedProbability = prize.getProbability()
-                    .multiply(BigDecimal.valueOf(finalMultiplier));
-            totalWeight = totalWeight.add(adjustedProbability);
         }
         
-        // 生成随机数
+        logger.info("🎯 [概率计算] 总权重: {}", totalWeight);
+        
+        // 如果总权重为0，返回未中奖
+        if (totalWeight.compareTo(BigDecimal.ZERO) <= 0) {
+            logger.info("🎯 [抽奖算法] 总权重为0，返回未中奖");
+            return null;
+        }
+        
+        // 生成0到总权重之间的随机数
         double randomValue = random.nextDouble();
         BigDecimal randomWeight = totalWeight.multiply(BigDecimal.valueOf(randomValue));
+        
+        logger.info("🎯 [随机抽取] 随机值: {:.4f}, 随机权重: {}", randomValue, randomWeight);
         
         // 根据调整后的权重选择奖品
         BigDecimal currentWeight = BigDecimal.ZERO;
         for (RedpacketPrize prize : prizes) {
-            BigDecimal adjustedProbability = prize.getProbability()
-                    .multiply(BigDecimal.valueOf(finalMultiplier));
-            currentWeight = currentWeight.add(adjustedProbability);
-            if (randomWeight.compareTo(currentWeight) <= 0) {
-                return prize;
+            if (prize.getProbability() != null && prize.getProbability().compareTo(BigDecimal.ZERO) > 0) {
+                BigDecimal adjustedProbability = prize.getProbability()
+                        .multiply(BigDecimal.valueOf(finalMultiplier));
+                currentWeight = currentWeight.add(adjustedProbability);
+                logger.info("🎯 [权重判断] 奖品: {}, 当前权重: {}, 随机权重: {}", 
+                           prize.getPrizeName(), currentWeight, randomWeight);
+                
+                if (randomWeight.compareTo(currentWeight) <= 0) {
+                    logger.info("🏆 [中奖结果] 恭喜中奖！奖品: {}, 最终倍率: {:.2f}", prize.getPrizeName(), finalMultiplier);
+                    return prize;
+                }
             }
         }
         
+        logger.info("😔 [抽奖结果] 未中奖，最终倍率: {:.2f}", finalMultiplier);
         return null; // 未中奖
     }
     
@@ -420,11 +473,12 @@ public class LotteryServiceImpl implements ILotteryService {
     }
     @Override
     public boolean hasParticipatedInSession(Long userId, String sessionId) {
-        RedpacketUserParticipationLog query = new RedpacketUserParticipationLog();
-        query.setUserId(userId);
-        query.setSessionId(sessionId);
-        // 使用 count 方法而不是查询整个列表，更高效
-        return participationLogMapper.countUserParticipationsBySessionId(query) > 0;
+        // 暂时注释，因为数据库表没有session_id字段
+        // RedpacketUserParticipationLog query = new RedpacketUserParticipationLog();
+        // query.setUserId(userId);
+        // query.setSessionId(sessionId);
+        // return participationLogMapper.countUserParticipationsBySessionId(query) > 0;
+        return false; // 暂时返回false，表示未参与过
     }
     @Override
     public Map<String, Object> getCurrentActiveRound() {
