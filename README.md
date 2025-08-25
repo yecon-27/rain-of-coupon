@@ -75,6 +75,11 @@ A interactive lottery mini-program built with Vue 3 and Spring Boot, featuring r
 
 ## Quick Start
 
+### Edit the files
+1. [line 11: Set your own SQL password](./ruoyi-admin/src/main/resources/application-druid.yml)
+2. [line 34: Set your IPv4 address for Management Frontend](./ruoyi-ui/vue.config.js)
+3. [line 3: Set your IPv4 address for Main Frontend](./rain-of-coupon/.env.development)
+   
 ### Prerequisites
 
 - Java 8+
