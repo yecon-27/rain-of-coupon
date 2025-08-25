@@ -5,7 +5,7 @@
       <!-- 准备阶段：显示 zbh.png -->
       <DynamicImage 
         v-if="currentPhase === 'prepare'"
-        resource-key="prepare_image"
+        resource-key="redpacket_rain"
         fallback-url="/src/assets/coupon/zbh.png"
         alt="准备图片"
         class-name="prepare-image"

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>测试红包图片API</title>
+</head>
+<body>
+    <h1>红包图片API专项测试</h1>
+    <div id="results"></div>
+    
+    <script>
+        async function testRedPacketBag() {
+            const results = document.getElementById('results');
+            
+            try {
+                console.log('开始测试 red_packet_bag 资源...');
+                
+                // 测试API调用
+                const response = await fetch('http://localhost:8080/public/redpacket/image/resource/red_packet_bag');
+                console.log('HTTP状态码:', response.status);
+                console.log('HTTP状态文本:', response.statusText);
+                
+                const data = await response.json();
+                console.log('完整响应数据:', data);
+                
+                const div = document.createElement('div');
+                div.innerHTML = `
+                    <h3>red_packet_bag 测试结果</h3>
+                    <p><strong>HTTP状态码:</strong> ${response.status}</p>
+                    <p><strong>响应码:</strong> ${data.code}</p>
+                    <p><strong>消息:</strong> ${data.msg}</p>
+                    <p><strong>数据:</strong></p>
+                    <pre>${JSON.stringify(data.data, null, 2)}</pre>
+                    
+                    ${data.data && data.data.filePath ? `
+                        <h4>图片预览测试</h4>
+                        <p><strong>文件路径:</strong> ${data.data.filePath}</p>
+                        <p><strong>完整URL:</strong> http://localhost:8080${data.data.filePath}</p>
+                        <img src="http://localhost:8080${data.data.filePath}" 
+                             alt="红包图片" 
+                             style="max-width: 200px; border: 1px solid #ccc;"
+                             onload="console.log('图片加载成功')"
+                             onerror="console.log('图片加载失败')">
+                    ` : ''}
+                `;
+                results.appendChild(div);
+                
+                // 同时测试其他资源作为对比
+                console.log('测试对比资源...');
+                const compareResources = ['home_bg', 'timer_btn', 'packet_count'];
+                
+                for (const resourceKey of compareResources) {
+                    try {
+                        const compareResponse = await fetch(`http://localhost:8080/public/redpacket/image/resource/${resourceKey}`);
+                        const compareData = await compareResponse.json();
+                        
+                        const compareDiv = document.createElement('div');
+                        compareDiv.innerHTML = `
+                            <h4>对比资源: ${resourceKey}</h4>
+                            <p>状态码: ${compareResponse.status}, 响应码: ${compareData.code}</p>
+                            <p>消息: ${compareData.msg}</p>
+                            <hr>
+                        `;
+                        results.appendChild(compareDiv);
+                        
+                    } catch (error) {
+                        console.error(`测试 ${resourceKey} 失败:`, error);
+                    }
+                }
+                
+            } catch (error) {
+                console.error('测试失败:', error);
+                const div = document.createElement('div');
+                div.innerHTML = `
+                    <h3>测试失败</h3>
+                    <p style="color: red;"><strong>错误:</strong> ${error.message}</p>
+                `;
+                results.appendChild(div);
+            }
+        }
+        
+        // 页面加载后自动测试
+        window.onload = testRedPacketBag;
+    </script>
+</body>
+</html>

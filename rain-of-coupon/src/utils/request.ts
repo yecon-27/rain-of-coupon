@@ -27,14 +27,33 @@ export const request = async <T = any>(url: string, options?: RequestInit): Prom
   try {
     const response = await fetch(fullUrl, defaultOptions)
     
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
+    // 尝试解析响应数据，即使状态码不是200也要尝试获取错误信息
+    let data;
+    try {
+      data = await response.json()
+    } catch (parseError) {
+      console.error('Response parse failed:', parseError)
+      data = { code: response.status, msg: response.statusText, data: null }
     }
     
-    const data = await response.json()
+    // 如果HTTP状态码不是200，创建包含状态码的错误
+    if (!response.ok) {
+      const error = new Error(`HTTP error! status: ${response.status}`) as any
+      error.status = response.status
+      error.statusText = response.statusText
+      error.response = data
+      throw error
+    }
+    
     return data
-  } catch (error) {
+  } catch (error: any) {
     console.error('Request failed:', error)
+    
+    // 确保错误对象包含状态码信息
+    if (error.status) {
+      error.message = `${error.message} (Status: ${error.status})`
+    }
+    
     throw error
   }
 }

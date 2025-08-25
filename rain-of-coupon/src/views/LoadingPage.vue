@@ -97,26 +97,86 @@ const showCrowdingMessage = async () => {
   try {
     console.log('🔍 [LoadingPage] 检查用户参与状态以决定显示哪种提示')
     
+    // 获取当前sessionId
+    const currentSessionId = localStorage.getItem('sessionId')
+    console.log('🔍 [LoadingPage] 当前sessionId:', currentSessionId)
+    
     // 加载用户的参与记录（不仅仅是中奖记录）
     await gameStore.loadPrizeRecord()
     
     // 检查用户今日是否已经参与过活动
-    // 这里需要调用后端API获取用户的参与状态
-    const response = await getUserStatus() // 需要导入这个API
+    const response = await getUserStatus({ sessionId: currentSessionId })
+    
+    console.log('🔍 [LoadingPage] 完整API响应:', response)
+    
+    // 检查API响应是否成功
+    if (response.code !== 200) {
+      console.warn('⚠️ [LoadingPage] API响应失败，code:', response.code, 'msg:', response.msg)
+      
+      // 检查是否是认证失败（401、403或相关错误消息）
+      if (response.code === 401 || response.code === 403 ||
+          (response.msg && (response.msg.includes('认证失败') || 
+                           response.msg.includes('无法访问') || 
+                           response.msg.includes('未登录') ||
+                           response.msg.includes('未授权') ||
+                           response.msg.includes('token') ||
+                           response.msg.includes('Token') ||
+                           response.msg.includes('Unauthorized') ||
+                           response.msg.includes('Forbidden') ||
+                           response.msg.includes('请先登录')))) {
+        console.log('❌ [LoadingPage] 认证失败，清除本地认证状态并跳转到登录页面')
+        // 清除本地认证状态
+        authStore.logout()
+        router.push('/login?redirect=/loading')
+        return
+      }
+      
+      // 其他非认证错误，显示WarningTip
+      console.log('⚠️ [LoadingPage] 其他API错误，为安全起见显示WarningTip')
+      router.push('/?showWarning=true')
+      return
+    }
+    
     const userStatus = response.data || response
     
     console.log('🔍 [LoadingPage] 用户参与状态:', userStatus)
     console.log('🔍 [LoadingPage] 今日参与次数:', userStatus.todayParticipations?.length || 0)
     console.log('🔍 [LoadingPage] 剩余抽奖次数:', userStatus.remainingCount)
     
-    // 如果用户今日已经参与过活动（不管是否中奖），显示WarningTip
-    if (userStatus.todayParticipations && userStatus.todayParticipations.length > 0) {
-      console.log('⚠️ [LoadingPage] 用户今日已参与过活动，显示WarningTip')
-      // 用户已参与过活动，跳转到首页并显示WarningTip
-      router.push('/?showWarning=true')
-    } else if (userStatus.remainingCount <= 0) {
-      console.log('⚠️ [LoadingPage] 用户今日抽奖次数已用完，显示WarningTip')
-      // 用户今日抽奖次数已用完，显示WarningTip
+    // 检查是否有相同sessionId的参与记录
+    let hasSameSessionParticipation = false
+    if (currentSessionId && userStatus.todayParticipations) {
+      hasSameSessionParticipation = userStatus.todayParticipations.some((participation: any) => 
+        participation.sessionId === currentSessionId
+      )
+      console.log('🔍 [LoadingPage] 是否有相同sessionId的参与记录:', hasSameSessionParticipation)
+      console.log('🔍 [LoadingPage] 今日参与记录详情:', userStatus.todayParticipations.map((p: any) => ({
+        sessionId: p.sessionId,
+        participationTime: p.participationTime,
+        isWin: p.isWin
+      })))
+    }
+    
+    // 决定显示哪种提示
+    let shouldShowWarning = false
+    let warningReason = ''
+    
+    if (hasSameSessionParticipation) {
+      shouldShowWarning = true
+      warningReason = '相同sessionId已参与过活动'
+    } else if (userStatus.todayParticipations && userStatus.todayParticipations.length > 0) {
+      shouldShowWarning = true
+      warningReason = '用户今日已参与过活动（不同sessionId）'
+    } else if (userStatus.remainingCount !== undefined && userStatus.remainingCount <= 0) {
+      shouldShowWarning = true
+      warningReason = '用户今日抽奖次数已用完'
+    }
+    
+    console.log('🔍 [LoadingPage] 是否应该显示WarningTip:', shouldShowWarning)
+    console.log('🔍 [LoadingPage] 原因:', warningReason)
+    
+    if (shouldShowWarning) {
+      console.log('⚠️ [LoadingPage] 显示WarningTip，原因:', warningReason)
       router.push('/?showWarning=true')
     } else {
       console.log('🚫 [LoadingPage] 用户可以参与活动但流量拥挤，显示CrowdingTip')
@@ -124,20 +184,43 @@ const showCrowdingMessage = async () => {
       uiStore.setCrowdingTip(true)
       router.push('/')
     }
-  } catch (error: any) { // 使用 any 类型来处理不同的错误对象
+  } catch (error: unknown) {
     console.error('🔍 [LoadingPage] 检查参与状态失败:', error)
+    console.error('🔍 [LoadingPage] 错误详情:', {
+      name: error?.name,
+      message: error?.message,
+      status: error?.status,
+      stack: error?.stack
+    })
     
-    // 检查是否为 HTTP 401 (认证失败) 错误
-    if (error && error.message && error.message.includes('401')) {
-      console.log('❌ [LoadingPage] 认证失败，跳转到登录页面')
-      router.push('/login')
-      return; // 立即返回，阻止后续代码执行
+    // 检查是否为认证失败错误（HTTP状态码或错误消息）
+    const isAuthError = error && (
+      error.status === 401 || 
+      error.status === 403 ||
+      error.message?.includes('401') ||
+      error.message?.includes('403') ||
+      error.message?.includes('认证失败') ||
+      error.message?.includes('无法访问') ||
+      error.message?.includes('未登录') ||
+      error.message?.includes('未授权') ||
+      error.message?.includes('token') ||
+      error.message?.includes('Token') ||
+      error.message?.includes('Unauthorized') ||
+      error.message?.includes('Forbidden') ||
+      error.message?.includes('请先登录')
+    )
+    
+    if (isAuthError) {
+      console.log('❌ [LoadingPage] 认证失败，清除本地认证状态并跳转到登录页面')
+      // 清除本地认证状态
+      authStore.logout()
+      router.push('/login?redirect=/loading')
+      return
     }
 
-    // 对于其他类型的错误，显示WarningTip
-    console.log('⚠️ [LoadingPage] 其他错误，显示WarningTip')
-    uiStore.setWarningTip(true) // 假设你的 UI Store 有一个设置 WarningTip 的方法
-    router.push('/')
+    // 对于其他类型的错误（包括网络错误、500错误等），显示WarningTip
+    console.log('⚠️ [LoadingPage] API调用失败，为安全起见显示WarningTip')
+    router.push('/?showWarning=true')
   }
 }
 

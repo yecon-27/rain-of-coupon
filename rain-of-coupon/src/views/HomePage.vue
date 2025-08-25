@@ -162,11 +162,14 @@ onMounted(() => {
   // 检查URL参数，如果有showWarning=true则显示警告提示
   const urlParams = new URLSearchParams(window.location.search)
   if (urlParams.get('showWarning') === 'true') {
+    console.log('🚨 [HomePage] 检测到showWarning参数，显示WarningTip')
     showWarningTip.value = true
     // 清除URL参数
     window.history.replaceState({}, '', window.location.pathname)
-    sessionTimer = setInterval(updateSessionId, 30 * 60 * 1000);
   }
+  
+  // 设置30分钟定时器更新sessionId（正常情况下）
+  sessionTimer = setInterval(updateSessionId, 30 * 60 * 1000);
 })
 // 组件卸载时清除定时器，防止内存泄漏
 onBeforeUnmount(() => {

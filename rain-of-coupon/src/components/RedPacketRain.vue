@@ -225,9 +225,9 @@ function startRain() {
 // 加载图片资源
 const loadImages = async () => {
   try {
-    timerBgUrl.value = await imageManager.getImageUrl('countdown_timer')
+    timerBgUrl.value = await imageManager.getImageUrl('timer_btn')
     countBgUrl.value = await imageManager.getImageUrl('packet_count')
-    redPacketUrl.value = await imageManager.getImageUrl('red_packet')
+    redPacketUrl.value = await imageManager.getImageUrl('red_packet_bag')
     console.log('✅ [RedPacketRain] 游戏图片加载完成')
   } catch (error) {
     console.error('❌ [RedPacketRain] 图片加载失败:', error)

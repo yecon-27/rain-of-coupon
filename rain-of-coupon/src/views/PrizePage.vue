@@ -125,7 +125,6 @@ const formatTime = (timestamp?: number): string => {
   height: 200px;
   object-fit: contain;
   border-radius: 15px;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
 }
 
 .prize-info h2 {

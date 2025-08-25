@@ -117,19 +117,38 @@ const request = async (url: string, options: RequestInit = {}) => {
     console.log('🔗 [Request] 响应状态:', response.status, response.statusText);
     console.log('🔗 [Request] 响应头:', Object.fromEntries(response.headers.entries()));
     
-    if (!response.ok) {
-      console.error('❌ [Request] HTTP错误:', response.status, response.statusText);
-      throw new Error(`HTTP error! status: ${response.status}`);
+    // 尝试解析响应数据，即使状态码不是200也要尝试获取错误信息
+    let data;
+    try {
+      data = await response.json();
+      console.log('✅ [Request] 响应数据:', data);
+    } catch (parseError) {
+      console.error('❌ [Request] 响应解析失败:', parseError);
+      data = { code: response.status, msg: response.statusText };
     }
     
-    const data = await response.json();
-    console.log('✅ [Request] 响应数据:', data);
+    // 如果HTTP状态码不是200，创建包含状态码的错误
+    if (!response.ok) {
+      console.error('❌ [Request] HTTP错误:', response.status, response.statusText);
+      const error = new Error(`HTTP error! status: ${response.status}`) as any;
+      error.status = response.status;
+      error.statusText = response.statusText;
+      error.response = data;
+      throw error;
+    }
     
     return data;
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ [Request] 请求失败:', error);
-    console.error('❌ [Request] 错误类型:', (error as Error).constructor.name);
-    console.error('❌ [Request] 错误消息:', (error as Error).message);
+    console.error('❌ [Request] 错误类型:', error.constructor.name);
+    console.error('❌ [Request] 错误消息:', error.message);
+    console.error('❌ [Request] 错误状态码:', error.status);
+    
+    // 确保错误对象包含状态码信息
+    if (error.status) {
+      error.message = `${error.message} (Status: ${error.status})`;
+    }
+    
     throw error;
   }
 }

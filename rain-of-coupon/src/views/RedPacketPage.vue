@@ -39,7 +39,7 @@ const showEncourage = ref(false)
 // 加载图片资源
 const loadImages = async () => {
   try {
-    backgroundImageUrl.value = await simpleImageManager.getImageUrl('background_image')
+    backgroundImageUrl.value = await simpleImageManager.getImageUrl('home_bg')
     console.log('✅ [RedPacketPage] 背景图片加载完成')
   } catch (error) {
     console.error('❌ [RedPacketPage] 图片加载失败:', error)

@@ -11,17 +11,41 @@ import placeholder from '@/assets/images/placeholder.svg'
 
 // 本地图片映射
 const LOCAL_IMAGES: Record<string, string> = {
-  'prepare_image': zbhImage,
+  // 倒计时相关
+  'redpacket_rain': zbhImage,
   'countdown_3': countdown3,
   'countdown_2': countdown2,
   'countdown_1': countdown1,
-  'participate_coupon': placeholder,
-  'prize_image': placeholder,
-  'crowding_image': placeholder,
-  'encourage_image': placeholder,
-  'food_display': placeholder,
-  'loading_gif': placeholder,
-  'background_image': placeholder,
+  
+  // 主页相关
+  'home_bg': '/src/assets/coupon/home.png',
+  'challenge_btn': '/src/assets/coupon/button.png',
+  'rule_btn': '/src/assets/coupon/gz.png',
+  'coupon_btn': '/src/assets/coupon/qb.png',
+  'show_dishes': '/src/assets/coupon/zscp.png',
+  
+  // 游戏相关
+  'timer_btn': '/src/assets/coupon/ds.png',
+  'packet_count': '/src/assets/coupon/sl.png',
+  'red_packet_bag': '/src/assets/coupon/luckyBag.png',
+  
+  // 优惠券相关
+  'challenge_get': '/src/assets/coupon/cytzhq.png',
+  'coupon_188': '/src/assets/coupon/满500元且消费一道特色菜可使用.png',
+  'coupon_588': '/src/assets/coupon/满1500元且消费一道特色菜可使用.png',
+  'coupon_888': '/src/assets/coupon/满2500元且消费一道特色菜可使用.png',
+  
+  // 提示相关
+  'luck_plus_btn': '/src/assets/coupon/福气+1.png',
+  'crowding_tip': '/src/assets/coupon/活动拥挤.png',
+  'loading_gif': '/src/assets/coupon/加载.gif',
+  
+  // 奖品相关
+  'prize_188': '/src/assets/coupon/188.png',
+  'prize_588': '/src/assets/coupon/588.png',
+  'prize_888': '/src/assets/coupon/888.png',
+  
+  // 默认占位符
   'default_placeholder': placeholder
 }
 

@@ -2,17 +2,41 @@ import { getImageByKey, getImagesByScene, type ImageResource } from '@/api/image
 
 // 本地图片映射表（降级方案）
 const LOCAL_IMAGE_MAP: Record<string, string> = {
+  // 倒计时相关
   'prepare_image': '/src/assets/images/zbh.svg',
   'countdown_3': '/src/assets/images/3.svg',
   'countdown_2': '/src/assets/images/2.svg', 
   'countdown_1': '/src/assets/images/1.svg',
-  'participate_coupon': '/src/assets/images/placeholder.svg',
-  'prize_image': '/src/assets/images/placeholder.svg',
-  'crowding_image': '/src/assets/images/placeholder.svg',
-  'encourage_image': '/src/assets/images/placeholder.svg',
-  'food_display': '/src/assets/images/placeholder.svg',
-  'loading_gif': '/src/assets/images/placeholder.svg',
-  'background_image': '/src/assets/images/placeholder.svg',
+  
+  // 红包雨游戏相关
+  'timer_btn': '/src/assets/coupon/ds.png',
+  'packet_count': '/src/assets/coupon/sl.png',
+  'red_packet_bag': '/src/assets/coupon/luckyBag.png',
+  'redpacket_rain': '/src/assets/coupon/zbh.png',
+  
+  // 主页相关
+  'home_bg': '/src/assets/coupon/home.png',
+  'challenge_btn': '/src/assets/coupon/button.png',
+  'rule_btn': '/src/assets/coupon/gz.png',
+  'coupon_btn': '/src/assets/coupon/qb.png',
+  'show_dishes': '/src/assets/coupon/zscp.png',
+  
+  // 优惠券相关
+  'coupon_188': '/src/assets/coupon/满500元且消费一道特色菜可使用.png',
+  'coupon_588': '/src/assets/coupon/满1500元且消费一道特色菜可使用.png',
+  'coupon_888': '/src/assets/coupon/满2500元且消费一道特色菜可使用.png',
+  
+  // 提示相关
+  'luck_plus_btn': '/src/assets/coupon/福气+1.png',
+  'crowding_tip': '/src/assets/coupon/活动拥挤.png',
+  'loading_gif': '/src/assets/coupon/加载.gif',
+  
+  // 奖品相关
+  'prize_188': '/src/assets/coupon/188.png',
+  'prize_588': '/src/assets/coupon/588.png',
+  'prize_888': '/src/assets/coupon/888.png',
+  
+  // 默认占位符
   'default_placeholder': '/src/assets/images/placeholder.svg'
 }
 
@@ -55,17 +79,40 @@ class ImageResourceManager {
       console.log(`🔍 [ImageManager] 尝试从数据库获取图片: ${resourceKey}`)
       const response = await getImageByKey(resourceKey)
       
+      console.log(`🔍 [ImageManager] API响应详情:`, {
+        resourceKey,
+        responseCode: response?.code,
+        responseMsg: response?.msg,
+        responseData: response?.data,
+        fullResponse: response
+      })
+      
       if (response.code === 200 && response.data?.filePath) {
         const imageUrl = this.buildFullUrl(response.data.filePath)
         console.log(`✅ [ImageManager] 数据库图片获取成功: ${resourceKey} -> ${imageUrl}`)
         this.cache.set(resourceKey, imageUrl)
         return imageUrl
       } else {
-        console.warn(`⚠️ [ImageManager] 数据库图片获取失败: ${resourceKey}, 使用本地降级`)
+        console.warn(`⚠️ [ImageManager] 数据库图片获取失败: ${resourceKey}`)
+        console.warn(`   响应码: ${response?.code}`)
+        console.warn(`   响应消息: ${response?.msg}`)
+        console.warn(`   响应数据:`, response?.data)
+        console.warn(`   使用本地降级`)
         return this.getLocalImage(resourceKey)
       }
     } catch (error) {
-      console.error(`❌ [ImageManager] 数据库请求异常: ${resourceKey}`, error)
+      console.error(`❌ [ImageManager] 数据库请求异常: ${resourceKey}`)
+      console.error(`   错误类型: ${(error as Error)?.name}`)
+      console.error(`   错误消息: ${(error as Error)?.message}`)
+      console.error(`   完整错误:`, error)
+      
+      // 检查是否是认证错误
+      if ((error as Error)?.message?.includes('认证失败') || (error as Error)?.message?.includes('401')) {
+        console.warn(`🔐 [ImageManager] 认证失败，后端服务可能需要重启`)
+      } else if ((error as Error)?.name === 'TypeError' && (error as Error)?.message?.includes('fetch')) {
+        console.warn(`🌐 [ImageManager] 网络请求失败，后端服务可能未启动`)
+      }
+      
       console.log(`🔄 [ImageManager] 启用本地降级模式`)
       this.useLocalFallback = true
       return this.getLocalImage(resourceKey)

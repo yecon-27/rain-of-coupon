@@ -3,7 +3,7 @@
     <!-- 未中奖状态 - 只显示图片 -->
     <div v-if="!gameStore.hasPrize" class="no-coupon">
       <DynamicImage 
-        resource-key="participate_coupon" 
+        resource-key="challenge_get" 
         fallback-url="/src/assets/coupon/cytzhq.png"
         alt="参与挑战获取" 
         class-name="coupon-image" 

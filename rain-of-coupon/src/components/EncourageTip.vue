@@ -2,7 +2,7 @@
   <div class="encourage-tip">
     <div class="modal-content">
       <DynamicImage 
-        resource-key="luck_plus" 
+        resource-key="luck_plus_btn" 
         fallback-url="/src/assets/coupon/福气+1.png"
         alt="福气+1按钮" 
         class-name="encourage-image" 

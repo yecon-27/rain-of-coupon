@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>测试图片API</title>
+</head>
+<body>
+    <h1>图片API测试</h1>
+    <div id="results"></div>
+    
+    <script>
+        async function testImageAPI() {
+            const results = document.getElementById('results');
+            
+            // 测试资源列表
+            const testResources = [
+                'red_packet_bag',
+                'home_bg',
+                'timer_btn',
+                'packet_count',
+                'show_dishes'
+            ];
+            
+            for (const resourceKey of testResources) {
+                try {
+                    console.log(`测试资源: ${resourceKey}`);
+                    const response = await fetch(`http://localhost:8080/public/redpacket/image/resource/${resourceKey}`);
+                    const data = await response.json();
+                    
+                    const div = document.createElement('div');
+                    div.innerHTML = `
+                        <h3>${resourceKey}</h3>
+                        <p>状态码: ${response.status}</p>
+                        <p>响应码: ${data.code}</p>
+                        <p>消息: ${data.msg}</p>
+                        <p>数据: ${JSON.stringify(data.data, null, 2)}</p>
+                        <hr>
+                    `;
+                    results.appendChild(div);
+                    
+                } catch (error) {
+                    const div = document.createElement('div');
+                    div.innerHTML = `
+                        <h3>${resourceKey} - 错误</h3>
+                        <p style="color: red;">错误: ${error.message}</p>
+                        <hr>
+                    `;
+                    results.appendChild(div);
+                }
+            }
+        }
+        
+        // 页面加载后自动测试
+        window.onload = testImageAPI;
+    </script>
+</body>
+</html>
